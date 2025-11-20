@@ -1,0 +1,30 @@
+# 工作空间元数据（不应该提交）
+.metadata/
+
+# CDT 项目配置（可选忽略）
+*.project
+*.cproject
+
+# 项目内部的设置目录
+Macro_TC264/.settings/
+
+# 编译输出目录（总是忽略）
+Macro_TC264/Debug/
+
+# VS Code文件
+.vscode/
+
+# 编译生成的中间文件
+*.o
+*.obj
+*.d
+*.map
+*.elf
+*.hex
+*.bin
+
+# 忽略日志文件
+*.log
+
+# 忽略备份文件
+*~
