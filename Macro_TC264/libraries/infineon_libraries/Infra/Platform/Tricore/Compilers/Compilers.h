@@ -93,6 +93,16 @@
 #elif defined(__MSVC__)
 #include "CompilerMsvc.h"
 
+// HACK START
+#elif defined(_VSCODE)
+#include "CompilerTasking.h"
+// HACK END
+
+// HACK START
+#undef IFX_INTERRUPT
+#define IFX_INTERRUPT(timer, core, priority) void _fake_interrupt##timer##_##core()
+// HACK END
+
 #else
 
 /** \addtogroup IfxLld_Cpu_Std_Interrupt
@@ -131,6 +141,8 @@
 #define BEGIN_DATA_SECTION(sec) DATA_SECTION(section #sec WX)
 #define DATA_SECTION(sec) _Pragma(#sec)
 #define END_DATA_SECTION DATA_SECTION(section DATA X)
+#elif defined(_VSCODE)
+
 #else
 #error "Please specify compiler."
 #endif
