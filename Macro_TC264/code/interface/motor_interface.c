@@ -8,8 +8,10 @@ static int32 motor_right_pwm = 0;
 
 static MotorType motor_type;
 
-void motor_interface_init(MotorType motor_type){
-    switch (motor_type) {
+uint8 motion_control_power_flag = 0;
+
+void motor_interface_init(MotorType type){
+    switch (type) {
         case BRUSHLESS_MOTOR:
             // 初始化无刷电机相关设置
             break;
@@ -29,7 +31,7 @@ void motor_interface_init(MotorType motor_type){
             break;
     }
     // 初始化定时器中断
-    motor_type = motor_type;
+    motor_type = type;
     motor_interface_pit_init();
 }
 
@@ -41,6 +43,12 @@ void motor_set_pwm(int16 left_pwm, int16 right_pwm){
     // PWM限幅
     motor_left_pwm  = (left_pwm  > MOTOR_PWM_MAX_DUTY) ? MOTOR_PWM_MAX_DUTY : ((left_pwm  < -MOTOR_PWM_MAX_DUTY) ? -MOTOR_PWM_MAX_DUTY : left_pwm);
     motor_right_pwm = (right_pwm > MOTOR_PWM_MAX_DUTY) ? MOTOR_PWM_MAX_DUTY : ((right_pwm < -MOTOR_PWM_MAX_DUTY) ? -MOTOR_PWM_MAX_DUTY : right_pwm);
+    
+    if(!motion_control_power_flag){
+        left_pwm  = 0;
+        right_pwm = 0;
+    }
+    
     switch (motor_type)
     {
         case BRUSHLESS_MOTOR:
@@ -59,7 +67,7 @@ void motor_set_pwm(int16 left_pwm, int16 right_pwm){
 }
 
 void motor_interface_pit_init(void){
-    pit_ms_init(MOTOR_INTERFACE_PIT_CHANNEL, MOTOR_INTERFACE_PIT_TIME);
+    pit_ms_init(MOTOR_INTERFACE_PIT_INDEX, MOTOR_INTERFACE_PIT_TIME);
 }
 void motor_interface_pit_callback(void){
     // 获取速度

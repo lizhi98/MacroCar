@@ -4,7 +4,7 @@
 #include "zf_common_headfile.h"
 
 #include "motor_interface.h"
-
+#include "motor_control.h"
 
 
 #endif
