@@ -73,4 +73,7 @@ void motor_interface_pit_callback(void){
     // 获取速度
     motor_left_speed  = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX)  * 10 / MOTOR_INTERFACE_PIT_TIME;
     motor_right_speed = encoder_get_count(MOTOR_RIGHT_ENCODER_INDEX) * 10 / MOTOR_INTERFACE_PIT_TIME;  // 转换速度不受PIT时间影响
+    // 清零计数
+    encoder_clear_count(MOTOR_LEFT_ENCODER_INDEX);
+    encoder_clear_count(MOTOR_RIGHT_ENCODER_INDEX);
 }

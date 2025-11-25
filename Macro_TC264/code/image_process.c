@@ -1,4 +1,4 @@
-#include "zf_common_headfile.h"
+#include "image_process.h"
 
 int otsu_threshold_optimized(uint8 *image, int width, int height)
 {
