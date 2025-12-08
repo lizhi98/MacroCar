@@ -1,71 +1,75 @@
 #include "image_process.h"
 
-int otsu_threshold_optimized(uint8 *image, int width, int height)
+#define GrayScale 256
+#define grayscale 256
+uint16 hist[GrayScale]={0};     //灰度值像素点的数量，数值存放，直方图
+float P[GrayScale]={0};         //每个灰度级出现的概率
+float PK[GrayScale]={0};         //概率累计和
+float MK[GrayScale]={0};        //灰度值累加均值
+uint8 img_threshold;            //输出阈值
+float imgsize;                  //图像像素总量
+uint8  image[MT9V03X_H][MT9V03X_W];
+
+uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
 {
-    int histogram[256] = {0};
-    int total_pixels = width * height;
+    uint8 threshold;
+    imgsize = MT9V03X_H * MT9V03X_W;    //总像素个数
+    uint8 images_value_temp;            //中间变量暂时存储
 
-    // 计算直方图
-    for (int i = 0; i < total_pixels; i++)
+    float sumPK = 0;
+    float sumMK = 0;
+    float var = 0;
+    float vartmp = 0;
+
+    //清零
+    for(uint16 i=0;i<GrayScale;i++)
     {
-        histogram[image[i]]++;
+        hist[i]=0;
+        P[i]=0;
+        PK[i]=0;
+        MK[i]=0;
     }
 
-    // 计算总灰度值
-    long long sum_total = 0;
-    for (int i = 0; i < 256; i++)
+    //获取直方图
+    for(uint8 i = 0;i<MT9V03X_H;i++)
     {
-        sum_total += i * histogram[i];
-    }
-
-    // 遍历阈值
-    long long sum_background = 0;
-    int weight_background = 0;
-    int weight_foreground = 0;
-
-    float max_variance = 0.0f;
-    int best_threshold = 0;
-
-    for (int t = 0; t < 256; t++)
-    {
-        weight_background += histogram[t];
-        if (weight_background == 0)
-            continue;
-
-        weight_foreground = total_pixels - weight_background;
-        if (weight_foreground == 0)
-            break;
-
-        sum_background += t * histogram[t];
-
-        long long sum_foreground = sum_total - sum_background;
-
-        float mean_background = (float)sum_background / weight_background;
-        float mean_foreground = (float)sum_foreground / weight_foreground;
-
-        // 计算类间方差
-        float between_variance = (float)weight_background * (float)weight_foreground *
-                                 (mean_background - mean_foreground) *
-                                 (mean_background - mean_foreground);
-
-        if (between_variance > max_variance)
+        for(uint8 j=0;j<MT9V03X_W;j++)
         {
-            max_variance = between_variance;
-            best_threshold = t;
+            images_value_temp = index[i][j];
+            hist[images_value_temp]++;
         }
     }
 
-    return best_threshold;
+    //求类间方差
+    for(uint16 i=0;i<GrayScale;i++)
+    {
+        P[i]=(float)hist[i]/imgsize;
+        PK[i] = sumPK + P[i];
+        sumPK=PK[i];
+        MK[i] = sumMK+i*P[i];
+        sumMK=MK[i];
+    }
+    //求解最大类间方差的阈值
+    for(uint8 i=5;i<245;i++)
+    {
+        vartmp = ((MK[GrayScale-1] * PK[i] - MK[i]) * (MK[GrayScale - 1] * PK[i] - MK[i])) / (PK[i] * (1 - PK[i]));
+        if(vartmp>var)
+        {
+            var = vartmp;
+            threshold = i;      //输出阈值
+        }
+    }
+    return threshold;
 }
 
-void Binarization(uint8 *image, int width, int height)
+void Binarization(int width, int height)
 {
-    int threshold = otsu_threshold_optimized(image, width, height);
+    img_threshold = Ostu(image);
     for (int i = 0; i < height; i++)
     {
         for (int j = 0; j < width; j++)
         {
-            if (image[i][j] > threshold)
+            if(image[i][j] > img_threshold)
             {
                 image[i][j] = 255;
             }
@@ -77,7 +81,7 @@ void Binarization(uint8 *image, int width, int height)
     }
 }
 
-void draw_tangle(uint8 *image, int width, int height)
+void draw_tangle(int width, int height)
 {
     for (int i = 0; i < height; i++)
     {
@@ -87,17 +91,24 @@ void draw_tangle(uint8 *image, int width, int height)
             image[i][width - 1 - j] = 0; // 右侧3列设为0
         }
     }
+    for(int i=0;i<3;i++)
+    {
+        for(int j=0;j<width-1;j++)
+        {
+            image[i][j]=0;
+        }
+    }
 }
 
 uint8 left_start_point = 0;
 uint8 right_start_point = MT9V03X_W - 1;
-void seek_points(uint8 *image, int height, int width)
+void seek_points(int height, int width)
 {
-    draw_tangle(image, width, height);
+    draw_tangle(width, height);
     left_start_point = 0;
     right_start_point = width - 1;
 
-    for (int i = 1; i < width - 2; i++)
+    for (uint8 i = 1; i < width - 2; i++)
     {
         if (image[height - 3][i - 1] == 0 && image[height - 3][i] == 255 && image[height - 3][i + 1] == 255)
         {
@@ -118,10 +129,10 @@ int right_points_col[MAX_POINTS] = {0};
 int points_count;
 int min_raw_l = MT9V03X_H - 3;
 int min_raw_r = MT9V03X_H - 3;
-void seek_line(uint8 *image, int height, int width)
+void seek_line( int height, int width)
 {
 
-    seek_points(image, height, width);
+    seek_points(height, width);
     points_count = 0;
     min_raw_l = MT9V03X_H - 3;
     min_raw_r = MT9V03X_H - 3;
@@ -400,11 +411,23 @@ int weight_array[MT9V03X_H] = {
     25, 23, 21, 19, 17, 15, 14, 12, 11, 10,
     9, 8, 7, 6, 5, 5, 4, 4, 3, 3,
     2, 2, 2, 1, 1, 1, 0, 0};
-int mid_line_list[MT9V03X_H] = {(int)(MT9V03X_W / 2)} int get_error_image(void)
+int mid_line_list[MT9V03X_H];
+int error_image;
+int get_error_image(void)
 {
     int error_image = 0;
-    int min_raw = min(min_raw_l, min_raw_r);
-    for (int i = min_raw; i < MT9V03X_H - 3)
+    int min_raw;
+    if(min_raw_l>min_raw_r)
+    {
+        min_raw=min_raw_r;
+    }
+    else
+    {
+        min_raw=min_raw_l;
+    }
+
+    int i;
+    for(i = min_raw; i < MT9V03X_H - 3;i++)
     {
         mid_line_list[i] = (right_line_list[i] + left_line_list[i]) / 2;
         error_image += weight_array[i] * (94 - mid_line_list[i]);
@@ -412,37 +435,17 @@ int mid_line_list[MT9V03X_H] = {(int)(MT9V03X_W / 2)} int get_error_image(void)
     }
     return error_image;
 }
-// void seek_list(int l_x[], int l_y[], int r_x[], int r_y[],
-//                int start, int num,
-//                int left_line_list[], int right_line_list[],
-//                int* list_size) {
 
-//     int range_size = 98 - start + 1;
-//     int* list1 = (int*)malloc(range_size * sizeof(int));
-
-//     // 生成从98到start的序列
-//     for (int i = 0; i < range_size; i++) {
-//         list1[i] = 98 - i;
-//     }
-
-//     int j = 0;
-//     int k = 0;
-//     *list_size = 0;
-
-//     for (int i = 0; i < num; i++) {
-//         if (j < range_size && list1[j] == l_y[i]) {
-//             left_line_list[*list_size] = l_x[i];
-//             j++;
-//             (*list_size)++;
-//         }
-//         if (k < range_size && list1[k] == r_y[i]) {
-//             right_line_list[*list_size-1] = r_x[i]; // 注意：这里假设左右线同步
-//             k++;
-//         }
-//         if (k >= range_size && j >= range_size) {
-//             break;
-//         }
-//     }
-
-//     free(list1);
-// }
+void image_process(void)
+{
+    if(mt9v03x_finish_flag)
+    {
+        mt9v03x_finish_flag=0;
+        memcpy(image[0],mt9v03x_image[0],MT9V03X_IMAGE_SIZE);//复制图像数组
+        Binarization(MT9V03X_W, MT9V03X_H);
+        seek_points(MT9V03X_H, MT9V03X_W);
+        seek_line(MT9V03X_H,MT9V03X_W);
+        seek_list(points_count);
+    }
+   error_image=get_error_image();
+}
