@@ -53,7 +53,7 @@
 
 #include "zf_common_typedef.h"
 
-          
+
 #define WIFI_SPI_INDEX              (SPI_3             )        // 定义使用的SPI号
 #define WIFI_SPI_SPEED              (30 * 1000 * 1000  )        // 硬件 SPI 速率
 #define WIFI_SPI_SCK_PIN            (SPI3_SCLK_P22_3   )        // 定义SPI_SCK引脚
@@ -73,8 +73,8 @@
 #if     (WIFI_SPI_AUTO_CONNECT > 2)    
 #error "WIFI_SPI_AUTO_CONNECT 的值只能为 [0,1,2]"
 #else   
-#define WIFI_SPI_TARGET_IP          "192.168.137.1"              // 连接目标的 IP
-#define WIFI_SPI_TARGET_PORT        "8086"                      // 连接目标的端口
+#define WIFI_SPI_TARGET_IP          "192.168.31.98"              // 连接目标的 IP
+#define WIFI_SPI_TARGET_PORT        "9895"                      // 连接目标的端口
 #define WIFI_SPI_LOCAL_PORT         "6666"                      // 本机的端口 0：随机  可设置范围2048-65535  默认 6666
 #endif
 

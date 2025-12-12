@@ -3,7 +3,31 @@
 
 #include "zf_device_wifi_spi.h"
 
-#define WIFI_SSID       "AP-lizhi"
-#define WIFI_PASSWORD   "9894653xxk"
+#define WIFI_SSID           "XIAOMI_GoGoGo"
+#define WIFI_PASSWORD       "9894653xxk"
+
+#define HOST_IP             "192.168.31.98"
+#define HOST_PORT           "9895"
+#define HOST_CONNECT_MODE   "TCP"
+
+typedef enum _NetworkPackType{
+    NETWORK_PACK_TYPE_PARAMETER   = 0x00,
+    NETWORK_PACK_TYPE_IMAGE       = 0x01,
+}NetworkPackType;
+
+typedef struct _NetworkPack{
+    uint32 pack_id;
+    uint16 buffer_length;
+    uint8 buffer[];
+}NetworkPack;
+
+extern uint32 pack_id;
+extern NetworkPack * network_image_pack;
+
+uint8 network_interface_init(void);
+uint8 network_interface_send_pack(NetworkPackType pack_type, uint8 *buffer, uint16 length);
+uint8 network_interface_receive_pack();
+
+void network_interface_test(void);
 
 #endif
