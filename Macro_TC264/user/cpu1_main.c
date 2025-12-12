@@ -1,4 +1,5 @@
 #include "zf_common_headfile.h"
+#include "image_process.h"
 #pragma section all "cpu1_dsram"
 // 将本语句与#pragma section all restore语句之间的全局变量都放在CPU1的RAM中
 
@@ -13,7 +14,7 @@ void core1_main(void)
     cpu_wait_event_ready();                 // 等待所有核心初始化完毕
     while (TRUE)
     {
-
+        image_process();
         
 
     }
