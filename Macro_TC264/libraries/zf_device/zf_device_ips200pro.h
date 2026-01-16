@@ -65,7 +65,7 @@
 
 #define IPS200PRO_WAIT_TIME                	    ( 900               )   // 通讯等待时长，内部是软件延时，因此这里没有时间单位
 #define IPS200PRO_CRC_ENABLE                    ( 0                 )   // 0：关闭CRC模式（通常关闭即可） 1：使能CRC模式，在传输的数据包中加入CRC校验，能提高屏幕的抗干扰的能力
-#define IPS200PRO_DEFAULT_FORMAT                (IPS200PRO_FORMAT_GBK)  // 默认编码格式，会在初始化屏幕的时候进行设置
+#define IPS200PRO_DEFAULT_FORMAT                (IPS200PRO_FORMAT_UTF8)  // 默认编码格式，会在初始化屏幕的时候进行设置
 #define IPS200PRO_DEFAULT_FONT_SIZE             ( FONT_SIZE_16      )   // 默认指定大小，会在初始化屏幕的时候进行设置
 #define IPS200PRO_DEFAULT_OPTIMIZE              ( 1                 )   // 0:关闭优化 1：开启优化，默认开启优化，会在初始化屏幕的时候进行设置
 

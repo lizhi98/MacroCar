@@ -19,14 +19,14 @@ float PID_calculate(PIDParam* pid_param, float target, float current){
         // 积分限幅
         pid_param->integral =   (pid_param->integral > pid_param->integral_limit) ? 
                                 (pid_param->integral_limit) : ((pid_param->integral < -pid_param->integral_limit) ? -pid_param->integral_limit : pid_param->integral);
-        float output = pid_param->kp * error
-                     + pid_param->ki * pid_param->integral
-                     + pid_param->kd * (error - pid_param->previous_error);
+        output = pid_param->kp * error
+               + pid_param->ki * pid_param->integral
+               + pid_param->kd * (error - pid_param->previous_error);
     }else if(pid_param->type == PID_INC){
         // 增量式PID
-        float output = pid_param->kp * (error - pid_param->previous_error)
-                     + pid_param->ki * error
-                     + pid_param->kd * (error - 2 * pid_param->previous_error + pid_param->previous_previous_error);
+        output = pid_param->kp * (error - pid_param->previous_error)
+               + pid_param->ki * error
+               + pid_param->kd * (error - 2 * pid_param->previous_error + pid_param->previous_previous_error);
         pid_param->previous_previous_error = pid_param->previous_error;
     }
     pid_param->previous_error = error;
@@ -75,11 +75,11 @@ void motion_control_pit_callback(){
     motor_steering_speed = (int16)PID_calculate(&motion_steering_pid, 0.0f, 0.0f); // 这里的目标值和当前值需要根据具体应用修改
     // 单电机速度环
     if(motor_left_speed_pid.type == PID_INC){
-        motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  motion_control_run_flag ? motor_steering_speed + 0 : 0, motor_left_speed);
-        motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, motion_control_run_flag ? -motor_steering_speed + 0 : 0, motor_right_speed);
+        motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed + 0 : 0), (float)motor_left_speed);
+        motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? -motor_steering_speed + 0 : 0), (float)motor_right_speed);
     }else if(motor_left_speed_pid.type == PID_POS){
-        motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  motion_control_run_flag ? 0 : 0, motor_left_speed);
-        motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, motion_control_run_flag ? 0 : 0, motor_right_speed);
+        motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? 0 : 0), (float)motor_left_speed);
+        motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? 0 : 0), (float)motor_right_speed);
     }
     // 应用PWM
     motor_set_pwm(motor_left_current_pwm_duty, motor_right_current_pwm_duty);

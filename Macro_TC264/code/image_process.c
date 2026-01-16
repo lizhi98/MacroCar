@@ -8,7 +8,8 @@ float PK[GrayScale]={0};         //概率累计和
 float MK[GrayScale]={0};        //灰度值累加均值
 uint8 img_threshold;            //输出阈值
 float imgsize;                  //图像像素总量
-uint8  image[MT9V03X_H][MT9V03X_W];
+
+uint8 (*image)[MT9V03X_W];
 
 uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
 {
@@ -387,6 +388,8 @@ void seek_list(int num)
     }
     for (int i = 0; i < num; i++)
     {
+
+        
         if (left_points_raw[i] == j && j > min_raw_l)
         {
             left_line_list[j] = left_points_col[i];
@@ -433,20 +436,25 @@ int get_error_image(void)
         error_image += weight_array[i] * (94 - mid_line_list[i]);
         error_image /= 500;
     }
+  //  image_draw(min_raw);
     return error_image;
 }
 
-void image_process(void)
+void image_draw(int min_raw)
 {
-    if(mt9v03x_finish_flag)
+    for(int i = min_raw; i < MT9V03X_H - 3;i++)
     {
-        memcpy(image[0],mt9v03x_image[0],MT9V03X_IMAGE_SIZE);//复制图像数组
-        mt9v03x_finish_flag=0;
-        Binarization(MT9V03X_W, MT9V03X_H);
-        seek_points(MT9V03X_H, MT9V03X_W);
-        seek_line(MT9V03X_H,MT9V03X_W);
-        seek_list(points_count);
+        image[i][mid_line_list[i]]  = 10;
+        image[i][left_line_list[i]]  = 5;
+        image[i][right_line_list[i]]  = 15;
     }
-
-   error_image=get_error_image();
+}
+void image_process(uint8 (*source_image)[MT9V03X_W])
+{
+    image = source_image;
+    Binarization(MT9V03X_W, MT9V03X_H);
+    seek_points(MT9V03X_H, MT9V03X_W);
+    seek_line(MT9V03X_H,MT9V03X_W);
+    seek_list(points_count);
+    error_image=get_error_image();
 }
