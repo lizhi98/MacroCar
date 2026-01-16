@@ -51,8 +51,8 @@ int main(int argc, char** argv) {
     std::string header_path = ".\\image_process.h";
     
     if (!fs::exists(fs::path(code_path)) || !fs::exists(fs::path(header_path))) {
-        system("copy \"D:\\code\\Macro_TC264\\Macro_TC264\\code\\image_process.c\" .");
-        system("copy \"D:\\code\\Macro_TC264\\Macro_TC264\\code\\image_process.h\" .");
+        system("copy \"..\\..\\Macro_TC264\\code\\image_process.c\" .");
+        system("copy \"..\\..\\Macro_TC264\\code\\image_process.h\" .");
         system("gcc -D_VSCODE image_process_main.c image_process.c -o image_process_debug.exe");
     }
 
