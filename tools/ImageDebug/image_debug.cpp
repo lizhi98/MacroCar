@@ -53,7 +53,9 @@ int main(int argc, char** argv) {
     if (!fs::exists(fs::path(code_path)) || !fs::exists(fs::path(header_path))) {
         system("copy \"..\\..\\Macro_TC264\\code\\image_process.c\" .");
         system("copy \"..\\..\\Macro_TC264\\code\\image_process.h\" .");
+        std::cout << "Copied image_process.c and image_process.h to current directory." << std::endl;
         system("gcc -D_VSCODE image_process_main.c image_process.c -o image_process_debug.exe");
+        std::cout << "Compiled image_process_debug.exe." << std::endl;
     }
 
     system("image_process_debug.exe args.txt");
