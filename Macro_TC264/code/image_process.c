@@ -63,12 +63,12 @@ uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
     return threshold;
 }
 
-void Binarization(int width, int height)
+void Binarization()
 {
     img_threshold = Ostu(image);
-    for (int i = 0; i < height; i++)
+    for (int i = 0; i < MT9V03X_H; i++)
     {
-        for (int j = 0; j < width; j++)
+        for (int j = 0; j < MT9V03X_W; j++)
         {
             if(image[i][j] > img_threshold)
             {
@@ -82,24 +82,25 @@ void Binarization(int width, int height)
     }
 }
 
-void draw_tangle(int width, int height)
+void draw_tangle()
 {
-    for (int i = 0; i < height; i++)
+    for (int i = 0; i < MT9V03X_H; i++)
     {
         for (int j = 0; j < 3; j++)
         {
             image[i][j] = 0;             // 左侧3列设为0
-            image[i][width - 1 - j] = 0; // 右侧3列设为0
+            image[i][MT9V03X_W - 1 - j] = 0; // 右侧3列设为0
         }
     }
     for(int i=0;i<3;i++)
     {
-        for(int j=0;j<width-1;j++)
+        for(int j=0;j<MT9V03X_W-1;j++)
         {
             image[i][j]=0;
         }
     }
 }
+
 
 uint8 left_start_point = 0;
 uint8 right_start_point = MT9V03X_W - 1;
@@ -416,6 +417,17 @@ int weight_array[MT9V03X_H] = {
     2, 2, 2, 1, 1, 1, 0, 0};
 int mid_line_list[MT9V03X_H];
 int error_image;
+
+void image_draw(int min_raw)
+{
+    for(int i = min_raw; i < MT9V03X_H - 3;i++)
+    {
+        image[i][mid_line_list[i]]  = 10;
+        image[i][left_line_list[i]]  = 5;
+        image[i][right_line_list[i]]  = 15;
+    }
+}
+
 int get_error_image(void)
 {
     int error_image = 0;
@@ -436,19 +448,11 @@ int get_error_image(void)
         error_image += weight_array[i] * (94 - mid_line_list[i]);
         error_image /= 500;
     }
-  //  image_draw(min_raw);
+    image_draw(min_raw);
     return error_image;
 }
 
-void image_draw(int min_raw)
-{
-    for(int i = min_raw; i < MT9V03X_H - 3;i++)
-    {
-        image[i][mid_line_list[i]]  = 10;
-        image[i][left_line_list[i]]  = 5;
-        image[i][right_line_list[i]]  = 15;
-    }
-}
+
 void image_process(uint8 (*source_image)[MT9V03X_W])
 {
     image = source_image;
