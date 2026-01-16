@@ -440,12 +440,13 @@ void image_process(void)
 {
     if(mt9v03x_finish_flag)
     {
-        mt9v03x_finish_flag=0;
         memcpy(image[0],mt9v03x_image[0],MT9V03X_IMAGE_SIZE);//复制图像数组
+        mt9v03x_finish_flag=0;
         Binarization(MT9V03X_W, MT9V03X_H);
         seek_points(MT9V03X_H, MT9V03X_W);
         seek_line(MT9V03X_H,MT9V03X_W);
         seek_list(points_count);
     }
+
    error_image=get_error_image();
 }
