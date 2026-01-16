@@ -7,12 +7,22 @@
 typedef struct _FlashDataSetInfo
 {
     uint8  data_valid;
+    uint8  page_from_num;
+    uint8  page_to_num;
     uint32 data_size;
 }FlashDataSetInfo;
 
-void flash_interface_init(void);
-void flash_get_data_info(FlashDataSetInfo* info);
-void flash_read_data(uint8* dest, uint32 size);
-void flash_write_data(const uint8* src, uint32 size);
+typedef struct _FlashDataInfo
+{
+    uint8            set_num;
+    FlashDataSetInfo data_set_info[];
+}FlashDataInfo;
+
+void  flash_interface_init(void);
+uint8 flash_get_data_info(FlashDataInfo* info);
+uint8 flash_write_data_info(FlashDataInfo* info);
+
+void flash_read_data(uint8 data_set_index, uint8 *dest, uint32 size);
+void flash_write_data(uint8 data_set_index, uint8 *src, uint32 size);
 
 #endif

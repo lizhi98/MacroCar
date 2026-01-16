@@ -14,7 +14,7 @@ void core1_main(void)
     cpu_wait_event_ready();                 // 等待所有核心初始化完毕
     while (TRUE)
     {
-        image_process();
+//        image_process();
         
 
     }

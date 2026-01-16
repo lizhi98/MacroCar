@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.10)
+project(ImageDebug)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(OpenCV_DIR "D:/lib/cpp/OpenCVWindows/opencv/build")
+
+
+find_package(OpenCV REQUIRED)
+
+add_executable(ImageDebug image_debug.cpp)
+
+target_compile_definitions(ImageDebug PRIVATE
+    _VSCODE
+)
+
+target_link_libraries(ImageDebug ${OpenCV_LIBS})
