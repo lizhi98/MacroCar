@@ -31,3 +31,4 @@ Macro_TC264/Debug/
 
 # 忽略编译文件
 build/
+args.txt

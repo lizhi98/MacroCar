@@ -3,8 +3,8 @@
 
 #ifdef _VSCODE
 
-#define MT9V03X_W  (188)
-#define MT9V03X_H  (120)
+#define MT9V03X_W  (120)
+#define MT9V03X_H  (90)
 
 #ifndef TRUE
 #define TRUE (1u)

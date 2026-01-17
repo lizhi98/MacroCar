@@ -36,7 +36,8 @@ int main(int argc, char** argv) {
     WORD color_black = 0;
     WORD color_white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE;
     WORD color_mid_line = FOREGROUND_RED | BACKGROUND_RED;
-    WORD color_side_line = FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_RED | BACKGROUND_GREEN;
+    WORD color_side_line_left = FOREGROUND_BLUE | BACKGROUND_BLUE;
+    WORD color_side_line_right = FOREGROUND_GREEN | BACKGROUND_GREEN;
     for(int i=0;i<MT9V03X_H;i++){
         for(int j=0;j<MT9V03X_W;j++){
             // 根据数值判断颜色
@@ -51,9 +52,11 @@ int main(int argc, char** argv) {
             case 10:
                 SetConsoleTextAttribute(hConsole, color_mid_line);
                 break;
-            case 15:
             case 5:
-                SetConsoleTextAttribute(hConsole, color_side_line);
+                SetConsoleTextAttribute(hConsole, color_side_line_left);
+                break;
+            case 15:
+                SetConsoleTextAttribute(hConsole, color_side_line_right);
                 break;
             default:
                 SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);

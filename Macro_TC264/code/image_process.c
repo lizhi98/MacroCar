@@ -403,19 +403,30 @@ void seek_list(int num)
     }
 }
 
-int weight_array[MT9V03X_H] = {
-    1, 1, 1, 1, 1, 2, 2, 2, 3, 3,
-    4, 4, 5, 5, 6, 7, 8, 9, 10, 11,
-    12, 14, 15, 17, 19, 21, 23, 25, 27, 29,
-    31, 33, 35, 37, 39, 41, 43, 44, 46, 47,
-    48, 49, 50, 50, 51, 51, 52, 52, 52, 52,
-    52, 52, 51, 51, 50, 50, 49, 48, 47, 46,
-    44, 43, 41, 39, 37, 35, 33, 31, 29, 27,
-    25, 23, 21, 19, 17, 15, 14, 12, 11, 10,
-    9, 8, 7, 6, 5, 5, 4, 4, 3, 3,
-    2, 2, 2, 1, 1, 1, 0, 0};
+// int weight_array[MT9V03X_H] = {
+//     1, 1, 1, 1, 1, 2, 2, 2, 3, 3,
+//     4, 4, 5, 5, 6, 7, 8, 9, 10, 11,
+//     12, 14, 15, 17, 19, 21, 23, 25, 27, 29,
+//     31, 33, 35, 37, 39, 41, 43, 44, 46, 47,
+//     48, 49, 50, 50, 51, 51, 52, 52, 52, 52,
+//     52, 52, 51, 51, 50, 50, 49, 48, 47, 46,
+//     44, 43, 41, 39, 37, 35, 33, 31, 29, 27,
+//     25, 23, 21, 19, 17, 15, 14, 12, 11, 10,
+//     9, 8, 7, 6, 5, 5, 4, 4, 3, 3,
+//     2, 2, 2, 1, 1, 1, 0, 0};
 int mid_line_list[MT9V03X_H];
 int error_image;
+
+void image_draw(int min_raw)
+{
+    for(int i = min_raw; i < MT9V03X_H - 3;i++)
+    {
+        image[i][mid_line_list[i]]  = 10;
+        image[i][left_line_list[i]]  = 5;
+        image[i][right_line_list[i]]  = 15;
+    }
+}
+
 int get_error_image(void)
 {
     int error_image = 0;
@@ -433,22 +444,14 @@ int get_error_image(void)
     for(i = min_raw; i < MT9V03X_H - 3;i++)
     {
         mid_line_list[i] = (right_line_list[i] + left_line_list[i]) / 2;
-        error_image += weight_array[i] * (94 - mid_line_list[i]);
-        error_image /= 500;
+       // error_image += weight_array[i] * (94 - mid_line_list[i]);
+       // error_image /= 500;
     }
-  //  image_draw(min_raw);
+    image_draw(min_raw);
     return error_image;
 }
 
-void image_draw(int min_raw)
-{
-    for(int i = min_raw; i < MT9V03X_H - 3;i++)
-    {
-        image[i][mid_line_list[i]]  = 10;
-        image[i][left_line_list[i]]  = 5;
-        image[i][right_line_list[i]]  = 15;
-    }
-}
+
 void image_process(uint8 (*source_image)[MT9V03X_W])
 {
     image = source_image;
