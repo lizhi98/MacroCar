@@ -63,12 +63,12 @@ uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
     return threshold;
 }
 
-void Binarization(int width, int height)
+void Binarization()
 {
     img_threshold = Ostu(image);
-    for (int i = 0; i < height; i++)
+    for (int i = 0; i < MT9V03X_H; i++)
     {
-        for (int j = 0; j < width; j++)
+        for (int j = 0; j < MT9V03X_W; j++)
         {
             if(image[i][j] > img_threshold)
             {
@@ -82,24 +82,25 @@ void Binarization(int width, int height)
     }
 }
 
-void draw_tangle(int width, int height)
+void draw_tangle()
 {
-    for (int i = 0; i < height; i++)
+    for (int i = 0; i < MT9V03X_H; i++)
     {
         for (int j = 0; j < 3; j++)
         {
             image[i][j] = 0;             // 左侧3列设为0
-            image[i][width - 1 - j] = 0; // 右侧3列设为0
+            image[i][MT9V03X_W - 1 - j] = 0; // 右侧3列设为0
         }
     }
     for(int i=0;i<3;i++)
     {
-        for(int j=0;j<width-1;j++)
+        for(int j=0;j<MT9V03X_W-1;j++)
         {
             image[i][j]=0;
         }
     }
 }
+
 
 uint8 left_start_point = 0;
 uint8 right_start_point = MT9V03X_W - 1;
