@@ -3,8 +3,8 @@
 
 #ifdef _VSCODE
 
-#define MT9V03X_W  (120)
-#define MT9V03X_H  (90)
+#define MT9V03X_W               (188)                                           // 图像宽度     范围 [1-752]
+#define MT9V03X_H               (120)                                           // 图像高度     范围 [1-480]
 
 #ifndef TRUE
 #define TRUE (1u)

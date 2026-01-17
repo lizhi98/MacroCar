@@ -7,8 +7,8 @@
 
 namespace fs = std::filesystem;
 
-#define MT9V03X_W  (120)
-#define MT9V03X_H  (90)
+#define MT9V03X_W  (188)
+#define MT9V03X_H  (120)
 
 int main(int argc, char** argv) {
 
