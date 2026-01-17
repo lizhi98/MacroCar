@@ -1,14 +1,5 @@
-/*
- * quaternion.h
- *
- *  Created on: 2025Äê11ÔÂ26ÈÕ
- *      Author: LENOVO
- */
-
 #ifndef CODE_QUATERNION_H_
 #define CODE_QUATERNION_H_
-
-
 
 #include "zf_common_typedef.h"
 
@@ -28,4 +19,4 @@ Quaternion* get_euler_angles(void);
 
 
 
-#endif /* CODE_QUATERNION_H_ */
+#endif

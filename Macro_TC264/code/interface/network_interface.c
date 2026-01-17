@@ -4,6 +4,7 @@
 uint32 pack_id = 0;
 
 NetworkPack * network_image_pack = NULL;
+uint8 mt9v03x_copy_image[MT9V03X_H][MT9V03X_W];
 
 uint8 network_interface_init(void){
     // 初始化并连接wifi
@@ -22,23 +23,12 @@ void network_interface_test(void){
     system_delay_ms(1000);
 }
 
-uint8 network_interface_copy_image(uint8 * image, size_t length){
+void network_interface_copy_image(uint8 * image, size_t length){
     // image为空
     if(image == NULL){
-        return 1;
+        zf_assert(0);
     }
-    // 若未分配network_image_pack，则创建
-    if(network_image_pack == NULL){
-        network_image_pack = (NetworkPack *)malloc(sizeof(uint32) + sizeof(uint16) + length);
-        if(network_image_pack == NULL){
-            return 2;
-        }
-    }
-    if(length > network_image_pack->buffer_length){
-        return 3;
-    }
-    memcpy(network_image_pack->buffer, image, length);
-    return 0;
+    memcpy(mt9v03x_copy_image, image, length);
 }
 
 uint8 network_interface_send_pack(NetworkPackType pack_type, uint8 *buffer, uint16 length){
@@ -74,4 +64,10 @@ uint8 network_interface_send_pack(NetworkPackType pack_type, uint8 *buffer, uint
 
 uint8 network_interface_receive_pack(){
     return 0;
+}
+
+
+uint8 network_interface_seekfree_host_config(uint8 *image_addr){
+    seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_WIFI_SPI);
+    seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, image_addr, MT9V03X_W, MT9V03X_H);
 }
