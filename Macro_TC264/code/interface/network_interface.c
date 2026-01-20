@@ -1,21 +1,25 @@
 #include "network_interface.h"
 #include "zf_driver_delay.h"
 
+uint8 network_status = 1; // 网络状态，0表示正常 1表示未初始化 2表示连接失败
+
 uint32 pack_id = 0;
 
 NetworkPack * network_image_pack = NULL;
 uint8 mt9v03x_copy_image[MT9V03X_H][MT9V03X_W];
 
-uint8 network_interface_init(void){
+void network_interface_init(void){
     // 初始化并连接wifi
     if(wifi_spi_init(WIFI_SSID, WIFI_PASSWORD)){
-        return 1;
+        network_status = 2;
+        return;
     }
     // 连接TCP服务器
     if(wifi_spi_socket_connect("TCP", HOST_IP, HOST_PORT, "6666")){
-        return 2;
+        network_status = 2;
+        return;
     }
-    return 0;
+    network_status = 0;
 }
 
 void network_interface_test(void){
@@ -67,7 +71,7 @@ uint8 network_interface_receive_pack(){
 }
 
 
-uint8 network_interface_seekfree_host_config(uint8 *image_addr){
+void network_interface_seekfree_host_config(uint8 *image_addr){
     seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_WIFI_SPI);
     seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, image_addr, MT9V03X_W, MT9V03X_H);
 }

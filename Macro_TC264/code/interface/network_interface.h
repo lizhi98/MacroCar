@@ -6,10 +6,10 @@
 #include "seekfree_assistant_interface.h"
 #include "zf_device_mt9v03x.h"
 
-#define WIFI_SSID           "AP-lizhi"
+#define WIFI_SSID           "XIAOMI_GoGoGo"
 #define WIFI_PASSWORD       "9894653xxk"
 
-#define HOST_IP             "10.206.51.252"
+#define HOST_IP             "192.168.31.98"
 #define HOST_PORT           "9895"
 #define HOST_CONNECT_MODE   "TCP"
 
@@ -27,14 +27,15 @@ typedef struct _NetworkPack{
 extern uint32 pack_id;
 extern NetworkPack * network_image_pack;
 extern uint8 mt9v03x_copy_image[MT9V03X_H][MT9V03X_W];
+extern uint8 network_status;
 
-uint8 network_interface_init(void);
+void  network_interface_init(void);
 uint8 network_interface_send_pack(NetworkPackType pack_type, uint8 *buffer, uint16 length);
 uint8 network_interface_receive_pack();
 
 void  network_interface_copy_image(uint8 * image, size_t length);
 
-uint8 network_interface_seekfree_host_config(uint8 *image_addr);
+void network_interface_seekfree_host_config(uint8 *image_addr);
 
 void network_interface_test(void);
 
