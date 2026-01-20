@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
         system("gcc -D_VSCODE image_process_main.c image_process.c -o image_process_debug.exe");
         std::cout << "Compiled image_process_debug.exe." << std::endl;
     }
-
+    system("pause");
     system("image_process_debug.exe args.txt");
     // 删除文件
     system("del image_process.c");

@@ -9,7 +9,7 @@ int main(int argc, char** argv) {
         printf("Please provide image data as command line argument.\n");
         return -1;
     }
-    // 从文件argv[1]读取图像数据到source_image数组
+    // 从argv[1]读取图像数据到source_image数组
     FILE * file = fopen(argv[1], "r");
     if(!file) {
         printf("Failed to open file: %s\n", argv[1]);
@@ -31,8 +31,18 @@ int main(int argc, char** argv) {
     // 清空屏幕
     system("cls");
     image_process(source_image);
-    // 打印处理后的图像
+
     HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    // 获取原来的颜色
+    CONSOLE_SCREEN_BUFFER_INFO csbi;
+    // 获取控制台屏幕缓冲区信息
+    if (!GetConsoleScreenBufferInfo(hConsole, &csbi)) {
+        printf("获取控制台颜色信息失败，错误码：%d\n", GetLastError());
+        return FALSE;
+    }
+    // 保存默认的颜色属性（wAttributes字段存储前景色+背景色）
+    WORD color_default = csbi.wAttributes;
+
     WORD color_black = 0;
     WORD color_white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE;
     WORD color_mid_line = FOREGROUND_RED | BACKGROUND_RED;
@@ -48,7 +58,7 @@ int main(int argc, char** argv) {
                 printf("--");
             }
             printf("\n");
-            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+            SetConsoleTextAttribute(hConsole, color_default);
         }
         // 图像内容
         for(int j=0;j<MT9V03X_W;j++){
@@ -56,7 +66,7 @@ int main(int argc, char** argv) {
             if(j == 0){
                 SetConsoleTextAttribute(hConsole, color_image_boundary);
                 printf("| ");
-                SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                SetConsoleTextAttribute(hConsole, color_default);
             }
             // 根据数值判断颜色
             switch (source_image[i][j])
@@ -77,17 +87,17 @@ int main(int argc, char** argv) {
                 SetConsoleTextAttribute(hConsole, color_side_line_right);
                 break;
             default:
-                SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                SetConsoleTextAttribute(hConsole, color_default);
                 break;
             }
-            printf("%d ",source_image[i][j] == 255 ? 1 : 0);
+            printf("%d ",source_image[i][j] == 0 ? 0 : 1);
             // 重置颜色
-            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+            SetConsoleTextAttribute(hConsole, color_default);
             // 最右边边界
             if(j == MT9V03X_W - 1){
                 SetConsoleTextAttribute(hConsole, color_image_boundary);
                 printf(" |");
-                SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+                SetConsoleTextAttribute(hConsole, color_default);
             }
         }
         printf("\n");
@@ -98,9 +108,12 @@ int main(int argc, char** argv) {
             for(int k=0;k<=MT9V03X_W+1;k++){
                 printf("--");
             }
+            SetConsoleTextAttribute(hConsole, color_default);
             printf("\n");
-            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
         }
     }
+    // 显示必要参数
+    printf("参数1: %d\n", 1);
+    
     return 0;
 }

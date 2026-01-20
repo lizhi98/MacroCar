@@ -21,7 +21,7 @@ int judge_distance(void)
         detected_distance=1;
         encoder_clear_count(MOTOR_LEFT_ENCODER_INDEX);
         encoder_clear_count(MOTOR_RIGHT_ENCODER_INDEX);
-     }
+    }
     return detected_distance ;
 }
 

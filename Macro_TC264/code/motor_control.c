@@ -73,6 +73,7 @@ void motion_control_pit_callback(){
     motor_get_speed(&motor_left_speed, &motor_right_speed);
     // 转向环
     motor_steering_speed = (int16)PID_calculate(&motion_steering_pid, 0.0f, 0.0f); // 这里的目标值和当前值需要根据具体应用修改
+    
     // 单电机速度环
     if(motor_left_speed_pid.type == PID_INC){
         motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed + 0 : 0), (float)motor_left_speed);
