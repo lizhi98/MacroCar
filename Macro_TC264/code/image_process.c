@@ -13,77 +13,76 @@ uint8 (*image)[MT9V03X_W];
 
 uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
 {
-   uint8 threshold;
-   imgsize = MT9V03X_H * MT9V03X_W;    //总像素个数
-   uint8 images_value_temp;            //中间变量暂时存储
+    uint8 threshold;
+    imgsize = MT9V03X_H * MT9V03X_W;    //总像素个数
+    uint8 images_value_temp;            //中间变量暂时存储
 
-   float sumPK = 0;
-   float sumMK = 0;
-   float var = 0;
-   float vartmp = 0;
+    float sumPK = 0;
+    float sumMK = 0;
+    float var = 0;
+    float vartmp = 0;
 
    //清零
-   for(uint16 i=0;i<GrayScale;i++)
-   {
-       hist[i]=0;
-       P[i]=0;
-       PK[i]=0;
-       MK[i]=0;
-   }
+    for(uint16 i=0;i<GrayScale;i++)
+    {
+        hist[i]=0;
+        P[i]=0;
+        PK[i]=0;
+        MK[i]=0;
+    }
 
    //获取直方图
-   for(uint8 i = 0;i<MT9V03X_H;i++)
-   {
-       for(uint8 j=0;j<MT9V03X_W;j++)
-       {
-           images_value_temp = index[i][j];
-           hist[images_value_temp]++;
-       }
-   }
+    for(uint8 i = 0;i<MT9V03X_H;i++)
+    {
+        for(uint8 j=0;j<MT9V03X_W;j++)
+        {
+            images_value_temp = index[i][j];
+            hist[images_value_temp]++;
+        }
+    }
 
    //求类间方差
-   for(uint16 i=0;i<GrayScale;i++)
-   {
-       P[i]=(float)hist[i]/imgsize;
-       PK[i] = sumPK + P[i];
-       sumPK=PK[i];
-       MK[i] = sumMK+i*P[i];
-       sumMK=MK[i];
-   }
+    for(uint16 i=0;i<GrayScale;i++)
+    {
+        P[i]=(float)hist[i]/imgsize;
+        PK[i] = sumPK + P[i];
+        sumPK=PK[i];
+        MK[i] = sumMK+i*P[i];
+        sumMK=MK[i];
+    }
    //求解最大类间方差的阈值
-   for(uint8 i=5;i<245;i++)
-   {
-       vartmp = ((MK[GrayScale-1] * PK[i] - MK[i]) * (MK[GrayScale - 1] * PK[i] - MK[i])) / (PK[i] * (1 - PK[i]));
-       if(vartmp>var)
-       {
-           var = vartmp;
-           threshold = i;      //输出阈值
-       }
-   }
-   return threshold;
+    for(uint8 i=5;i<245;i++)
+    {
+        vartmp = ((MK[GrayScale-1] * PK[i] - MK[i]) * (MK[GrayScale - 1] * PK[i] - MK[i])) / (PK[i] * (1 - PK[i]));
+        if(vartmp>var)
+        {
+            var = vartmp;
+            threshold = i;      //输出阈值
+        }
+    }
+    return threshold;
 }
 
 void Binarization()
 {
-   img_threshold = Ostu(image);
-   for (int i = 0; i < MT9V03X_H; i++)
-   {
-       for (int j = 0; j < MT9V03X_W; j++)
-       {
-           if(image[i][j] > img_threshold)
-           {
-               image[i][j] = 255;
-           }
-           else
-           {
-               image[i][j] = 0;
-           }
-       }
-   }
+    img_threshold = Ostu(image);
+    for (int i = 0; i < MT9V03X_H; i++)
+    {
+        for (int j = 0; j < MT9V03X_W; j++)
+        {
+            if(image[i][j] > img_threshold)
+            {
+                image[i][j] = 255;
+            }
+            else
+            {
+                image[i][j] = 0;
+            }
+        }
+    }
 }
 
 void remove_white_noise_filter() {
-
     for (int i = 1; i < MT9V03X_H - 1; i++) {
         for (int j = 1; j < MT9V03X_W - 1; j++) {
             if (image[i][j] == 255) {
@@ -103,16 +102,16 @@ void remove_white_noise_filter() {
 void draw_tangle()
 {
     remove_white_noise_filter() ;
-   for (int i = 0; i < MT9V03X_H; i++)
-   {
-       image[i][0] = 0;
-       image[i][MT9V03X_W - 1] = 0;
-   }
-   for (int j = 0; j < MT9V03X_W; j++)
-   {
-       image[0][j] = 0;
-       image[MT9V03X_H - 1][j] = 0;
-   }
+    for (int i = 0; i < MT9V03X_H; i++)
+    {
+        image[i][0] = 0;
+        image[i][MT9V03X_W - 1] = 0;
+    }
+    for (int j = 0; j < MT9V03X_W; j++)
+    {
+        image[0][j] = 0;
+        image[MT9V03X_H - 1][j] = 0;
+    }
 }
 
 
@@ -120,21 +119,21 @@ uint8 left_start_point = 0;
 uint8 right_start_point = MT9V03X_W - 1;
 void seek_start_points(int row)
 {
-   draw_tangle();
-   left_start_point = 0;
-   right_start_point = MT9V03X_W - 1;
+    draw_tangle();
+    left_start_point = 0;
+    right_start_point = MT9V03X_W - 1;
 
-   for (uint8 i = 1; i < MT9V03X_W - 1; i++)
-   {
-       if (image[row][i-1] == 0 && image[row][i] == 255 && image[row][i+1] == 255)
-       {
-           left_start_point = i;
-       }
-       if (image[row][i - 1] == 255 && image[row][i] == 255 && image[row][i + 1] == 0)
-       {
-           right_start_point = i;
-       }
-   }
+    for (uint8 i = 1; i < MT9V03X_W - 1; i++)
+    {
+        if (image[row][i-1] == 0 && image[row][i] == 255 && image[row][i+1] == 255)
+        {
+            left_start_point = i;
+        }
+        if (image[row][i - 1] == 255 && image[row][i] == 255 && image[row][i + 1] == 0)
+        {
+            right_start_point = i;
+        }
+    }
 }
 
 int seek_stop_line(void)
@@ -143,22 +142,22 @@ int seek_stop_line(void)
     for(int i=left_start_point;i<=right_start_point;i++)
     {
         int count1=0 ;
-       for(int j=MT9V03X_H-2;j>=0;j--)
-       {
-              if(image[j][i] == 255)
-              {
-                count1++;
-              }
-              else
-              {
-                  break;
-              }
-       }
-       if(count<count1)
-       {
-           count = count1;
-       }
-    }
+        for(int j=MT9V03X_H-2;j>=0;j--)
+        {
+                if(image[j][i] == 255)
+                {
+                    count1++;
+                }
+                else
+                {
+                    break;
+                }
+        }
+        if(count<count1)
+        {
+            count = count1;
+        }
+        }
 
 
     return count;
@@ -175,252 +174,252 @@ int min_raw_r = MT9V03X_H - 2;
 void seek_line( int height, int width)
 {
 
-   seek_start_points(MT9V03X_H - 2);
-   points_count = 0;
-   min_raw_l = MT9V03X_H - 2;
-   min_raw_r = MT9V03X_H - 2;
-   int point_l_raw = height - 2;
-   int point_l_col = left_start_point;
-   int point_r_raw = height - 2;
-   int point_r_col = right_start_point;
+    seek_start_points(MT9V03X_H - 2);
+    points_count = 0;
+    min_raw_l = MT9V03X_H - 2;
+    min_raw_r = MT9V03X_H - 2;
+    int point_l_raw = height - 2;
+    int point_l_col = left_start_point;
+    int point_r_raw = height - 2;
+    int point_r_col = right_start_point;
 
-   int dir_l[4] = {0, 1, 2, 3}; // 0为上，1为右，2为下，3为左
-   int dir_r[4] = {0, 1, 2, 3}; // 0为上，1为左，2为下，3为右
-   int dir_ll = 0;              // 左当前方向
-   int dir_rr = 0;              // 右当前方向
-   int turn_l = 0;
-   int turn_r = 0;
+    int dir_l[4] = {0, 1, 2, 3}; // 0为上，1为右，2为下，3为左
+    int dir_r[4] = {0, 1, 2, 3}; // 0为上，1为左，2为下，3为右
+    int dir_ll = 0;              // 左当前方向
+    int dir_rr = 0;              // 右当前方向
+    int turn_l = 0;
+    int turn_r = 0;
 
-   int stop_line = seek_stop_line();
-   for (int i = 0; i < MAX_POINTS; i++)
-   {
-       // 检查左右点是否接近
-       if (((point_l_raw - point_r_raw) * (point_l_raw - point_r_raw) +
+    int stop_line = seek_stop_line();
+    for (int i = 0; i < MAX_POINTS; i++)
+    {
+        // 检查左右点是否接近
+        if (((point_l_raw - point_r_raw) * (point_l_raw - point_r_raw) +
             (point_l_col - point_r_col) * (point_l_col - point_r_col)) < 5)
-       {
-           break;
-       }
-       //最长白列截止
-       if(point_l_raw <= MT9V03X_H-2-stop_line || point_r_raw <= MT9V03X_H-2-stop_line)
-       {
-           break;
-       }
-         // 记录最小行数
-       if (point_l_raw < min_raw_l)
-       {
-           min_raw_l = point_l_raw;
-       }
-       if (point_r_raw < min_raw_r)
-       {
-           min_raw_r = point_r_raw;
-       }
-       // 存储当前点
-       left_points_raw[points_count] = point_l_raw;
-       left_points_col[points_count] = point_l_col;
-       right_points_raw[points_count] = point_r_raw;
-       right_points_col[points_count] = point_r_col;
-       points_count++;
+        {
+            break;
+        }
+        //最长白列截止
+        if(point_l_raw <= MT9V03X_H-2-stop_line || point_r_raw <= MT9V03X_H-2-stop_line)
+        {
+            break;
+        }
+            // 记录最小行数
+        if (point_l_raw < min_raw_l)
+        {
+            min_raw_l = point_l_raw;
+        }
+        if (point_r_raw < min_raw_r)
+        {
+            min_raw_r = point_r_raw;
+        }
+        // 存储当前点
+        left_points_raw[points_count] = point_l_raw;
+        left_points_col[points_count] = point_l_col;
+        right_points_raw[points_count] = point_r_raw;
+        right_points_col[points_count] = point_r_col;
+        points_count++;
 
-       /* 左线追踪 */
-       if (dir_ll == 0 && point_l_raw >= point_r_raw )
-       { // 向上
-           if (image[point_l_raw - 1][point_l_col] == 0)
-           {
-               dir_ll += 1;
-           }
-           else if (image[point_l_raw - 1][point_l_col] == 255 &&
+        /* 左线追踪 */
+        if (dir_ll == 0 && point_l_raw >= point_r_raw )
+        { // 向上
+            if (image[point_l_raw - 1][point_l_col] == 0)
+            {
+                dir_ll += 1;
+            }
+            else if (image[point_l_raw - 1][point_l_col] == 255 &&
                     image[point_l_raw - 1][point_l_col - 1] == 255)
-           {
-               dir_ll -= 1;
-               point_l_raw = point_l_raw - 1;
-               point_l_col = point_l_col - 1;
-           }
-           else if (image[point_l_raw - 1][point_l_col] == 255 &&
+            {
+                dir_ll -= 1;
+                point_l_raw = point_l_raw - 1;
+                point_l_col = point_l_col - 1;
+            }
+            else if (image[point_l_raw - 1][point_l_col] == 255 &&
                     image[point_l_raw - 1][point_l_col - 1] == 0)
-           {
-               point_l_raw = point_l_raw - 1;
-           }
-           else
-           {
-               break;
-           }
-           if (dir_ll < 0)
-               dir_ll = 3;
-       }
-       else if (dir_ll == 1 && point_l_raw >= point_r_raw )
-       { // 向右
-           if (image[point_l_raw][point_l_col + 1] == 0)
-           {
-               dir_ll += 1;
-           }
-           else if (image[point_l_raw][point_l_col + 1] == 255 &&
+            {
+                point_l_raw = point_l_raw - 1;
+            }
+            else
+            {
+                break;
+            }
+            if (dir_ll < 0)
+                dir_ll = 3;
+        }
+        else if (dir_ll == 1 && point_l_raw >= point_r_raw )
+        { // 向右
+            if (image[point_l_raw][point_l_col + 1] == 0)
+            {
+                dir_ll += 1;
+            }
+            else if (image[point_l_raw][point_l_col + 1] == 255 &&
                     image[point_l_raw - 1][point_l_col + 1] == 255)
-           {
-               dir_ll -= 1;
-               point_l_raw = point_l_raw - 1;
-               point_l_col = point_l_col + 1;
-           }
-           else if (image[point_l_raw][point_l_col + 1] == 255 &&
+            {
+                dir_ll -= 1;
+                point_l_raw = point_l_raw - 1;
+                point_l_col = point_l_col + 1;
+            }
+            else if (image[point_l_raw][point_l_col + 1] == 255 &&
                     image[point_l_raw - 1][point_l_col + 1] == 0)
-           {
-               point_l_col = point_l_col + 1;
-           }
-           else
-           {
-               break;
-           }
-       }
-       else if (dir_ll == 2 && point_l_raw >= point_r_raw )
-       { // 向下
-           if (image[point_l_raw + 1][point_l_col] == 0)
-           {
-               dir_ll += 1;
-           }
-           else if (image[point_l_raw + 1][point_l_col] == 255 &&
+            {
+                point_l_col = point_l_col + 1;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if (dir_ll == 2 && point_l_raw >= point_r_raw )
+        { // 向下
+            if (image[point_l_raw + 1][point_l_col] == 0)
+            {
+                dir_ll += 1;
+            }
+            else if (image[point_l_raw + 1][point_l_col] == 255 &&
                     image[point_l_raw + 1][point_l_col + 1] == 255)
-           {
-               dir_ll -= 1;
-               point_l_raw = point_l_raw + 1;
-               point_l_col = point_l_col + 1;
-           }
-           else if (image[point_l_raw + 1][point_l_col] == 255 &&
+            {
+                dir_ll -= 1;
+                point_l_raw = point_l_raw + 1;
+                point_l_col = point_l_col + 1;
+            }
+            else if (image[point_l_raw + 1][point_l_col] == 255 &&
                     image[point_l_raw + 1][point_l_col + 1] == 0)
-           {
-               point_l_raw = point_l_raw + 1;
-           }
-           else
-           {
-               break;
-           }
-       }
-       else if (dir_ll == 3 && point_l_raw >= point_r_raw )
-       { // 向左
-           if (image[point_l_raw][point_l_col - 1] == 0)
-           {
-               dir_ll += 1;
-           }
-           else if (image[point_l_raw][point_l_col - 1] == 255 &&
+            {
+                point_l_raw = point_l_raw + 1;
+            }
+            else
+            {
+                break;
+            }
+        }
+        else if (dir_ll == 3 && point_l_raw >= point_r_raw )
+        { // 向左
+            if (image[point_l_raw][point_l_col - 1] == 0)
+            {
+                dir_ll += 1;
+            }
+            else if (image[point_l_raw][point_l_col - 1] == 255 &&
                     image[point_l_raw + 1][point_l_col - 1] == 255)
-           {
-               dir_ll -= 1;
-               point_l_raw = point_l_raw + 1;
-               point_l_col = point_l_col - 1;
-           }
-           else if (image[point_l_raw][point_l_col - 1] == 255 &&
+            {
+                dir_ll -= 1;
+                point_l_raw = point_l_raw + 1;
+                point_l_col = point_l_col - 1;
+            }
+            else if (image[point_l_raw][point_l_col - 1] == 255 &&
                     image[point_l_raw + 1][point_l_col - 1] == 0)
-           {
-               point_l_col = point_l_col - 1;
-           }
-           else
-           {
-               break;
-           }
-           if (dir_ll > 3)
-               dir_ll = 0;
-       }
+            {
+                point_l_col = point_l_col - 1;
+            }
+            else
+            {
+                break;
+            }
+            if (dir_ll > 3)
+                dir_ll = 0;
+        }
 
-       /* 右线追踪 */
-       if (dir_rr == 0 && point_l_raw < point_r_raw )
-       { // 向上
-           if (image[point_r_raw - 1][point_r_col] == 0)
-           {
-               dir_rr += 1;
-           }
-           else if (image[point_r_raw - 1][point_r_col] == 255 &&
+        /* 右线追踪 */
+        if (dir_rr == 0 && point_l_raw < point_r_raw )
+        { // 向上
+            if (image[point_r_raw - 1][point_r_col] == 0)
+            {
+                dir_rr += 1;
+            }
+            else if (image[point_r_raw - 1][point_r_col] == 255 &&
                     image[point_r_raw - 1][point_r_col + 1] == 255)
-           {
-               dir_rr -= 1;
-               point_r_raw = point_r_raw - 1;
-               point_r_col = point_r_col + 1;
-           }
-           else if (image[point_r_raw - 1][point_r_col] == 255 &&
+            {
+                dir_rr -= 1;
+                point_r_raw = point_r_raw - 1;
+                point_r_col = point_r_col + 1;
+            }
+            else if (image[point_r_raw - 1][point_r_col] == 255 &&
                     image[point_r_raw - 1][point_r_col + 1] == 0)
-           {
-               point_r_raw = point_r_raw - 1;
-           }
-           else
-           {
-               break;
-           }
-           if (dir_rr < 0)
-               dir_rr = 3;
-       }
-       else if (dir_rr == 1 && point_l_raw < point_r_raw )
-       { // 向右（实际上是向左搜索）
-           if (image[point_r_raw][point_r_col - 1] == 0)
-           {
-               dir_rr += 1;
-           }
-           else if (image[point_r_raw][point_r_col - 1] == 255 &&
+            {
+                point_r_raw = point_r_raw - 1;
+            }
+            else
+            {
+                break;
+            }
+            if (dir_rr < 0)
+                dir_rr = 3;
+        }
+        else if (dir_rr == 1 && point_l_raw < point_r_raw )
+        { // 向右（实际上是向左搜索）
+            if (image[point_r_raw][point_r_col - 1] == 0)
+            {
+                dir_rr += 1;
+            }
+            else if (image[point_r_raw][point_r_col - 1] == 255 &&
                     image[point_r_raw - 1][point_r_col - 1] == 255)
-           {
-               dir_rr -= 1;
-               point_r_raw = point_r_raw - 1;
-               point_r_col = point_r_col - 1;
-           }
-           else if (image[point_r_raw][point_r_col - 1] == 255 &&
+            {
+                dir_rr -= 1;
+                point_r_raw = point_r_raw - 1;
+                point_r_col = point_r_col - 1;
+            }
+            else if (image[point_r_raw][point_r_col - 1] == 255 &&
                     image[point_r_raw - 1][point_r_col - 1] == 0)
-           {
-               point_r_col = point_r_col - 1;
-           }
-           else
-           {
-               break;
-           }
-           if (dir_rr > 3)
-               dir_rr = 0;
-       }
-       else if (dir_rr == 2 && point_l_raw < point_r_raw )
-       { // 向下
-           if (image[point_r_raw + 1][point_r_col] == 0)
-           {
-               dir_rr += 1;
-           }
-           else if (image[point_r_raw + 1][point_r_col] == 255 &&
+            {
+                point_r_col = point_r_col - 1;
+            }
+            else
+            {
+                break;
+            }
+            if (dir_rr > 3)
+                dir_rr = 0;
+        }
+        else if (dir_rr == 2 && point_l_raw < point_r_raw )
+        { // 向下
+            if (image[point_r_raw + 1][point_r_col] == 0)
+            {
+                dir_rr += 1;
+            }
+            else if (image[point_r_raw + 1][point_r_col] == 255 &&
                     image[point_r_raw + 1][point_r_col - 1] == 255)
-           {
-               dir_rr -= 1;
-               point_r_raw = point_r_raw + 1;
-               point_r_col = point_r_col - 1;
-           }
-           else if (image[point_r_raw + 1][point_r_col] == 255 &&
+            {
+                dir_rr -= 1;
+                point_r_raw = point_r_raw + 1;
+                point_r_col = point_r_col - 1;
+            }
+            else if (image[point_r_raw + 1][point_r_col] == 255 &&
                     image[point_r_raw + 1][point_r_col - 1] == 0)
-           {
-               point_r_raw = point_r_raw + 1;
-           }
-           else
-           {
-               break;
-           }
-           if (dir_rr > 3)
-               dir_rr = 0;
-       }
-       else if (dir_rr == 3 && point_l_raw < point_r_raw )
-       { // 向左（实际上是向右搜索）
-           if (image[point_r_raw][point_r_col + 1] == 0)
-           {
-               dir_rr += 1;
-           }
-           else if (image[point_r_raw][point_r_col + 1] == 255 &&
+            {
+                point_r_raw = point_r_raw + 1;
+            }
+            else
+            {
+                break;
+            }
+            if (dir_rr > 3)
+                dir_rr = 0;
+        }
+        else if (dir_rr == 3 && point_l_raw < point_r_raw )
+        { // 向左（实际上是向右搜索）
+            if (image[point_r_raw][point_r_col + 1] == 0)
+            {
+                dir_rr += 1;
+            }
+            else if (image[point_r_raw][point_r_col + 1] == 255 &&
                     image[point_r_raw + 1][point_r_col + 1] == 255)
-           {
-               dir_rr -= 1;
-               point_r_raw = point_r_raw + 1;
-               point_r_col = point_r_col + 1;
-           }
-           else if (image[point_r_raw][point_r_col + 1] == 255 &&
+            {
+                dir_rr -= 1;
+                point_r_raw = point_r_raw + 1;
+                point_r_col = point_r_col + 1;
+            }
+            else if (image[point_r_raw][point_r_col + 1] == 255 &&
                     image[point_r_raw + 1][point_r_col + 1] == 0)
-           {
-               point_r_col = point_r_col + 1;
-           }
-           else
-           {
-               break;
-           }
-           if (dir_rr > 3)
-               dir_rr = 0;
-       }
-   }
+            {
+                point_r_col = point_r_col + 1;
+            }
+            else
+            {
+                break;
+            }
+            if (dir_rr > 3)
+                dir_rr = 0;
+        }
+    }
 }
 
 uint8 left_line_list[MT9V03X_H];
@@ -436,74 +435,75 @@ void seek_list(int num)
     {
         max_raw=min_raw_r;
     }
-   int j = MT9V03X_H - 2;
-   int k = MT9V03X_H - 2;
-   for (int i = 0; i < MT9V03X_H; i++)
-   {
-       left_line_list[i] = 0;
-       right_line_list[i] = MT9V03X_W - 1;
-   }
-   for (int i = 0; i < num; i++)
-   {
-       if (left_points_raw[i] == j && j >= max_raw)
-       {
-           left_line_list[j] = left_points_col[i];
-           j--;
-       }
-       if (right_points_raw[i] == k && k >= max_raw)
-       {
-           right_line_list[k] = right_points_col[i];
-           k--;
-       }
-   }
+    int j = MT9V03X_H - 2;
+    int k = MT9V03X_H - 2;
+    for (int i = 0; i < MT9V03X_H; i++)
+    {
+        left_line_list[i] = 0;
+        right_line_list[i] = MT9V03X_W - 1;
+    }
+    for (int i = 0; i < num; i++)
+    {
+        if (left_points_raw[i] == j && j >= max_raw)
+        {
+            left_line_list[j] = left_points_col[i];
+            j--;
+        }
+        if (right_points_raw[i] == k && k >= max_raw)
+        {
+            right_line_list[k] = right_points_col[i];
+            k--;
+        }
+    }
 }
 
 int weight_array[MT9V03X_H] = {
-   1, 1, 1, 1, 1, 2, 2, 2, 3, 3,
-   4, 4, 5, 5, 6, 7, 8, 9, 10, 11,
-   12, 14, 15, 17, 19, 21, 23, 25, 27, 29,
-   31, 33, 35, 37, 39, 41, 43, 44, 46, 47,
-   48, 49, 50, 50, 51, 51, 52, 52, 52, 52,
-   52, 52, 51, 51, 50, 50, 49, 48, 47, 46,
-   44, 43, 41, 39, 37, 35, 33, 31, 29, 27,
-   25, 23, 21, 19, 17, 15, 14, 12, 11, 10,
-   9, 8, 7, 6, 5, 5, 4, 4, 3, 3,
-   2, 2, 2, 1, 1, 1, 0, 0};
+    1, 1, 1, 1, 1, 2, 2, 2, 3, 3,
+    4, 4, 5, 5, 6, 7, 8, 9, 10, 11,
+    12, 14, 15, 17, 19, 21, 23, 25, 27, 29,
+    31, 33, 35, 37, 39, 41, 43, 44, 46, 47,
+    48, 49, 50, 50, 51, 51, 52, 52, 52, 52,
+    52, 52, 51, 51, 50, 50, 49, 48, 47, 46,
+    44, 43, 41, 39, 37, 35, 33, 31, 29, 27,
+    25, 23, 21, 19, 17, 15, 14, 12, 11, 10,
+    9, 8, 7, 6, 5, 5, 4, 4, 3, 3,
+    2, 2, 2, 1, 1, 1, 0, 0
+};
 int mid_line_list[MT9V03X_H];
 int error_image;
 
 void image_draw(int min_raw)
 {
-   for(int i = min_raw; i < MT9V03X_H - 1;i++)
-   {
-       image[i][mid_line_list[i]]  = 10;
-       image[i][left_line_list[i]]  = 5;
-       image[i][right_line_list[i]]  = 15;
-   }
+    for(int i = min_raw; i < MT9V03X_H - 1;i++)
+    {
+        image[i][mid_line_list[i]]  = 10;
+        image[i][left_line_list[i]]  = 5;
+        image[i][right_line_list[i]]  = 15;
+    }
 }
 
 int get_error_image(void)
 {
-   int error_image = 0;
-   int min_raw;
-   if(min_raw_l>min_raw_r)
-   {
-       min_raw=min_raw_l;
-   }
-   else
-   {
-       min_raw=min_raw_r;
-   }
+    int error_image = 0;
+    int min_raw;
+    if(min_raw_l>min_raw_r)
+    {
+        min_raw=min_raw_l;
+    }
+    else
+    {
+        min_raw=min_raw_r;
+    }
 
-   int i;
-   for(i = min_raw; i < MT9V03X_H - 1;i++)
-   {
-       mid_line_list[i] = (right_line_list[i] + left_line_list[i]) / 2;
-       error_image += weight_array[i] * (94 - mid_line_list[i]);
-       error_image /= 500;
-   }
-   image_draw(min_raw);
-   return error_image;
+    int i;
+    for(i = min_raw; i < MT9V03X_H - 1;i++)
+    {
+        mid_line_list[i] = (right_line_list[i] + left_line_list[i]) / 2;
+        error_image += weight_array[i] * (94 - mid_line_list[i]);
+        error_image /= 500;
+    }
+    image_draw(min_raw);
+    return error_image;
 }
 
 //行特征值
@@ -517,12 +517,12 @@ int get_error_image(void)
 #define FEATURE_DETECT_WIDTH_RIGHT 170
 #define detect_height_start_row 10
 #define detect_height_end_row 70
-typedef struct
-{
+typedef struct{
     int left_feature_flag;
     int right_feature_flag;
     int height_feature_flag;
-}FeatureDetectResult;
+} FeatureDetectResult;
+
 FeatureDetectResult detect_feature_line()
 {
     FeatureDetectResult result={0,0,0};
@@ -552,15 +552,15 @@ FeatureDetectResult detect_feature_line()
             }
         }
         if(count_height[0]>detect_existing_col_min &&
-           count_height[1]>detect_existing_col_min &&
-           count_height[2]>detect_existing_col_min &&
-           count_height[3]>detect_existing_col_min &&
-           count_height[4]>detect_existing_col_min &&
-           count_height[0]<detect_existing_col_max &&
-           count_height[1]<detect_existing_col_max &&
-           count_height[2]<detect_existing_col_max &&
-           count_height[3]<detect_existing_col_max &&
-           count_height[4]<detect_existing_col_max)
+            count_height[1]>detect_existing_col_min &&
+            count_height[2]>detect_existing_col_min &&
+            count_height[3]>detect_existing_col_min &&
+            count_height[4]>detect_existing_col_min &&
+            count_height[0]<detect_existing_col_max &&
+            count_height[1]<detect_existing_col_max &&
+            count_height[2]<detect_existing_col_max &&
+            count_height[3]<detect_existing_col_max &&
+            count_height[4]<detect_existing_col_max)
         {
             result.height_feature_flag=2;
         }
@@ -586,116 +586,116 @@ FeatureDetectResult detect_feature_line()
 float parameterA;
 float parameterB;
 void regression(int type, int startline, int endline)//最小二乘法拟合曲线，分别拟合中线，左线，右线,type表示拟合哪几条线
- {
-     int i = 0;
-     int sumlines = endline - startline;
-     int sumX = 0;
-     int sumY = 0;
-     float averageX = 0;
-     float averageY = 0;
-     float sumUp = 0;
-     float sumDown = 0;
-     if (type == 0)      //拟合中线
-     {
-         for (i = startline; i < endline; i++)
-         {
-             sumX += i;
-             sumY += mid_line_list[i];
-         }
-         if (sumlines != 0)
-         {
-             averageX = (float)(sumX / sumlines);     //x的平均值
-             averageY = (float)(sumY / sumlines);     //y的平均值
-         }
-         else
-         {
-             averageX = 0;     //x的平均值
-             averageY = 0;     //y的平均值
-         }
-         for (i = startline; i < endline; i++)
-         {
-             sumUp += (mid_line_list[i] - averageY) * (i - averageX);
-             sumDown += (i - averageX) * (i - averageX);
-         }
-         if (sumDown == 0) parameterB = 0;
-         else parameterB = sumUp / sumDown;
-         parameterA = averageY - parameterB * averageX;
-     }
-     else if (type == 1)//拟合左线
-     {
-         for (i = startline; i < endline; i++)
-         {
-             sumX += i;
-             sumY += left_line_list[i];
-         }
-         if (sumlines == 0) sumlines = 1;
-         averageX = (float)(sumX / sumlines);     //x的平均值
-         averageY = (float)(sumY / sumlines);     //y的平均值
-         for (i = startline; i < endline; i++)
-         {
-             sumUp += (left_line_list[i] - averageY) * (i - averageX);
-             sumDown += (i - averageX) * (i - averageX);
-         }
-         if (sumDown == 0) parameterB = 0;
-         else parameterB = sumUp / sumDown;
-         parameterA = averageY - parameterB * averageX;
-     }
-     else if (type == 2)//拟合右线
-     {
-         for (i = startline; i < endline; i++)
-         {
-             sumX += i;
-             sumY += right_line_list[i];
-         }
-         if (sumlines == 0) sumlines = 1;
-         averageX = (float)(sumX / sumlines);     //x的平均值
-         averageY = (float)(sumY / sumlines);     //y的平均值
-         for (i = startline; i < endline; i++)
-         {
-             sumUp += (right_line_list[i] - averageY) * (i - averageX);
-             sumDown += (i - averageX) * (i - averageX);
-         }
-         if (sumDown == 0) parameterB = 0;
-         else parameterB = sumUp / sumDown;
-         parameterA = averageY - parameterB * averageX;
+{
+    int i = 0;
+    int sumlines = endline - startline;
+    int sumX = 0;
+    int sumY = 0;
+    float averageX = 0;
+    float averageY = 0;
+    float sumUp = 0;
+    float sumDown = 0;
+    if (type == 0)      //拟合中线
+    {
+        for (i = startline; i < endline; i++)
+        {
+            sumX += i;
+            sumY += mid_line_list[i];
+        }
+        if (sumlines != 0)
+        {
+            averageX = (float)(sumX / sumlines);     //x的平均值
+            averageY = (float)(sumY / sumlines);     //y的平均值
+        }
+        else
+        {
+            averageX = 0;     //x的平均值
+            averageY = 0;     //y的平均值
+        }
+        for (i = startline; i < endline; i++)
+        {
+            sumUp += (mid_line_list[i] - averageY) * (i - averageX);
+            sumDown += (i - averageX) * (i - averageX);
+        }
+        if (sumDown == 0) parameterB = 0;
+        else parameterB = sumUp / sumDown;
+        parameterA = averageY - parameterB * averageX;
+    }
+    else if (type == 1)//拟合左线
+    {
+        for (i = startline; i < endline; i++)
+        {
+            sumX += i;
+            sumY += left_line_list[i];
+        }
+        if (sumlines == 0) sumlines = 1;
+        averageX = (float)(sumX / sumlines);     //x的平均值
+        averageY = (float)(sumY / sumlines);     //y的平均值
+        for (i = startline; i < endline; i++)
+        {
+            sumUp += (left_line_list[i] - averageY) * (i - averageX);
+            sumDown += (i - averageX) * (i - averageX);
+        }
+        if (sumDown == 0) parameterB = 0;
+        else parameterB = sumUp / sumDown;
+        parameterA = averageY - parameterB * averageX;
+    }
+    else if (type == 2)//拟合右线
+    {
+        for (i = startline; i < endline; i++)
+        {
+            sumX += i;
+            sumY += right_line_list[i];
+        }
+        if (sumlines == 0) sumlines = 1;
+        averageX = (float)(sumX / sumlines);     //x的平均值
+        averageY = (float)(sumY / sumlines);     //y的平均值
+        for (i = startline; i < endline; i++)
+        {
+            sumUp += (right_line_list[i] - averageY) * (i - averageX);
+            sumDown += (i - averageX) * (i - averageX);
+        }
+        if (sumDown == 0) parameterB = 0;
+        else parameterB = sumUp / sumDown;
+        parameterA = averageY - parameterB * averageX;
 
-     }
+    }
 
- }
+}
 int monileft[MT9V03X_H];
 int moniright[MT9V03X_H];
 int monimiddle[MT9V03X_H];
 void monileftfuzhi(float A, float B, int start_point, int end_point)
- {
-     int m;
-     for (m = start_point; m <= end_point; m++)
-     {
-         if ((B * m + A) >= 255) monileft[m] = 255;
-         if ((B * m + A) <= 0) monileft[m] = 0;
-         else if (0 < (B * m + A) && (B * m + A) < 255) monileft[m] = (int)(B * m + A);
-     }
- }
- void monirightfuzhi(float A, float B, int start_point, int end_point)
- {
-     int m;
-     for (m = start_point; m <= end_point; m++)
-     {
-         if ((B * m + A) >= 255) moniright[m] = 255;
-         if ((B * m + A) <= 0) moniright[m] = 0;
-         else if (0 < (B * m + A) && (B * m + A) < 255) moniright[m] = (int)(B * m + A);
-     }
- }
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
+        if ((B * m + A) >= 255) monileft[m] = 255;
+        if ((B * m + A) <= 0) monileft[m] = 0;
+        else if (0 < (B * m + A) && (B * m + A) < 255) monileft[m] = (int)(B * m + A);
+    }
+}
+void monirightfuzhi(float A, float B, int start_point, int end_point)
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
+        if ((B * m + A) >= 255) moniright[m] = 255;
+        if ((B * m + A) <= 0) moniright[m] = 0;
+        else if (0 < (B * m + A) && (B * m + A) < 255) moniright[m] = (int)(B * m + A);
+    }
+}
 
- void monizhongfuzhi(float A, float B, int start_point, int end_point)
- {
-     int m;
-     for (m = start_point; m <= end_point; m++)
-     {
-         if ((B * m + A) >= 255) monimiddle[m] = 255;
-         if ((B * m + A) <= 0) monimiddle[m] = 0;
-         else if (0 < (B * m + A) && (B * m + A) < 255) monimiddle[m] = (int)(B * m + A);
-     }
- }
+void monizhongfuzhi(float A, float B, int start_point, int end_point)
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
+        if ((B * m + A) >= 255) monimiddle[m] = 255;
+        if ((B * m + A) <= 0) monimiddle[m] = 0;
+        else if (0 < (B * m + A) && (B * m + A) < 255) monimiddle[m] = (int)(B * m + A);
+    }
+}
 
 double pianfangleft;
 double pianfangright;
@@ -753,11 +753,11 @@ void pianfangcal(int begin, int end, int type)
 //图像处理主函数
 void image_process(uint8 (*source_image)[MT9V03X_W])
 {
-   image = source_image;
-   Binarization(MT9V03X_W, MT9V03X_H);
-   seek_line(MT9V03X_H,MT9V03X_W);
-   seek_list(points_count);
-   error_image=get_error_image();
+    image = source_image;
+    Binarization(MT9V03X_W, MT9V03X_H);
+    seek_line(MT9V03X_H,MT9V03X_W);
+    seek_list(points_count);
+    error_image=get_error_image();
 }
 
 
