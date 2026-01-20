@@ -36,9 +36,28 @@ int main(int argc, char** argv) {
     WORD color_black = 0;
     WORD color_white = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE | BACKGROUND_RED | BACKGROUND_GREEN | BACKGROUND_BLUE;
     WORD color_mid_line = FOREGROUND_RED | BACKGROUND_RED;
-    WORD color_side_line = FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_RED | BACKGROUND_GREEN;
+    WORD color_side_line_left = FOREGROUND_BLUE | BACKGROUND_BLUE;
+    WORD color_side_line_right = FOREGROUND_GREEN | BACKGROUND_GREEN;
+    WORD color_image_boundary = FOREGROUND_RED | FOREGROUND_GREEN | BACKGROUND_RED | BACKGROUND_GREEN;
+
     for(int i=0;i<MT9V03X_H;i++){
+        // 最上面边界
+        if(i == 0){
+            SetConsoleTextAttribute(hConsole, color_image_boundary);
+            for(int k=0;k<=MT9V03X_W+1;k++){
+                printf("--");
+            }
+            printf("\n");
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+        }
+        // 图像内容
         for(int j=0;j<MT9V03X_W;j++){
+            // 最左边边界
+            if(j == 0){
+                SetConsoleTextAttribute(hConsole, color_image_boundary);
+                printf("| ");
+                SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+            }
             // 根据数值判断颜色
             switch (source_image[i][j])
             {
@@ -51,19 +70,37 @@ int main(int argc, char** argv) {
             case 10:
                 SetConsoleTextAttribute(hConsole, color_mid_line);
                 break;
-            case 15:
             case 5:
-                SetConsoleTextAttribute(hConsole, color_side_line);
+                SetConsoleTextAttribute(hConsole, color_side_line_left);
+                break;
+            case 15:
+                SetConsoleTextAttribute(hConsole, color_side_line_right);
                 break;
             default:
                 SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
                 break;
             }
-            printf("%d,",source_image[i][j] == 255 ? 1 : 0);
+            printf("%d ",source_image[i][j] == 255 ? 1 : 0);
             // 重置颜色
             SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+            // 最右边边界
+            if(j == MT9V03X_W - 1){
+                SetConsoleTextAttribute(hConsole, color_image_boundary);
+                printf(" |");
+                SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+            }
         }
         printf("\n");
+
+        // 最下面边界
+        if(i == MT9V03X_H - 1){
+            SetConsoleTextAttribute(hConsole, color_image_boundary);
+            for(int k=0;k<=MT9V03X_W+1;k++){
+                printf("--");
+            }
+            printf("\n");
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+        }
     }
     return 0;
 }

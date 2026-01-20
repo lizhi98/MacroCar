@@ -26,6 +26,8 @@ typedef signed long long    int64;
 #include "zf_device_mt9v03x.h"
 #endif
 
+#define image_w  (MT9V03X_W)
+#define image_h  (MT9V03X_H)
 extern uint8 img_threshold;
 extern int points_count;
 extern int error_image;
