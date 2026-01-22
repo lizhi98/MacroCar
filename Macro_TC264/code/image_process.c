@@ -172,6 +172,7 @@ int right_points_col[MAX_POINTS] = {0};
 int points_count;
 int min_raw_l = MT9V03X_H - 2;
 int min_raw_r = MT9V03X_H - 2;
+int stop_line;
 void seek_line( int height, int width)
 {
 
@@ -191,7 +192,7 @@ void seek_line( int height, int width)
    int turn_l = 0;
    int turn_r = 0;
 
-   int stop_line = seek_stop_line();
+   stop_line = seek_stop_line();
    for (int i = 0; i < MAX_POINTS; i++)
    {
        // 检查左右点是否接近
@@ -458,73 +459,67 @@ void seek_list(int num)
    }
 }
 
-int weight_array[MT9V03X_H] = {
-   1, 1, 1, 1, 1, 2, 2, 2, 3, 3,
-   4, 4, 5, 5, 6, 7, 8, 9, 10, 11,
-   12, 14, 15, 17, 19, 21, 23, 25, 27, 29,
-   31, 33, 35, 37, 39, 41, 43, 44, 46, 47,
-   48, 49, 50, 50, 51, 51, 52, 52, 52, 52,
-   52, 52, 51, 51, 50, 50, 49, 48, 47, 46,
-   44, 43, 41, 39, 37, 35, 33, 31, 29, 27,
-   25, 23, 21, 19, 17, 15, 14, 12, 11, 10,
-   9, 8, 7, 6, 5, 5, 4, 4, 3, 3,
-   2, 2, 2, 1, 1, 1, 0, 0};
-int mid_line_list[MT9V03X_H];
-int error_image;
-
-void image_draw(int min_raw)
+void Add_Line(int x1,int y1,int x2,int y2)//右补线,补的是边界
 {
-   for(int i = min_raw; i < MT9V03X_H - 1;i++)
-   {
-       image[i][mid_line_list[i]]  = 10;
-       image[i][left_line_list[i]]  = 5;
-       image[i][right_line_list[i]]  = 15;
-   }
+    int i,max,a1,a2;
+    int hx;
+    if(x1>=MT9V03X_W-1)//起始点位置校正，排除数组越界的可能
+       x1=MT9V03X_W-1;
+    else if(x1<=0)
+        x1=0;
+    if(y1>=MT9V03X_H-1)
+        y1=MT9V03X_H-1;
+    else if(y1<=0)
+        y1=0;
+    if(x2>=MT9V03X_W-1)
+        x2=MT9V03X_W-1;
+    else if(x2<=0)
+        x2=0;
+    if(y2>=MT9V03X_H-1)
+        y2=MT9V03X_H-1;
+    else if(y2<=0)
+         y2=0;
+    a1=y1;
+    a2=y2;
+    if(a1>a2)//坐标互换
+    {
+        max=a1;
+        a1=a2;
+        a2=max;
+    }
+    for(i=a1;i<=a2;i++)//根据斜率补线即可
+    {
+        hx=(i-y1)*(x2-x1)/(y2-y1)+x1;
+        if(hx>=MT9V03X_W)
+            hx=MT9V03X_W;
+        else if(hx<=0)
+            hx=0;
+        mid_line_list[i]=hx;
+    }
 }
 
-int get_error_image(void)
-{
-   int error_image = 0;
-   int min_raw;
-   if(min_raw_l>min_raw_r)
-   {
-       min_raw=min_raw_l;
-   }
-   else
-   {
-       min_raw=min_raw_r;
-   }
-
-   int i;
-   for(i = min_raw; i < MT9V03X_H - 1;i++)
-   {
-       mid_line_list[i] = (right_line_list[i] + left_line_list[i]) / 2;
-       error_image += weight_array[i] * (94 - mid_line_list[i]);
-       error_image /= 500;
-   }
-   image_draw(min_raw);
-   return error_image;
-}
-
+int feature_row_l=0;
+int feature_row_r=0;
+FeatureDetectResult image_feature;
 //行特征值
 #define FEATURE_DETECT_HEIGHT 20
 #define detect_left_start_col 30
 #define detect_right_start_col 150
-#define detect_existing_col_min 10
-#define detect_existing_col_max 50
+#define detect_existing_col_min 1
+#define detect_existing_col_max 8
 //列特征值
 #define FEATURE_DETECT_WIDTH_LEFT 20
 #define FEATURE_DETECT_WIDTH_RIGHT 170
 #define detect_height_start_row 10
 #define detect_height_end_row 70
-typedef struct
-{
-    int left_feature_flag;
-    int right_feature_flag;
-    int height_feature_flag;
-}FeatureDetectResult;
+#define detect_existing_row_min 5
+#define detect_existing_row_max 30
+
+
 FeatureDetectResult detect_feature_line()
 {
+    feature_row_l=0;
+    feature_row_r=0;
     FeatureDetectResult result={0,0,0};
     //检查行特征，确保不会出现断线（如电容），以此来作为判断转向点依据,0为白列长度正常，1为白列长度缩短，且构成转弯条件，2为白列长度缩短，但构成了电容等元素特征
     int height_flag=0;
@@ -539,7 +534,6 @@ FeatureDetectResult detect_feature_line()
     }
     if(height_flag==1)
     {
-        result.height_feature_flag=1;
         int count_height[5]={0};
         for(int i=10;i<15;i++)
         {
@@ -551,16 +545,17 @@ FeatureDetectResult detect_feature_line()
                 }
             }
         }
-        if(count_height[0]>detect_existing_col_min &&
-           count_height[1]>detect_existing_col_min &&
-           count_height[2]>detect_existing_col_min &&
-           count_height[3]>detect_existing_col_min &&
-           count_height[4]>detect_existing_col_min &&
-           count_height[0]<detect_existing_col_max &&
-           count_height[1]<detect_existing_col_max &&
-           count_height[2]<detect_existing_col_max &&
-           count_height[3]<detect_existing_col_max &&
-           count_height[4]<detect_existing_col_max)
+        if( count_height[0]>detect_existing_row_min &&
+            count_height[1]>detect_existing_row_min &&
+            count_height[2]>detect_existing_row_min &&
+            count_height[3]>detect_existing_row_min &&
+            count_height[4]>detect_existing_row_min &&
+            count_height[0]<detect_existing_row_max &&
+            count_height[1]<detect_existing_row_max &&
+            count_height[2]<detect_existing_row_max &&
+            count_height[3]<detect_existing_row_max &&
+            count_height[4]<detect_existing_row_max
+        )
         {
             result.height_feature_flag=2;
         }
@@ -572,9 +567,201 @@ FeatureDetectResult detect_feature_line()
     }
 
     //检查左列特征
+    int left_count=0;
+    int left_flag=0;
+    int left_flag_count[5]={0};
+    for(int i=0;i<MT9V03X_H-1;i++)
+    {
+        if(left_count==0)
+        {
+            feature_row_l++;
+        }
+        if(image[i][FEATURE_DETECT_WIDTH_LEFT]==255)
+        {
+            left_count++;
+        }
+    }
+    if(left_count>1)
+    {
+        left_flag=1;
+    }
+    if(left_flag==1)
+    {
+        for(int j=FEATURE_DETECT_WIDTH_LEFT;j<FEATURE_DETECT_WIDTH_LEFT+5;j++)
+        {
+            for(int i=detect_height_start_row;i<detect_height_end_row;i++)
+            {
+                if(image[i][j]==255)
+                {
 
+                    left_flag_count[j-FEATURE_DETECT_WIDTH_LEFT]++;
+                }
+            }
+        }
+        if( left_flag_count[0]>detect_existing_col_min &&
+            left_flag_count[1]>detect_existing_col_min &&
+            left_flag_count[2]>detect_existing_col_min &&
+            left_flag_count[3]>detect_existing_col_min &&
+            left_flag_count[4]>detect_existing_col_min &&
+            left_flag_count[0]<detect_existing_col_max &&
+            left_flag_count[1]<detect_existing_col_max &&
+            left_flag_count[2]<detect_existing_col_max &&
+            left_flag_count[3]<detect_existing_col_max &&
+            left_flag_count[4]<detect_existing_col_max)
+        {
+            result.left_feature_flag=1;
+        }
+        
+    }
 
+    //检查右列特征
+    int right_count=0;
+    int right_flag=0;
+    int right_flag_count[5]={0};
+    for(int i=0;i<MT9V03X_H-1;i++)
+    {
+        if(right_count==0)
+        {
+            feature_row_r++;
+        }
+        if(image[i][FEATURE_DETECT_WIDTH_RIGHT]==255)
+        {
+            right_count++;
+        }
+    }
+    if(right_count>1)
+    {
+        right_flag=1;
+    }
+    //待优化
+    if(right_flag==1)
+    {
+        
+        for(int j=FEATURE_DETECT_WIDTH_RIGHT-5;j<FEATURE_DETECT_WIDTH_RIGHT;j++)
+        {
+            for(int i=detect_height_start_row;i<detect_height_end_row;i++)
+            {
+                if(image[i][j]==255)
+                {
+                    right_flag_count[j-(FEATURE_DETECT_WIDTH_RIGHT-5)]++;
+                }
+            }
+        }
+        if( right_flag_count[0]>detect_existing_col_min &&
+            right_flag_count[1]>detect_existing_col_min &&
+            right_flag_count[2]>detect_existing_col_min &&
+            right_flag_count[3]>detect_existing_col_min &&
+            right_flag_count[4]>detect_existing_col_min &&
+            right_flag_count[0]<detect_existing_col_max &&
+            right_flag_count[1]<detect_existing_col_max &&
+            right_flag_count[2]<detect_existing_col_max &&
+            right_flag_count[3]<detect_existing_col_max &&
+            right_flag_count[4]<detect_existing_col_max)
+        {
+            result.right_feature_flag=1;
+        }
+
+    }
+    return result;
 }
+
+
+void feature_process()
+{
+    image_feature = detect_feature_line();
+    if(image_feature.left_feature_flag==1&&image_feature.right_feature_flag==0)
+    {
+        if(stop_line<35)
+        {
+            Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,mid_line_list[feature_row_l],feature_row_l);
+        }
+        else
+        {
+            Add_Line(mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,mid_line_list[feature_row_l],feature_row_l);
+        }
+        
+    }
+    else if(image_feature.right_feature_flag==1&&image_feature.left_feature_flag==0)
+    {
+        if(stop_line<35)
+        {
+            Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,mid_line_list[feature_row_r],feature_row_r);
+        }
+        else
+        {      
+            Add_Line( mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,mid_line_list[feature_row_r],feature_row_r);
+        }
+        
+    }
+}
+
+
+
+int weight_array[MT9V03X_H] = {
+0,0,0,0,0,0,0,0,0,0,    //10
+0,0,0,0,0,0,0,0,0,0,    //20
+0,0,0,0,0,0,0,0,0,0,    //30
+0,0,0,0,0,0,0,0,0,0,    //40
+0,0,0,0,0,0,0,0,0,0,    //50
+0,0,0,0,0,1,2,3,4,5,    //60
+5,4,3,2,1,0,0,0,0,0,    //70
+0,0,0,0,0,0,0,0,0,0,    //80
+0,0,0,0,0,0,0,0,0,0,    //90
+0,0,0,0,0,0,0,0,0,0,    //100
+0,0,0,0,0,0,0,0,0,0,    //110
+0,0,0,0,0,0,0,0,0,0,    //120
+};
+uint8 mid_line_list[MT9V03X_H];
+int error_image;
+
+void image_draw(int min_raw)
+{
+   for(int i = min_raw; i < MT9V03X_H - 1;i++)
+   {
+       image[i][mid_line_list[i]]  = 10;
+       image[i][left_line_list[i]]  = 5;
+       image[i][right_line_list[i]]  = 15;
+   }
+}
+
+void get_mid_line()
+{
+   for(int i = 0; i < MT9V03X_H - 1;i++)
+   {
+       mid_line_list[i] = (right_line_list[i] + left_line_list[i]) / 2;
+   }
+   
+}
+#define turn_row 60
+int get_error_image(void)
+{
+    int min_raw;
+   if(min_raw_l>min_raw_r)
+   {
+       min_raw=min_raw_l;
+   }
+   else
+   {
+       min_raw=min_raw_r;
+   }
+    image_draw(min_raw);
+   int error_image = 0;
+   for(int i=turn_row-5; i<=turn_row+5;i++)
+   {
+       error_image += (MT9V03X_W/2-mid_line_list[i])* weight_array[i];
+   }
+   error_image /= 30;
+
+   return error_image;
+}
+
+
+
+
+
+
+
+
 
 
 
@@ -686,16 +873,16 @@ void monileftfuzhi(float A, float B, int start_point, int end_point)
      }
  }
 
- void monizhongfuzhi(float A, float B, int start_point, int end_point)
- {
-     int m;
-     for (m = start_point; m <= end_point; m++)
-     {
+void monizhongfuzhi(float A, float B, int start_point, int end_point)
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
          if ((B * m + A) >= 255) monimiddle[m] = 255;
          if ((B * m + A) <= 0) monimiddle[m] = 0;
          else if (0 < (B * m + A) && (B * m + A) < 255) monimiddle[m] = (int)(B * m + A);
-     }
- }
+    }
+}
 
 double pianfangleft;
 double pianfangright;
@@ -750,14 +937,17 @@ void pianfangcal(int begin, int end, int type)
 
 
 
+
 //图像处理主函数
 void image_process(uint8 (*source_image)[MT9V03X_W])
 {
-   image = source_image;
-   Binarization(MT9V03X_W, MT9V03X_H);
-   seek_line(MT9V03X_H,MT9V03X_W);
-   seek_list(points_count);
-   error_image=get_error_image();
+    image = source_image;
+    Binarization(MT9V03X_W, MT9V03X_H);
+    seek_line(MT9V03X_H,MT9V03X_W);
+    seek_list(points_count);
+    get_mid_line();
+    feature_process();
+    error_image=get_error_image();
 }
 
 

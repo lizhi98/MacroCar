@@ -28,13 +28,26 @@ typedef signed long long    int64;
 
 #define image_w  (MT9V03X_W)
 #define image_h  (MT9V03X_H)
+
+
+typedef struct
+{
+    int left_feature_flag;
+    int right_feature_flag;
+    int height_feature_flag;
+}FeatureDetectResult;
+
+extern FeatureDetectResult image_feature;
+
+extern int stop_line;
 extern uint8 img_threshold;
 extern int points_count;
 extern int error_image;
 extern uint8 (*image)[MT9V03X_W];
-extern uint8 left_start_point;
-extern uint8 right_start_point;
 extern uint8 left_line_list[MT9V03X_H];
 extern uint8 right_line_list[MT9V03X_H];
+extern uint8 mid_line_list[MT9V03X_H];
+
+
 void image_process(uint8 (*source_image)[MT9V03X_W]);
 #endif

@@ -31,11 +31,10 @@ Macro_TC264/Debug/
 
 # 忽略编译文件
 build/
-args.txt
+*.txt
 image_process_debug.exe
 
 # 忽略cmake
 CMakeFiles/
-*.txt
 *.ilk
 *.pdb

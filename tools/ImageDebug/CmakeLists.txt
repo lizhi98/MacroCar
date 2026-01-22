@@ -4,7 +4,7 @@ project(ImageDebug)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(OpenCV_DIR "D:/lib/cpp/OpenCVWindows/opencv/build")
+set(OpenCV_DIR "D:/OpenCV_Windows/opencv/build")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR})
 
 find_package(OpenCV REQUIRED)

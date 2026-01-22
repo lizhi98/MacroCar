@@ -113,7 +113,9 @@ int main(int argc, char** argv) {
         }
     }
     // 显示必要参数
-    printf("参数1: %d\n", 1);
-    
+    printf("参数1: %d\n", image_feature.left_feature_flag);
+    printf("参数2: %d\n", image_feature.right_feature_flag);
+    printf("参数3: %d\n", image_feature.height_feature_flag);
+
     return 0;
 }
