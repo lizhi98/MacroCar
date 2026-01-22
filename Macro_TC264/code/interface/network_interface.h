@@ -4,7 +4,7 @@
 #include "zf_device_wifi_spi.h"
 #include "seekfree_assistant.h"
 #include "seekfree_assistant_interface.h"
-#include "zf_device_mt9v03x.h"
+#include "zf_device_mt9v03x_double.h"
 
 #define WIFI_SSID           "XIAOMI_GoGoGo"
 #define WIFI_PASSWORD       "9894653xxk"

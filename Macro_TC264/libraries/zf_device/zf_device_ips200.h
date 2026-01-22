@@ -104,10 +104,10 @@
 //D4-D7四个数据引脚必须连续 例如B0-B3,B1-B4等等。
 //可以连接到不同端口的意思就是屏幕的D0-D3与C1-C4连接，D4-D7与B2-B5连接。
 //切换引脚后注意修改IPS200_DATA_PORT1和IPS200_DATA_PORT2宏定义
-#define IPS200_D0_PIN_PARALLEL8         (P11_9 )                                // (八位并口)液晶数据引脚D0
-#define IPS200_D1_PIN_PARALLEL8         (P11_10)                                // (八位并口)液晶数据引脚D1
-#define IPS200_D2_PIN_PARALLEL8         (P11_11)                                // (八位并口)液晶数据引脚D2
-#define IPS200_D3_PIN_PARALLEL8         (P11_12)                                // (八位并口)液晶数据引脚D3
+#define IPS200_D0_PIN_PARALLEL8         (P02_0 )                                // (八位并口)液晶数据引脚D0
+#define IPS200_D1_PIN_PARALLEL8         (P02_1)                                // (八位并口)液晶数据引脚D1
+#define IPS200_D2_PIN_PARALLEL8         (P02_2)                                // (八位并口)液晶数据引脚D2
+#define IPS200_D3_PIN_PARALLEL8         (P02_3)                                // (八位并口)液晶数据引脚D3
 #define IPS200_D4_PIN_PARALLEL8         (P13_0 )                                // (八位并口)液晶数据引脚D4
 #define IPS200_D5_PIN_PARALLEL8         (P13_1 )                                // (八位并口)液晶数据引脚D5
 #define IPS200_D6_PIN_PARALLEL8         (P13_2 )                                // (八位并口)液晶数据引脚D6
@@ -119,7 +119,7 @@
 #define IPS200_DEFAULT_DISPLAY_FONT     (IPS200_8X16_FONT)                      // 默认的字体模式
 
 //定义数据端口所在PORT，切换引脚后务必根据引脚所在PORT进行更改   这里使用了两组端口进行组合  因此定义了两个引脚起始编号
-#define IPS200_DATA_PORT1               (3)       //0：P00端口  1：P02端口  2：P10端口  3：P11端口  4：P13端口  5：P14端口  6：P15端口  7：P20端口  8：P21端口  9：P22端口  10：P23端口  11：P32端口  12：P33端口
+#define IPS200_DATA_PORT1               (1)       //0：P00端口  1：P02端口  2：P10端口  3：P11端口  4：P13端口  5：P14端口  6：P15端口  7：P20端口  8：P21端口  9：P22端口  10：P23端口  11：P32端口  12：P33端口
 #define IPS200_DATAPORT1                (get_port_out_addr(IPS200_DATA_PORT1))
 #define DATA_START_NUM1                 (IPS200_D0_PIN_PARALLEL8&0x1f)          // 定义数据引脚的起始编号
 #define IPS200_DATA_PORT2               (4)       //0：P00端口  1：P02端口  2：P10端口  3：P11端口  4：P13端口  5：P14端口  6：P15端口  7：P20端口  8：P21端口  9：P22端口  10：P23端口  11：P32端口  12：P33端口
@@ -210,7 +210,7 @@ void    ips200_init                     (ips200_type_enum type_select);         
 // 使用示例     ips200_displayimage03x(mt9v03x_image[0], MT9V03X_W, MT9V03X_H);
 // 备注信息     拓展的一键显示函数，默认无缩放，从屏幕坐标起始点开始显示
 //-------------------------------------------------------------------------------------------------------------------
-#define ips200_displayimage03x(p, width, height)        (ips200_show_gray_image(0, 0, (p), MT9V03X_W, MT9V03X_H, (width), (height), 0))
+#define ips200_displayimage03x(p, width, height)        (ips200_show_gray_image(0, 0, (p), MT9V03X_1_W, MT9V03X_1_H, (width), (height), 0))
 //-------------------------------------------------------------------------------------------------------------------
 // 函数简介     IPS200 显示凌瞳图像
 // 参数说明     p               图像数组指针

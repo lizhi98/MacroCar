@@ -98,7 +98,7 @@
 #include "zf_device_key.h"
 #include "zf_device_menc15a.h"
 #include "zf_device_mpu6050.h"
-#include "zf_device_mt9v03x.h"
+#include "zf_device_mt9v03x_double.h"
 #include "zf_device_oled.h"
 #include "zf_device_ov7725.h"
 #include "zf_device_scc8660.h"

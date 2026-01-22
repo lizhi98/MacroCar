@@ -23,7 +23,7 @@ typedef signed short int    int16;
 typedef signed int          int32;
 typedef signed long long    int64;
 #else
-#include "zf_device_mt9v03x.h"
+#include "zf_device_mt9v03x_double.h"
 #endif
 
 #define image_w  (MT9V03X_W)

@@ -42,13 +42,13 @@ void PID_clear(PIDParam* pid_param){
 // 单电机速度控制
 PIDParam motor_left_speed_pid   = {
     .type = PID_INC,
-    .kp = 0.0f, .ki = 0.0f, .kd = 0.00f,
+    .kp = 1.0f, .ki = 0.3f, .kd = 0.10f,
     .integral_limit = 100.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_INC,
-    .kp = 0.0f, .ki = 0.0f, .kd = 0.00f,
+    .kp = 1.0f, .ki = 0.3f, .kd = 0.10f,
     .integral_limit = 100.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -76,14 +76,14 @@ void motion_control_pit_callback(){
     
     // 单电机速度环
     if(motor_left_speed_pid.type == PID_INC){
-        motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed + 0 : 0), (float)motor_left_speed);
-        motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? -motor_steering_speed + 0 : 0), (float)motor_right_speed);
+        motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed  + 100 : 0), (float)motor_left_speed);
+        motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? -motor_steering_speed + 100 : 0), (float)motor_right_speed);
     }else if(motor_left_speed_pid.type == PID_POS){
         motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? 0 : 0), (float)motor_left_speed);
         motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? 0 : 0), (float)motor_right_speed);
     }
     // 应用PWM
-    motor_set_pwm(motor_left_current_pwm_duty, motor_right_current_pwm_duty);
+    motor_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
 }
 
 void motion_control_pit_init(void){
