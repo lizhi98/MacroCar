@@ -119,7 +119,7 @@
 #define IPS200_DEFAULT_DISPLAY_FONT     (IPS200_8X16_FONT)                      // 默认的字体模式
 
 //定义数据端口所在PORT，切换引脚后务必根据引脚所在PORT进行更改   这里使用了两组端口进行组合  因此定义了两个引脚起始编号
-#define IPS200_DATA_PORT1               (3)       //0：P00端口  1：P02端口  2：P10端口  3：P11端口  4：P13端口  5：P14端口  6：P15端口  7：P20端口  8：P21端口  9：P22端口  10：P23端口  11：P32端口  12：P33端口
+#define IPS200_DATA_PORT1               (1)       //0：P00端口  1：P02端口  2：P10端口  3：P11端口  4：P13端口  5：P14端口  6：P15端口  7：P20端口  8：P21端口  9：P22端口  10：P23端口  11：P32端口  12：P33端口
 #define IPS200_DATAPORT1                (get_port_out_addr(IPS200_DATA_PORT1))
 #define DATA_START_NUM1                 (IPS200_D0_PIN_PARALLEL8&0x1f)          // 定义数据引脚的起始编号
 #define IPS200_DATA_PORT2               (4)       //0：P00端口  1：P02端口  2：P10端口  3：P11端口  4：P13端口  5：P14端口  6：P15端口  7：P20端口  8：P21端口  9：P22端口  10：P23端口  11：P32端口  12：P33端口
