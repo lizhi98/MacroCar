@@ -2,6 +2,8 @@
 #define __MOTOR_CONTROL_H__
 
 #include "motor_interface.h"
+#include "image_process.h"
+#include "gyroscope_interface.h"
 
 // 算法部分
 // PID算法
@@ -33,7 +35,9 @@ extern PIDParam motor_left_speed_pid;
 extern PIDParam motor_right_speed_pid;
 
 // 转向控制
-extern PIDParam motion_steering_pid;
+extern PIDParam motion_image_steering_pid;
+extern int16 motion_image_steering_speed;
+extern PIDParam motor_steering_pid;
 extern int16 motor_steering_speed;
 
 // 运动控制
@@ -45,6 +49,8 @@ extern int16 motor_left_current_pwm_duty;
 extern int16 motor_right_current_pwm_duty;
 extern int32 motor_left_speed;
 extern int32 motor_right_speed;
+
+extern int32 motor_forward_speed;
 
 void motion_control_pit_callback(void);
 void motion_control_pit_init(void);

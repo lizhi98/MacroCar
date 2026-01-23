@@ -65,7 +65,7 @@
             vuint8      mt9v03x_finish_flag_1;                          // 总钻风摄像头1 单幅图像采集完成标志位
             vuint8      mt9v03x_finish_flag_2;                          // 总钻风摄像头2 单幅图像采集完成标志位
 IFX_ALIGN(4) uint8      mt9v03x_image_1[MT9V03X_1_H][MT9V03X_1_W];      // 总钻风摄像头1 图像数据存储数组
-IFX_ALIGN(4) uint8      mt9v03x_image_2[MT9V03X_2_H][MT9V03X_2_W];      // 总钻风摄像头2 图像数据存储数组
+// IFX_ALIGN(4) uint8      mt9v03x_image_2[MT9V03X_2_H][MT9V03X_2_W];      // 总钻风摄像头2 图像数据存储数组
             uint32      mt9v03x_fps[2];                                 // 总钻风摄像头实际采集帧率
 
 
@@ -144,15 +144,15 @@ static void mt9v03x_dma_restart_1(void)
 //-------------------------------------------------------------------------------------------------------------------
 static void mt9v03x_dma_restart_2(void)
 {
-    dma_disable(MT9V03X_2_DMA_CH);
-    IfxDma_resetChannel(&MODULE_DMA, MT9V03X_2_DMA_CH);
-    dma_init_2(MT9V03X_2_DMA_CH,
-               MT9V03X_2_DATA_ADD,
-               mt9v03x_image_2[0],
-               MT9V03X_2_PCLK_PIN,
-               EXTI_TRIGGER_FALLING,
-               MT9V03X_2_IMAGE_SIZE);           // 如果超频到300M 倒数第二个参数请设置为FALLING
-    dma_enable(MT9V03X_2_DMA_CH);
+    // dma_disable(MT9V03X_2_DMA_CH);
+    // IfxDma_resetChannel(&MODULE_DMA, MT9V03X_2_DMA_CH);
+    // dma_init_2(MT9V03X_2_DMA_CH,
+    //            MT9V03X_2_DATA_ADD,
+    //            mt9v03x_image_2[0],
+    //            MT9V03X_2_PCLK_PIN,
+    //            EXTI_TRIGGER_FALLING,
+    //            MT9V03X_2_IMAGE_SIZE);           // 如果超频到300M 倒数第二个参数请设置为FALLING
+    // dma_enable(MT9V03X_2_DMA_CH);
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -169,14 +169,15 @@ static void mt9v03x_vsync_handler_1(void)
 
     if(gpio_get_level(P33_7))
     {
-        if(camera_work_type == mt9v03x_double && mt9v03x_dma_state[0] && gpio_get_level(P10_3) == 0)
-        {
-            mt9v03x_dma_state[0] = 0;
-            mt9v03x_dma_restart_2();
+        // if(camera_work_type == mt9v03x_double && mt9v03x_dma_state[0] && gpio_get_level(P10_3) == 0)
+        // {
+        //     mt9v03x_dma_state[0] = 0;
+        //     mt9v03x_dma_restart_2();
 
-            mt9v03x_gather_flag = 2;
-        }
-        else if(mt9v03x_gather_flag == 0)
+        //     mt9v03x_gather_flag = 2;
+        // }
+        // else 
+        if(mt9v03x_gather_flag == 0)
         {
             mt9v03x_dma_restart_1();
 
@@ -190,19 +191,19 @@ static void mt9v03x_vsync_handler_1(void)
             // 采集完成
             // 一副图像从采集开始到采集结束耗时3.8MS左右(50FPS、188*120分辨率)
             dma_disable(MT9V03X_1_DMA_CH);
-            if(camera_work_type == mt9v03x_double)
-            {
-                if(gpio_get_level(P10_3))
-                {
-                    mt9v03x_dma_state[0] = 1;
-                }
-                else
-                {
-                    mt9v03x_dma_restart_2();
-                    mt9v03x_gather_flag = 2;
-                }
-            }
-            else
+            // if(camera_work_type == mt9v03x_double)
+            // {
+            //     if(gpio_get_level(P10_3))
+            //     {
+            //         mt9v03x_dma_state[0] = 1;
+            //     }
+            //     else
+            //     {
+            //         mt9v03x_dma_restart_2();
+            //         mt9v03x_gather_flag = 2;
+            //     }
+            // }
+            // else
             {
                 mt9v03x_dma_restart_1();
             }
@@ -241,74 +242,74 @@ static void mt9v03x_vsync_handler_1(void)
 //-------------------------------------------------------------------------------------------------------------------
 static void mt9v03x_vsync_handler_2(void)
 {
-    Ifx_STM *module_num;
-    uint32 temp_time = 0;
-    static uint32 mt9v03x_fps_count = 0;
+    // Ifx_STM *module_num;
+    // uint32 temp_time = 0;
+    // static uint32 mt9v03x_fps_count = 0;
 
-    if(gpio_get_level(P10_3) == 1)
-    {
-        if(camera_work_type == mt9v03x_double && mt9v03x_dma_state[1] && gpio_get_level(P33_7) == 0)
-        {
-            mt9v03x_dma_state[1] = 0;
-            mt9v03x_dma_restart_1();
+    // if(gpio_get_level(P10_3) == 1)
+    // {
+    //     if(camera_work_type == mt9v03x_double && mt9v03x_dma_state[1] && gpio_get_level(P33_7) == 0)
+    //     {
+    //         mt9v03x_dma_state[1] = 0;
+    //         mt9v03x_dma_restart_1();
 
-            mt9v03x_gather_flag = 1;
-        }
-        else if(mt9v03x_gather_flag == 0)
-        {
-            mt9v03x_dma_restart_2();
-            mt9v03x_gather_flag = 2;
-        }
-    }
-    else
-    {
-        if(mt9v03x_gather_flag == 2)
-        {
-            // 采集完成
-            // 一副图像从采集开始到采集结束耗时3.8MS左右(50FPS、188*120分辨率)
+    //         mt9v03x_gather_flag = 1;
+    //     }
+    //     else if(mt9v03x_gather_flag == 0)
+    //     {
+    //         mt9v03x_dma_restart_2();
+    //         mt9v03x_gather_flag = 2;
+    //     }
+    // }
+    // else
+    // {
+    //     if(mt9v03x_gather_flag == 2)
+    //     {
+    //         // 采集完成
+    //         // 一副图像从采集开始到采集结束耗时3.8MS左右(50FPS、188*120分辨率)
 
-            dma_disable(MT9V03X_2_DMA_CH);
+    //         dma_disable(MT9V03X_2_DMA_CH);
 
-            if(camera_work_type == mt9v03x_double)
-            {
-                if(gpio_get_level(P33_7))
-                {
-                    mt9v03x_dma_state[1] = 1;
-                }
-                else
-                {
-                    mt9v03x_dma_restart_1();
+    //         if(camera_work_type == mt9v03x_double)
+    //         {
+    //             if(gpio_get_level(P33_7))
+    //             {
+    //                 mt9v03x_dma_state[1] = 1;
+    //             }
+    //             else
+    //             {
+    //                 mt9v03x_dma_restart_1();
 
-                    mt9v03x_gather_flag = 1;
-                }
-            }
-            else
-            {
-                mt9v03x_dma_restart_2();
-            }
+    //                 mt9v03x_gather_flag = 1;
+    //             }
+    //         }
+    //         else
+    //         {
+    //             mt9v03x_dma_restart_2();
+    //         }
 
-            module_num = IfxStm_getAddress((IfxStm_Index)(IfxCpu_getCoreId()));
+    //         module_num = IfxStm_getAddress((IfxStm_Index)(IfxCpu_getCoreId()));
 
-            if(mt9v03x_time[1] == 0)
-            {
-                mt9v03x_time[1] = IfxStm_getLower(module_num);
-            }
-            else
-            {
-                temp_time = (uint32)((uint64)(IfxStm_getLower(module_num) - mt9v03x_time[1]) * 1000 / IfxStm_getFrequency(module_num));
-                if(temp_time >= 1000)
-                {
-                    mt9v03x_time[1] = IfxStm_getLower(module_num);
-                    mt9v03x_fps[1] = mt9v03x_fps_count - 1;
-                    mt9v03x_fps_count = 0;
-                }
-            }
+    //         if(mt9v03x_time[1] == 0)
+    //         {
+    //             mt9v03x_time[1] = IfxStm_getLower(module_num);
+    //         }
+    //         else
+    //         {
+    //             temp_time = (uint32)((uint64)(IfxStm_getLower(module_num) - mt9v03x_time[1]) * 1000 / IfxStm_getFrequency(module_num));
+    //             if(temp_time >= 1000)
+    //             {
+    //                 mt9v03x_time[1] = IfxStm_getLower(module_num);
+    //                 mt9v03x_fps[1] = mt9v03x_fps_count - 1;
+    //                 mt9v03x_fps_count = 0;
+    //             }
+    //         }
 
-            mt9v03x_fps_count ++;
+    //         mt9v03x_fps_count ++;
 
-            mt9v03x_finish_flag_2 = 1;
-        }
-    }
+    //         mt9v03x_finish_flag_2 = 1;
+    //     }
+    // }
 }
 
 //-------------------------------------------------------------------------------------------------------------------
@@ -397,69 +398,69 @@ uint8 mt9v03x_double_init(m9v03x_double_init_type_enum init_type)
             }while(0);
         }break;
 
-        case mt9v03x_2:
-        {
-            do
-            {
-                // 使用SCCB通讯
-                set_camera_type(CAMERA_GRAYSCALE_2, mt9v03x_vsync_handler_2, NULL, NULL);
+        // case mt9v03x_2:
+        // {
+        //     do
+        //     {
+        //         // 使用SCCB通讯
+        //         set_camera_type(CAMERA_GRAYSCALE_2, mt9v03x_vsync_handler_2, NULL, NULL);
 
-                soft_iic_init(&mt9v03x_iic_struct_2, 0, MT9V03X_2_COF_IIC_DELAY, MT9V03X_2_COF_IIC_SCL, MT9V03X_2_COF_IIC_SDA);
-                if(mt9v03x_set_config_sccb_2(&mt9v03x_iic_struct_2,mt9v03x_set_confing_buffer_1))
-                {
-                    // SCCB通讯失败
-                    zf_log(0, "MT9V03X 2 set sccb error.");
-                    return_state = 1;
-                    break;
-                }
+        //         soft_iic_init(&mt9v03x_iic_struct_2, 0, MT9V03X_2_COF_IIC_DELAY, MT9V03X_2_COF_IIC_SCL, MT9V03X_2_COF_IIC_SDA);
+        //         if(mt9v03x_set_config_sccb_2(&mt9v03x_iic_struct_2,mt9v03x_set_confing_buffer_1))
+        //         {
+        //             // SCCB通讯失败
+        //             zf_log(0, "MT9V03X 2 set sccb error.");
+        //             return_state = 1;
+        //             break;
+        //         }
 
-                mt9v03x_link_list_num_2 = camera_init(MT9V03X_2_DATA_ADD, mt9v03x_image_2[0], MT9V03X_2_IMAGE_SIZE);
+        //         mt9v03x_link_list_num_2 = camera_init(MT9V03X_2_DATA_ADD, mt9v03x_image_2[0], MT9V03X_2_IMAGE_SIZE);
 
-                IfxDma_disableChannelInterrupt(&MODULE_DMA, MT9V03X_2_DMA_CH);
-            }while(0);
+        //         IfxDma_disableChannelInterrupt(&MODULE_DMA, MT9V03X_2_DMA_CH);
+        //     }while(0);
 
-        }break;
+        // }break;
 
-        case mt9v03x_double:
-        {
-            do
-            {
-                // 使用SCCB通讯
-                set_camera_type(CAMERA_GRAYSCALE_1, mt9v03x_vsync_handler_1, NULL, NULL);
+        // case mt9v03x_double:
+        // {
+        //     do
+        //     {
+        //         // 使用SCCB通讯
+        //         set_camera_type(CAMERA_GRAYSCALE_1, mt9v03x_vsync_handler_1, NULL, NULL);
 
-                soft_iic_init(&mt9v03x_iic_struct_1, 0, MT9V03X_1_COF_IIC_DELAY, MT9V03X_1_COF_IIC_SCL, MT9V03X_1_COF_IIC_SDA);
-                if(mt9v03x_set_config_sccb_1(&mt9v03x_iic_struct_1,mt9v03x_set_confing_buffer_1))
-                {
-                    // SCCB通讯失败
-                    zf_log(0, "MT9V03X 1 set sccb error.");
-                    return_state = 1;
-                    break;
-                }
+        //         soft_iic_init(&mt9v03x_iic_struct_1, 0, MT9V03X_1_COF_IIC_DELAY, MT9V03X_1_COF_IIC_SCL, MT9V03X_1_COF_IIC_SDA);
+        //         if(mt9v03x_set_config_sccb_1(&mt9v03x_iic_struct_1,mt9v03x_set_confing_buffer_1))
+        //         {
+        //             // SCCB通讯失败
+        //             zf_log(0, "MT9V03X 1 set sccb error.");
+        //             return_state = 1;
+        //             break;
+        //         }
 
-                mt9v03x_link_list_num_1 = camera_init(MT9V03X_1_DATA_ADD, mt9v03x_image_1[0], MT9V03X_1_IMAGE_SIZE);
+        //         mt9v03x_link_list_num_1 = camera_init(MT9V03X_1_DATA_ADD, mt9v03x_image_1[0], MT9V03X_1_IMAGE_SIZE);
 
-                IfxDma_disableChannelInterrupt(&MODULE_DMA, MT9V03X_1_DMA_CH);
+        //         IfxDma_disableChannelInterrupt(&MODULE_DMA, MT9V03X_1_DMA_CH);
 
-                system_delay_ms(MT9V03X_INIT_INTV_DELAY);                                                    //修改这个延时可以增加高帧率的运行时长
+        //         system_delay_ms(MT9V03X_INIT_INTV_DELAY);                                                    //修改这个延时可以增加高帧率的运行时长
 
-                // 使用SCCB通讯
-                set_camera_type(CAMERA_GRAYSCALE_2, mt9v03x_vsync_handler_2, NULL, NULL);
+        //         // 使用SCCB通讯
+        //         set_camera_type(CAMERA_GRAYSCALE_2, mt9v03x_vsync_handler_2, NULL, NULL);
 
-                soft_iic_init(&mt9v03x_iic_struct_2, 0, MT9V03X_2_COF_IIC_DELAY, MT9V03X_2_COF_IIC_SCL, MT9V03X_2_COF_IIC_SDA);
+        //         soft_iic_init(&mt9v03x_iic_struct_2, 0, MT9V03X_2_COF_IIC_DELAY, MT9V03X_2_COF_IIC_SCL, MT9V03X_2_COF_IIC_SDA);
 
-                if(mt9v03x_set_config_sccb_2(&mt9v03x_iic_struct_2,mt9v03x_set_confing_buffer_1))
-                {
-                    // SCCB通讯失败
-                    zf_log(0, "MT9V03X 2 set sccb error.");
-                    return_state = 1;
-                    break;
-                }
+        //         if(mt9v03x_set_config_sccb_2(&mt9v03x_iic_struct_2,mt9v03x_set_confing_buffer_1))
+        //         {
+        //             // SCCB通讯失败
+        //             zf_log(0, "MT9V03X 2 set sccb error.");
+        //             return_state = 1;
+        //             break;
+        //         }
 
-                mt9v03x_link_list_num_2 = camera_init(MT9V03X_2_DATA_ADD, mt9v03x_image_2[0], MT9V03X_2_IMAGE_SIZE);
+        //         mt9v03x_link_list_num_2 = camera_init(MT9V03X_2_DATA_ADD, mt9v03x_image_2[0], MT9V03X_2_IMAGE_SIZE);
 
-                IfxDma_disableChannelInterrupt(&MODULE_DMA, MT9V03X_2_DMA_CH);
-            }while(0);
-        }break;
+        //         IfxDma_disableChannelInterrupt(&MODULE_DMA, MT9V03X_2_DMA_CH);
+        //     }while(0);
+        // }break;
 
         default:break;
     }

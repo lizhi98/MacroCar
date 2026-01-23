@@ -51,8 +51,8 @@ void motor_set_pwm(int16 * left_pwm, int16 *right_pwm){
     motor_right_pwm = *right_pwm;
 
     if(!motor_interface_power_flag){
-        left_pwm  = 0;
-        right_pwm = 0;
+        motor_left_pwm  = 0;
+        motor_right_pwm = 0;
     }
     
     switch (motor_type)

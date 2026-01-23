@@ -52,32 +52,43 @@ PIDParam motor_right_speed_pid  = {
     .integral_limit = 100.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
-// 转向控制
-PIDParam motion_steering_pid = {
+// 图像误差要求的转向pid
+PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 0.0f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 2.0f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
-int16 motor_steering_speed = 0;
+// 实际转向pid
+PIDParam motor_steering_pid = {
+    .type = PID_POS,
+    .kp = 1.8f, .ki = 0.0f, .kd = 0.0f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+};
 
-uint8 motion_control_run_flag = 0;
+uint8 motion_control_run_flag = 0;      // 作用于单电机速度环，让速度=0
+
+int16 motion_image_steering_speed = 0;  // 图像要求的转向速度
+int16 motor_steering_speed = 0;         // 实际转向速度
 // 电机
 int16 motor_left_current_pwm_duty = 0;
 int16 motor_right_current_pwm_duty = 0;
 int32 motor_left_speed = 0;
 int32 motor_right_speed = 0;
 
+int32 motor_forward_speed = 0;
+
 void motion_control_pit_callback(){
     // 获取电机速度
     motor_get_speed(&motor_left_speed, &motor_right_speed);
-    // 转向环
-    motor_steering_speed = (int16)PID_calculate(&motion_steering_pid, 0.0f, 0.0f); // 这里的目标值和当前值需要根据具体应用修改
-    
+    // 图像要求的转向环
+    motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)error_image); // 这里的目标值和当前值需要根据具体应用修改
+    // 转向闭环
+    motor_steering_speed = (int16)PID_calculate(&motor_steering_pid, (float)motion_image_steering_speed, gyro_current_data.gyro_z); // 这里的当前值需要根据具体应用修改
     // 单电机速度环
     if(motor_left_speed_pid.type == PID_INC){
-        motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed  + 100 : 0), (float)motor_left_speed);
-        motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? -motor_steering_speed + 100 : 0), (float)motor_right_speed);
+        motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed  + motor_forward_speed : 0), (float)motor_left_speed);
+        motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? -motor_steering_speed + motor_forward_speed : 0), (float)motor_right_speed);
     }else if(motor_left_speed_pid.type == PID_POS){
         motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? 0 : 0), (float)motor_left_speed);
         motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? 0 : 0), (float)motor_right_speed);
@@ -96,7 +107,8 @@ void motion_control_init(void){
     // 清理PID参数
     PID_clear(&motor_left_speed_pid);
     PID_clear(&motor_right_speed_pid);
-    PID_clear(&motion_steering_pid);
+    PID_clear(&motion_image_steering_pid);
+    PID_clear(&motor_steering_pid);
     // 初始化计算定时器中断
     motion_control_pit_init();
 }

@@ -86,7 +86,7 @@
 #define MT9V03X_1_AUTO_EXP_DEF    ( 0   )                                           // 总钻风摄像头1 自动曝光设置     默认不开启自动曝光设置  范围 [0-63] 0为关闭
                                                                                     //                        如果自动曝光开启  EXP_TIME命令设置自动曝光时间的上限
                                                                                     //                        一般情况是不需要开启自动曝光设置 如果遇到光线非常不均匀的情况可以尝试设置自动曝光，增加图像稳定性
-#define MT9V03X_1_EXP_TIME_DEF    ( 180 )                                           // 总钻风摄像头1 曝光时间       摄像头收到后会自动计算出最大曝光时间，如果设置过大则设置为计算出来的最大曝光值
+#define MT9V03X_1_EXP_TIME_DEF    ( 160 )                                           // 总钻风摄像头1 曝光时间       摄像头收到后会自动计算出最大曝光时间，如果设置过大则设置为计算出来的最大曝光值
 #define MT9V03X_1_FPS_DEF         ( 50 )                                            // 总钻风摄像头1 图像帧率       摄像头收到后会自动计算出最大FPS，如果过大则设置为计算出来的最大FPS
 #define MT9V03X_1_LR_OFFSET_DEF   ( 0   )                                           // 总钻风摄像头1 图像左右偏移量   正值 右偏移   负值 左偏移  列为188 376 752时无法设置偏移
                                                                                     // 总钻风摄像头1              摄像头收偏移数据后会自动计算最大偏移，如果超出则设置计算出来的最大偏移
@@ -159,7 +159,7 @@ typedef enum
 extern vuint8    mt9v03x_finish_flag_1;                                             // 总钻风摄像头1 单幅图像采集完成标志位
 extern vuint8    mt9v03x_finish_flag_2;                                             // 总钻风摄像头2 单幅图像采集完成标志位
 extern uint8     mt9v03x_image_1[MT9V03X_1_H][MT9V03X_1_W];                         // 总钻风摄像头1 图像数据存储数组
-extern uint8     mt9v03x_image_2[MT9V03X_2_H][MT9V03X_2_W];                         // 总钻风摄像头2 图像数据存储数组
+// extern uint8     mt9v03x_image_2[MT9V03X_2_H][MT9V03X_2_W];                         // 总钻风摄像头2 图像数据存储数组
 extern uint32    mt9v03x_fps[2];                                                    // 总钻风摄像头实际采集帧率
 extern  int16 mt9v03x_set_confing_buffer_1[MT9V03X_DOUBLE_CONFIG_FINISH][2];
 extern  int16 mt9v03x_set_confing_buffer_2[MT9V03X_DOUBLE_CONFIG_FINISH][2];

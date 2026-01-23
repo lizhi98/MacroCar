@@ -2,16 +2,14 @@
 #include "image_process.h"
 #include "network_interface.h"
 
+extern uint8 core_busy_flag;
+
 #pragma section all "cpu1_dsram"
 // 将本语句与#pragma section all restore语句之间的全局变量都放在CPU1的RAM中
 
 /*
     CPU1 主要用于摄像头图像处理和图传
 */
-
-// Debug选项
-// #define SMARTCAR_DEBUG_NET
-// #define SMARTCAR_DEBUG_IPS
 
 void core1_main(void)
 {
@@ -34,13 +32,18 @@ void core1_main(void)
         {
             network_interface_copy_image(mt9v03x_image[0], MT9V03X_W * MT9V03X_H); // 复制图像
             mt9v03x_finish_flag = 0;
-            // 图像处理
-            // image_process(mt9v03x_copy_image);
 #ifdef SMARTCAR_DEBUG_NET
             if(!network_status)seekfree_assistant_camera_send(); // 网络状态正常则发送数据
 #endif
+            // 图像处理
+            image_process(mt9v03x_copy_image);
 #ifdef SMARTCAR_DEBUG_IPS
-            ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像
+            // 多核访问控制
+            if(!core_busy_flag){
+                core_busy_flag = 1;
+                ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像
+                core_busy_flag = 0;
+            }
 #endif
 
         }

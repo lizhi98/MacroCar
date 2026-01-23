@@ -712,46 +712,58 @@ int weight_array[MT9V03X_H] = {
 };
 uint8 mid_line_list[MT9V03X_H];
 int error_image;
+int error_image_last;
 
 void image_draw(int min_raw)
 {
-   for(int i = min_raw; i < MT9V03X_H - 1;i++)
-   {
-       image[i][mid_line_list[i]]  = 10;
-       image[i][left_line_list[i]]  = 5;
-       image[i][right_line_list[i]]  = 15;
-   }
+    for(int i = min_raw; i < MT9V03X_H - 1;i++)
+    {
+        image[i][mid_line_list[i]]  = 10;
+        image[i][left_line_list[i]]  = 5;
+        image[i][right_line_list[i]]  = 15;
+    }
 }
 
 void get_mid_line()
 {
-   for(int i = 0; i < MT9V03X_H - 1;i++)
-   {
-       mid_line_list[i] = (right_line_list[i] + left_line_list[i]) / 2;
-   }
-   
+    for(int i = 0; i < MT9V03X_H - 1;i++)
+    {
+        mid_line_list[i] = (right_line_list[i] + left_line_list[i]) / 2;
+    }
+    
 }
 #define turn_row 60
 int get_error_image(void)
 {
     int min_raw;
-   if(min_raw_l>min_raw_r)
-   {
-       min_raw=min_raw_l;
-   }
-   else
-   {
-       min_raw=min_raw_r;
-   }
+    if(min_raw_l>min_raw_r)
+    {
+        min_raw=min_raw_l;
+    }
+    else
+    {
+        min_raw=min_raw_r;
+    }
     image_draw(min_raw);
-   int error_image = 0;
-   for(int i=turn_row-5; i<=turn_row+5;i++)
-   {
-       error_image += (MT9V03X_W/2-mid_line_list[i])* weight_array[i];
-   }
-   error_image /= 30;
+    int error_image = 0;
 
-   return error_image;
+//    if(min_raw<55)
+//    {
+//        error_image_last=error_image;
+//        error_image=(MT9V03X_W/2-mid_line_list[60]);
+//
+//    }
+//    else if(min_raw<115)
+//    {
+//        error_image_last=error_image;
+//
+//    }
+//    else
+//    {
+//        error_image=error_image_last;
+//    }
+    error_image=(MT9V03X_W/2-mid_line_list[min_raw+5]);
+    return error_image;
 }
 
 
@@ -945,7 +957,7 @@ void image_process(uint8 (*source_image)[MT9V03X_W])
     seek_line(MT9V03X_H,MT9V03X_W);
     seek_list(points_count);
     get_mid_line();
-    feature_process();
+    //feature_process();
     error_image=get_error_image();
 }
 

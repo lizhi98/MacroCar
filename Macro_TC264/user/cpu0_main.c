@@ -2,6 +2,10 @@
 #include "image_process.h"
 #include "network_interface.h"
 #include "motor_control.h"
+#include "battery_protection.h"
+#include "gyroscope_interface.h"
+
+uint8 core_busy_flag = 0; // 核心忙标志
 
 #pragma section all "cpu0_dsram"
 // 将本语句与#pragma section all restore语句之间的全局变量都放在CPU0的RAM中
@@ -17,19 +21,44 @@ int core0_main(void)
     
     // 外设初始化
     motion_control_init();          // 运动控制初始化
+    battery_protection_init();      // 电池保护初始化
+    gyro_init();                    // 陀螺仪初始化
+
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
-    int32 motor_left_speed = 0;
-    int32 motor_right_speed = 0;
-    char info_buffer[32];
+
     motor_interface_power_flag = 1; // 使能电机PWM输出
-    motion_control_run_flag = 1;   // 使能运动控制
+    motion_control_run_flag = 1;    // 使能运动控制
+    motor_forward_speed = 70;       // 前进速度
+    // 计时器
+    system_start();                 // 启动系统定时器
+    char info_buffer[32];
     while (TRUE)
     {
-        motor_get_speed(&motor_left_speed, &motor_right_speed);
-        sprintf(info_buffer, "L_S:%4d   R_S:%4d ", motor_left_speed, motor_right_speed);
-        ips200_show_string(0, 0, info_buffer);
-        sprintf(info_buffer, "L_P:%5d  R_P:%5d", motor_left_current_pwm_duty, motor_right_current_pwm_duty);
-        ips200_show_string(0, 20, info_buffer);
+        // 30ms以上运行一次
+        if(system_getval_ms() % 30 != 0){
+            continue;
+        }
+        if(battery_protection_check()){
+            motor_interface_power_flag = 0; // 关闭电机PWM输出
+            zf_assert(battery_protection_check()); // 电池电压过低
+        }
+#ifdef SMARTCAR_DEBUG_IPS
+        // 多核访问控制
+        if(!core_busy_flag){
+            core_busy_flag = 1;
+            sprintf(info_buffer, "L_S:%4d   R_S:%4d ", motor_left_speed, motor_right_speed);
+            ips200_show_string(0, 130, info_buffer);
+            sprintf(info_buffer, "L_P:%5d  R_P:%5d", motor_left_current_pwm_duty, motor_right_current_pwm_duty);
+            ips200_show_string(0, 150, info_buffer);
+            sprintf(info_buffer, "B_A:%4d", battery_protection_adc_value);
+            ips200_show_string(0, 170, info_buffer);
+            sprintf(info_buffer, "I_E:%5d", error_image);
+            ips200_show_string(0, 190, info_buffer);
+            sprintf(info_buffer, "GZ:%6.2f", gyro_current_data.gyro_z);
+            ips200_show_string(0, 210, info_buffer);
+            core_busy_flag = 0;
+        }
+#endif
     }
 }
 
