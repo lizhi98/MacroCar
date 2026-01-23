@@ -129,9 +129,9 @@ void seek_start_points(int row)
         {
             left_start_point = i;
         }
-        if (image[row][i - 1] == 255 && image[row][i] == 255 && image[row][i + 1] == 0)
+        if (image[row][MT9V03X_W-i-2] == 255 && image[row][MT9V03X_W-i-1] == 255 && image[row][MT9V03X_W-i] == 0)
         {
-            right_start_point = i;
+            right_start_point = MT9V03X_W-i-1;
         }
     }
 }
@@ -172,6 +172,7 @@ int points_count;
 int min_raw_l = MT9V03X_H - 2;
 int min_raw_r = MT9V03X_H - 2;
 int stop_line;
+int seek_line_label=0;
 void seek_line( int height, int width)
 {
 
@@ -192,6 +193,13 @@ void seek_line( int height, int width)
     int turn_r = 0;
 
    stop_line = seek_stop_line();
+
+    //初次扫线判断图像是否有效
+   seek_line_label=0;
+   if(left_start_point!=0 && right_start_point!=MT9V03X_W-1 && stop_line!=0)
+   {
+    seek_line_label=1;
+   }
    for (int i = 0; i < MAX_POINTS; i++)
    {
        // 检查左右点是否接近
@@ -443,19 +451,23 @@ void seek_list(int num)
         left_line_list[i] = 0;
         right_line_list[i] = MT9V03X_W - 1;
     }
-    for (int i = 0; i < num; i++)
+    if(seek_line_label!=0)
     {
-        if (left_points_raw[i] == j && j >= max_raw)
+        for (int i = 0; i < num; i++)
         {
-            left_line_list[j] = left_points_col[i];
-            j--;
-        }
-        if (right_points_raw[i] == k && k >= max_raw)
-        {
-            right_line_list[k] = right_points_col[i];
-            k--;
+            if (left_points_raw[i] == j && j >= max_raw)
+            {
+                left_line_list[j] = left_points_col[i];
+                j--;
+            }
+            if (right_points_raw[i] == k && k >= max_raw)
+            {
+                right_line_list[k] = right_points_col[i];
+                k--;
+            }
         }
     }
+    
 }
 
 void Add_Line(int x1,int y1,int x2,int y2)//右补线,补的是边界
@@ -505,13 +517,13 @@ FeatureDetectResult image_feature;
 #define detect_left_start_col 30
 #define detect_right_start_col 150
 #define detect_existing_col_min 1
-#define detect_existing_col_max 8
+#define detect_existing_col_max 10
 //列特征值
 #define FEATURE_DETECT_WIDTH_LEFT 20
 #define FEATURE_DETECT_WIDTH_RIGHT 170
 #define detect_height_start_row 10
 #define detect_height_end_row 70
-#define detect_existing_row_min 5
+#define detect_existing_row_min 3
 #define detect_existing_row_max 30
 
 
@@ -520,50 +532,7 @@ FeatureDetectResult detect_feature_line()
     feature_row_l=0;
     feature_row_r=0;
     FeatureDetectResult result={0,0,0};
-    //检查行特征，确保不会出现断线（如电容），以此来作为判断转向点依据,0为白列长度正常，1为白列长度缩短，且构成转弯条件，2为白列长度缩短，但构成了电容等元素特征
-    int height_flag=0;
-    int stop_line = seek_stop_line();
-    if(MT9V03X_H-2-stop_line >= FEATURE_DETECT_HEIGHT)
-    {
-        height_flag = 1;
-    }
-    else
-    {
-        height_flag = 0;
-    }
-    if(height_flag==1)
-    {
-        int count_height[5]={0};
-        for(int i=10;i<15;i++)
-        {
-            for(int j=detect_left_start_col;j<detect_right_start_col;j++)
-            {
-                if(image[i][j]==255)
-                {
-                    count_height[i-10]++;
-                }
-            }
-        }
-        if( count_height[0]>detect_existing_row_min &&
-            count_height[1]>detect_existing_row_min &&
-            count_height[2]>detect_existing_row_min &&
-            count_height[3]>detect_existing_row_min &&
-            count_height[4]>detect_existing_row_min &&
-            count_height[0]<detect_existing_row_max &&
-            count_height[1]<detect_existing_row_max &&
-            count_height[2]<detect_existing_row_max &&
-            count_height[3]<detect_existing_row_max &&
-            count_height[4]<detect_existing_row_max
-        )
-        {
-            result.height_feature_flag=2;
-        }
-        else
-        {
-            result.height_feature_flag=1;
-        }
-
-    }
+    
 
     //检查左列特征
     int left_count=0;
@@ -661,6 +630,68 @@ FeatureDetectResult detect_feature_line()
         }
 
     }
+    //检查行特征，确保不会出现断线（如电容），以此来作为判断转向点依据,0为白列长度正常，1为白列长度缩短，且构成转弯条件，2为白列长度缩短，但构成了电容等元素特征
+    int height_flag=0;
+    int stop_line = seek_stop_line();
+    //检查是否存在白列变短情况
+    if(MT9V03X_H-2-stop_line >= FEATURE_DETECT_HEIGHT)
+    {
+        height_flag = 1;
+    }
+    else
+    {
+        height_flag = 0;
+    }
+    //检查是否存在路线
+    int count_height[5]={0};
+    for(int i=10;i<15;i++)
+    {
+       for(int j=detect_left_start_col;j<detect_right_start_col;j++)
+        {
+            if(image[i][j]==255)
+            {
+                count_height[i-10]++;
+            }
+        }
+    }
+    //存在白列变短且有路线（电容之类元素）
+    if( count_height[0]>detect_existing_row_min &&
+        count_height[1]>detect_existing_row_min &&
+        count_height[2]>detect_existing_row_min &&
+        count_height[3]>detect_existing_row_min &&
+        count_height[4]>detect_existing_row_min &&
+        count_height[0]<detect_existing_row_max &&
+        count_height[1]<detect_existing_row_max &&
+        count_height[2]<detect_existing_row_max &&
+        count_height[3]<detect_existing_row_max &&
+        count_height[4]<detect_existing_row_max &&
+        height_flag==1 )
+        {
+            result.height_feature_flag=2;
+        }
+    //白列变短，但不存在路线（转角）
+    else if( height_flag==1)
+        {
+            result.height_feature_flag=1;
+        }
+    //不存在路线变短情况，但是有
+    else if(count_height[0]>detect_existing_row_min &&
+        count_height[1]>detect_existing_row_min &&
+        count_height[2]>detect_existing_row_min &&
+        count_height[3]>detect_existing_row_min &&
+        count_height[4]>detect_existing_row_min &&
+        count_height[0]<detect_existing_row_max &&
+        count_height[1]<detect_existing_row_max &&
+        count_height[2]<detect_existing_row_max &&
+        count_height[3]<detect_existing_row_max &&
+        count_height[4]<detect_existing_row_max &&
+        height_flag==0
+    )
+    {
+        result.height_feature_flag=3;
+    }
+
+    
     return result;
 }
 
@@ -668,7 +699,7 @@ FeatureDetectResult detect_feature_line()
 void feature_process()
 {
     image_feature = detect_feature_line();
-    if(image_feature.left_feature_flag==1&&image_feature.right_feature_flag==0)
+    if(image_feature.left_feature_flag==1&&image_feature.right_feature_flag==0&&image_feature.height_feature_flag==1)
     {
         if(stop_line<35)
         {
@@ -680,7 +711,7 @@ void feature_process()
         }
         
     }
-    else if(image_feature.right_feature_flag==1&&image_feature.left_feature_flag==0)
+    else if(image_feature.right_feature_flag==1&&image_feature.left_feature_flag==0&&image_feature.height_feature_flag==1)
     {
         if(stop_line<35)
         {
@@ -696,22 +727,9 @@ void feature_process()
 
 
 
-int weight_array[MT9V03X_H] = {
-0,0,0,0,0,0,0,0,0,0,    //10
-0,0,0,0,0,0,0,0,0,0,    //20
-0,0,0,0,0,0,0,0,0,0,    //30
-0,0,0,0,0,0,0,0,0,0,    //40
-0,0,0,0,0,0,0,0,0,0,    //50
-0,0,0,0,0,1,2,3,4,5,    //60
-5,4,3,2,1,0,0,0,0,0,    //70
-0,0,0,0,0,0,0,0,0,0,    //80
-0,0,0,0,0,0,0,0,0,0,    //90
-0,0,0,0,0,0,0,0,0,0,    //100
-0,0,0,0,0,0,0,0,0,0,    //110
-0,0,0,0,0,0,0,0,0,0,    //120
-};
 uint8 mid_line_list[MT9V03X_H];
 int error_image;
+int error_image_last;
 int error_image_last;
 
 void image_draw(int min_raw)
@@ -732,7 +750,7 @@ void get_mid_line()
     }
     
 }
-#define turn_row 60
+
 int get_error_image(void)
 {
     int min_raw;
