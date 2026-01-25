@@ -4,7 +4,7 @@
 #define grayscale 256
 uint16 hist[GrayScale]={0};     //灰度值像素点的数量，数值存放，直方图
 float P[GrayScale]={0};         //每个灰度级出现的概率
-float PK[GrayScale]={0};         //概率累计和
+float PK[GrayScale]={0};        //概率累计和
 float MK[GrayScale]={0};        //灰度值累加均值
 uint8 img_threshold;            //输出阈值
 float imgsize;                  //图像像素总量
@@ -170,10 +170,10 @@ int seek_stop_line(void)
 }
 
 #define MAX_POINTS 350
-int left_points_raw[MAX_POINTS] = {0};
-int left_points_col[MAX_POINTS] = {0};
-int right_points_raw[MAX_POINTS] = {0};
-int right_points_col[MAX_POINTS] = {0};
+uint8 left_points_raw[MAX_POINTS] = {0};
+uint8 left_points_col[MAX_POINTS] = {0};
+uint8 right_points_raw[MAX_POINTS] = {0};
+uint8 right_points_col[MAX_POINTS] = {0};
 int points_count;
 int min_raw_l = MT9V03X_H - 2;
 int min_raw_r = MT9V03X_H - 2;
@@ -186,17 +186,17 @@ void seek_line( int height, int width)
     points_count = 0;
     min_raw_l = MT9V03X_H - 2;
     min_raw_r = MT9V03X_H - 2;
-    int point_l_raw = height - 2;
-    int point_l_col = left_start_point;
-    int point_r_raw = height - 2;
-    int point_r_col = right_start_point;
+    uint8 point_l_raw = height - 2;
+    uint8 point_l_col = left_start_point;
+    uint8 point_r_raw = height - 2;
+    uint8 point_r_col = right_start_point;
 
-    int dir_l[4] = {0, 1, 2, 3}; // 0为上，1为右，2为下，3为左
-    int dir_r[4] = {0, 1, 2, 3}; // 0为上，1为左，2为下，3为右
+//    int dir_l[4] = {0, 1, 2, 3}; // 0为上，1为右，2为下，3为左
+//    int dir_r[4] = {0, 1, 2, 3}; // 0为上，1为左，2为下，3为右
     int dir_ll = 0;              // 左当前方向
     int dir_rr = 0;              // 右当前方向
-    int turn_l = 0;
-    int turn_r = 0;
+//    int turn_l = 0;
+//    int turn_r = 0;
 
    stop_line = seek_stop_line();
 
@@ -215,10 +215,10 @@ void seek_line( int height, int width)
             break;
         }
         //最长白列截止
-        if(point_l_raw <= MT9V03X_H-2-stop_line || point_r_raw <= MT9V03X_H-2-stop_line)
-        {
-            break;
-        }
+        // if(point_l_raw <= MT9V03X_H-2-stop_line || point_r_raw <= MT9V03X_H-2-stop_line)
+        // {
+        //     break;
+        // }
             // 记录最小行数
         if (point_l_raw < min_raw_l)
         {
@@ -504,14 +504,16 @@ void Add_Line(int x1,int y1,int x2,int y2)//右补线,补的是边界
         a1=a2;
         a2=max;
     }
+
+    
     for(i=a1;i<=a2;i++)//根据斜率补线即可
-    {
-        hx=(i-y1)*(x2-x1)/(y2-y1)+x1;
+    {       //-46      //45 //-46 +89
+        hx=(i-y1)*(x2-x1)/(y2-y1)+ x1;
         if(hx>=MT9V03X_W)
             hx=MT9V03X_W;
         else if(hx<=0)
             hx=0;
-        mid_line_list[i]=hx;
+        mid_line_list[i]=(uint8)hx;
     }
 }
 
@@ -528,7 +530,7 @@ FeatureDetectResult image_feature;
 //列特征值
 #define FEATURE_DETECT_WIDTH_LEFT 15
 #define FEATURE_DETECT_WIDTH_RIGHT 175
-#define detect_height_start_row 10
+#define detect_height_start_row 20
 #define detect_height_end_row 90
 #define detect_existing_col_min 1
 #define detect_existing_col_max 15
@@ -712,55 +714,26 @@ void feature_process()
     {
         if(stop_line<35)
         {
-            if(left_count>7)
-            {
-                Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,mid_line_list[feature_row_l+5],feature_row_l+5);
-            }
-            else{
-                Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,mid_line_list[feature_row_l],feature_row_l);
-            }
-            
+    
+            Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-32,0,feature_row_l+left_count/2);
         }
         else
         {
-            if(left_count>7)
-            {
-                Add_Line(mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,mid_line_list[feature_row_l+5],feature_row_l+5);
-            }
-            else{
-                Add_Line(mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,mid_line_list[feature_row_l],feature_row_l);
-            }
-            
+
+            Add_Line(mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,0,feature_row_l+left_count/2);
         }
         
     }
     else if(image_feature.right_feature_flag==1&&image_feature.left_feature_flag==0)
     {
         
-        if(stop_line<40)
+        if(stop_line<35)
         {
-            
-            if(right_count>7)
-            {
-                Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,mid_line_list[feature_row_r+5],feature_row_r+5);
-            }
-            else
-            {
-                Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,mid_line_list[feature_row_r],feature_row_r);
-            }
-            
+            Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,187,feature_row_r+right_count/2);
         }
         else
-        {      
-            if(right_count>7)
-            {
-                
-                Add_Line(mid_line_list[MT9V03X_H-30],MT9V03X_H-32,mid_line_list[feature_row_r+5],feature_row_r+5);
-            }
-            else
-            {
-                Add_Line(mid_line_list[MT9V03X_H-30],MT9V03X_H-32,mid_line_list[feature_row_r],feature_row_r);
-            }
+        {   
+            Add_Line(mid_line_list[MT9V03X_H-32],MT9V03X_H-32,187,feature_row_r+right_count/2);
         }
         
     }
@@ -770,7 +743,6 @@ void feature_process()
 
 uint8 mid_line_list[MT9V03X_H];
 int error_image;
-int error_image_last;
 int error_image_last;
 
 void image_draw(int min_raw)
@@ -806,20 +778,21 @@ int get_error_image(void)
     image_draw(min_raw);
     int error_image = 0;
 
-    if(min_raw<55)
-     {
-        error_image_last=error_image;
-        error_image=(MT9V03X_W/2-mid_line_list[60]);
-
-    }
-    else if(min_raw<115)
+//    if(min_raw<55)
+//     {
+//        error_image_last=error_image;
+//        error_image=(MT9V03X_W/2-mid_line_list[60]);
+//
+//    }
+    if(min_raw<85)
     {
         error_image_last=error_image;
-        error_image=(MT9V03X_W/2-mid_line_list[min_raw+5]);
+        error_image=(MT9V03X_W/2-mid_line_list[(MT9V03X_H-36+min_raw)/2]);
     }
     else
     {
-        error_image=error_image_last;
+        error_image=(MT9V03X_W/2-mid_line_list[(MT9V03X_H-1+min_raw)/2]);
+        error_image_last=error_image;
     }
     //error_image=(MT9V03X_W/2-mid_line_list[min_raw+5]);
     return error_image;
@@ -1000,7 +973,7 @@ void pianfangcal(int begin, int end, int type)
         }
         junfang = junfang / (end - begin + 1);
         junfang = junfang * junfang;
-        pianfangmid = fangjun - junfang;
+        pianfangmid = (fangjun - junfang) * 1.0;
     }
 
 }

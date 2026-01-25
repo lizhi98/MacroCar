@@ -2,6 +2,7 @@
 #define __IMAGE_PROCESS_H__
 
 #ifdef _VSCODE
+#include <stdio.h>
 
 #define MT9V03X_W               (188)                                           // 图像宽度     范围 [1-752]
 #define MT9V03X_H               (120)                                           // 图像高度     范围 [1-480]
@@ -43,6 +44,7 @@ extern int stop_line;
 extern uint8 img_threshold;
 extern int points_count;
 extern int error_image;
+extern int error_image_last;
 extern uint8 (*image)[MT9V03X_W];
 extern uint8 left_line_list[MT9V03X_H];
 extern uint8 right_line_list[MT9V03X_H];

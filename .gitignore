@@ -38,3 +38,4 @@ image_process_debug.exe
 CMakeFiles/
 *.ilk
 *.pdb
+tools/ImageDebug/CmakeLists.txt

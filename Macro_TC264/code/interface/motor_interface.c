@@ -6,6 +6,8 @@ static int32 motor_right_speed = 0;
 static int32 motor_left_pwm = 0;
 static int32 motor_right_pwm = 0;
 
+static uint16 motor_fun_pwm = 0;
+
 static MotorType motor_type;
 
 uint8 motor_interface_power_flag = 0;
@@ -22,6 +24,8 @@ void motor_interface_init(MotorType type){
             gpio_init(MOTOR_RIGHT_DIR_PIN, GPO, 0, GPO_PUSH_PULL);
             pwm_init(MOTOR_LEFT_PWM_PIN,  MOTOR_PWM_FREQUENCY, MOTOR_PWM_INIT_DUTY);
             pwm_init(MOTOR_RIGHT_PWM_PIN, MOTOR_PWM_FREQUENCY, MOTOR_PWM_INIT_DUTY);
+            // 负压风扇
+            pwm_init(MOTOR_FUN_PWM_PIN, MOTOR_PWM_FREQUENCY, MOTOR_PWM_INIT_DUTY);
             // 编码器初始化
             encoder_dir_init(MOTOR_LEFT_ENCODER_INDEX, MOTOR_LEFT_ENCODER_PIN_1,    MOTOR_LEFT_ENCODER_PIN_2);
             encoder_dir_init(MOTOR_RIGHT_ENCODER_INDEX, MOTOR_RIGHT_ENCODER_PIN_1,   MOTOR_RIGHT_ENCODER_PIN_2);
@@ -40,6 +44,7 @@ void motor_get_speed(int32 * left_speed, int32 * right_speed){
     *right_speed = motor_right_speed;
 }
 void motor_set_pwm(int16 * left_pwm, int16 *right_pwm){
+
     // PWM限幅
     if(abs(*left_pwm) > MOTOR_PWM_MAX_DUTY){
         *left_pwm = (*left_pwm >=0) ? MOTOR_PWM_MAX_DUTY : -MOTOR_PWM_MAX_DUTY;
@@ -61,8 +66,8 @@ void motor_set_pwm(int16 * left_pwm, int16 *right_pwm){
             // 无刷电机PWM设置代码
             break;
         case BRUSHED_MOTOR:
-            gpio_set_level(MOTOR_LEFT_DIR_PIN,  (motor_left_pwm  >= 0) ? 0 : 1);
-            gpio_set_level(MOTOR_RIGHT_DIR_PIN, (motor_right_pwm >= 0) ? 0 : 1);
+            gpio_set_level(MOTOR_LEFT_DIR_PIN,  (motor_left_pwm  >= 0) ? 1 : 0);
+            gpio_set_level(MOTOR_RIGHT_DIR_PIN, (motor_right_pwm >= 0) ? 1 : 0);
             pwm_set_duty(MOTOR_LEFT_PWM_PIN,  abs(motor_left_pwm));
             pwm_set_duty(MOTOR_RIGHT_PWM_PIN, abs(motor_right_pwm));
             break;
@@ -70,6 +75,20 @@ void motor_set_pwm(int16 * left_pwm, int16 *right_pwm){
             zf_assert(0); // 不支持的电机类型
             break;
     }
+}
+
+/*
+    功能：设置负压风扇PWM PWM只有正值
+*/
+void motor_fun_set_pwm(uint16 * target_pwm){
+    if(*target_pwm > MOTOR_PWM_MAX_DUTY){
+        *target_pwm = MOTOR_PWM_MAX_DUTY;
+    }
+    motor_fun_pwm = *target_pwm;
+    if(!motor_interface_power_flag){
+        motor_fun_pwm = 0;
+    }
+    pwm_set_duty(MOTOR_FUN_PWM_PIN, motor_fun_pwm);
 }
 
 void motor_interface_pit_init(void){

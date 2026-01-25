@@ -1,12 +1,12 @@
-#ifndef _BBATTERY_PROTECTION_H_
-#define _BBATTERY_PROTECTION_H_
+#ifndef _BATTERY_PROTECTION_H_
+#define _BATTERY_PROTECTION_H_
 
 #include "zf_driver_adc.h"
 #include "beep_interface.h"
 
 #define BATTERY_PROTECTION_ADC_CHANNEL      ADC0_CH11_A11
 #define BATTERY_PROTECTION_ADC_RESOLUTION   ADC_8BIT
-#define BATTERY_PROTECTION_ADC_LOW_VALUE    83     // 电池电压低于此值时报警
+#define BATTERY_PROTECTION_ADC_LOW_VALUE    81     // 电池电压低于此值时报警
 
 extern uint16  battery_protection_adc_value;    // 当前电池电压ADC值
 

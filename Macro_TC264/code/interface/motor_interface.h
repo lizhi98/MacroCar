@@ -13,6 +13,8 @@
 #define MOTOR_LEFT_PWM_PIN              ATOM2_CH6_P11_11
 #define MOTOR_RIGHT_PWM_PIN             ATOM2_CH4_P11_9
 
+#define MOTOR_FUN_PWM_PIN               ATOM1_CH0_P21_2
+
 #define MOTOR_PWM_FREQUENCY             17000  // 17kHz
 #define MOTOR_PWM_MAX_DUTY              4000   // 最大占空比
 #define MOTOR_PWM_INIT_DUTY             0  // 最小占空比
@@ -45,6 +47,7 @@ void motor_interface_pit_init(void);
 
 void motor_get_speed(int32 * left_speed, int32 * right_speed);
 void motor_set_pwm(int16 * left_pwm, int16 * right_pwm);
+void motor_fun_set_pwm(uint16 * target_pwm);
 void motor_interface_init(MotorType motor_type);
 
 #endif

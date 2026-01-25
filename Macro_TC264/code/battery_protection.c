@@ -14,5 +14,5 @@ void    battery_protection_init(void){
 uint8   battery_protection_check(void){
     battery_protection_adc_value = adc_mean_filter_convert(BATTERY_PROTECTION_ADC_CHANNEL, 5);
 
-    return (battery_protection_adc_value <= BATTERY_PROTECTION_ADC_LOW_VALUE);
+    return (battery_protection_adc_value < BATTERY_PROTECTION_ADC_LOW_VALUE);
 }

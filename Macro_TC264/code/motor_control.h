@@ -47,6 +47,8 @@ extern int16 motor_steering_speed;
 extern uint8 motion_control_run_flag; // 作用于单电机速度环，让速度=0
 extern int16 motor_left_current_pwm_duty;
 extern int16 motor_right_current_pwm_duty;
+extern uint16 motor_fun_pwm_duty;
+
 extern int32 motor_left_speed;
 extern int32 motor_right_speed;
 
