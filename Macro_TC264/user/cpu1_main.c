@@ -17,7 +17,7 @@ void core1_main(void)
     interrupt_global_enable(0);             // 打开全局中断
 
     // 外设初始化
-    ips200_init(IPS200_TYPE_PARALLEL8);     // 初始化IPS200显示屏
+    // ips200_init(IPS200_TYPE_PARALLEL8);     // 初始化IPS200显示屏
     mt9v03x_init();                         // 初始化总钻风摄像头
 #ifdef SMARTCAR_DEBUG_NET
     network_interface_init();

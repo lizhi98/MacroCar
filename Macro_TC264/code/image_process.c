@@ -521,7 +521,7 @@ int feature_row_l=0;
 int feature_row_r=0;
 FeatureDetectResult image_feature;
 //行特征值
-#define FEATURE_DETECT_HEIGHT 20
+#define FEATURE_DETECT_HEIGHT 15
 #define detect_left_start_col 30
 #define detect_right_start_col 150
 #define detect_existing_row_min 3
@@ -706,6 +706,7 @@ FeatureDetectResult detect_feature_line()
 }
 
 
+
 void feature_process()
 {
     image_feature = detect_feature_line();
@@ -784,10 +785,10 @@ int get_error_image(void)
 //        error_image=(MT9V03X_W/2-mid_line_list[60]);
 //
 //    }
-    if(min_raw<85)
+    if(min_raw<75)
     {
         error_image_last=error_image;
-        error_image=(MT9V03X_W/2-mid_line_list[(MT9V03X_H-36+min_raw)/2]);
+        error_image=(MT9V03X_W/2-mid_line_list[(MT9V03X_H-46+min_raw)/2]);
     }
     else
     {

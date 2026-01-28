@@ -30,6 +30,12 @@ float PID_calculate(PIDParam* pid_param, float target, float current){
         pid_param->previous_previous_error = pid_param->previous_error;
     }
     pid_param->previous_error = error;
+    // 限幅，不超过占空比最大值，也不超过int16最大值
+    if(output > 10000.0f){
+        output = 10000.0f;
+    }else if(output < -10000.0f){
+        output = -10000.0f;
+    }
     return output;
 }
 
@@ -42,27 +48,27 @@ void PID_clear(PIDParam* pid_param){
 // 单电机速度控制
 PIDParam motor_left_speed_pid   = {
     .type = PID_POS,
-    .kp = 5.0f, .ki = 0.4f, .kd = 0.0f,
-    .integral_limit = 800.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+    .kp = 31.0f, .ki = 0.5f, .kd = 0.0f,
+    .integral_limit = 2500.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_POS,
-    .kp = 5.3f, .ki = 0.43f, .kd = 0.0f,
-    .integral_limit = 800.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+    .kp = 31.0f, .ki = 0.5f, .kd = 0.0f,
+    .integral_limit = 2500.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 图像误差要求的转向pid
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 4.5f, .ki = 0.0f, .kd = 1.0f,
+    .kp = 6.4f, .ki = 0.0f, .kd = 2.4f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.0f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 3.0f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
