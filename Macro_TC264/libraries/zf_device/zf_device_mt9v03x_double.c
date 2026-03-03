@@ -142,8 +142,8 @@ static void mt9v03x_dma_restart_1(void)
 //  返回参数      void
 //  使用示例      mt9v03x_dma_restart_1();
 //-------------------------------------------------------------------------------------------------------------------
-static void mt9v03x_dma_restart_2(void)
-{
+//static void mt9v03x_dma_restart_2(void)
+//{
     // dma_disable(MT9V03X_2_DMA_CH);
     // IfxDma_resetChannel(&MODULE_DMA, MT9V03X_2_DMA_CH);
     // dma_init_2(MT9V03X_2_DMA_CH,
@@ -153,7 +153,7 @@ static void mt9v03x_dma_restart_2(void)
     //            EXTI_TRIGGER_FALLING,
     //            MT9V03X_2_IMAGE_SIZE);           // 如果超频到300M 倒数第二个参数请设置为FALLING
     // dma_enable(MT9V03X_2_DMA_CH);
-}
+//}
 
 //-------------------------------------------------------------------------------------------------------------------
 //  函数简介      MT9V03X摄像头场中断
@@ -240,8 +240,8 @@ static void mt9v03x_vsync_handler_1(void)
 //  返回参数      void
 //  使用示例      mt9v03x_vsync_handler();
 //-------------------------------------------------------------------------------------------------------------------
-static void mt9v03x_vsync_handler_2(void)
-{
+//static void mt9v03x_vsync_handler_2(void)
+//{
     // Ifx_STM *module_num;
     // uint32 temp_time = 0;
     // static uint32 mt9v03x_fps_count = 0;
@@ -310,7 +310,7 @@ static void mt9v03x_vsync_handler_2(void)
     //         mt9v03x_finish_flag_2 = 1;
     //     }
     // }
-}
+//}
 
 //-------------------------------------------------------------------------------------------------------------------
 // 函数简介     mt9v03x单独设置曝光时间
