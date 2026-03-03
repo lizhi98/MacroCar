@@ -48,20 +48,20 @@ void PID_clear(PIDParam* pid_param){
 // 单电机速度控制
 PIDParam motor_left_speed_pid   = {
     .type = PID_POS,
-    .kp = 31.0f, .ki = 0.5f, .kd = 0.0f,
+    .kp = 28.0f, .ki = 0.45f, .kd = 0.0f,
     .integral_limit = 2500.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_POS,
-    .kp = 31.0f, .ki = 0.5f, .kd = 0.0f,
+    .kp = 28.0f, .ki = 0.45f, .kd = 0.0f,
     .integral_limit = 2500.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 图像误差要求的转向pid
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 6.4f, .ki = 0.0f, .kd = 2.4f,
+    .kp = 5.0f, .ki = 0.0f, .kd = 2.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 

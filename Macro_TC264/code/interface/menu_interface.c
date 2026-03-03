@@ -17,8 +17,13 @@ void menu_ips_print_info(MenuPrintInfoType info_type){
         ips200_show_string(0, 170, info_buffer);
         sprintf(info_buffer, "I_E:%+5d", error_image);
         ips200_show_string(0, 190, info_buffer);
-        sprintf(info_buffer, "GZ:%+6.2f  ", gyro_current_data.gyro_z);
+        sprintf(info_buffer, "GZ:%+6.2f YAW:%+6.2f", gyro_current_data.gyro_z, attitude.yaw);
         ips200_show_string(0, 210, info_buffer);
+        sprintf(info_buffer, "T_I:%u", T_index);
+        ips200_show_string(0, 230, info_buffer);
+        sprintf(info_buffer, "F_L:%u %u %u  I_P:%u %u %u",  image_feature.left_feature_flag, image_feature.height_feature_flag, image_feature.right_feature_flag, 
+                                                            image_plan_feature.left_feature_flag, image_plan_feature.height_feature_flag, image_plan_feature.right_feature_flag);
+        ips200_show_string(0, 250, info_buffer);
         break;
     case MENU_INFO_EXTEND:
         break;

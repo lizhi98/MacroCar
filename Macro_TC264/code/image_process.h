@@ -25,10 +25,12 @@ typedef signed int          int32;
 typedef signed long long    int64;
 #else
 #include "zf_device_mt9v03x_double.h"
+
 #endif
 
 #define image_w  (MT9V03X_W)
 #define image_h  (MT9V03X_H)
+
 
 
 typedef struct
@@ -38,8 +40,9 @@ typedef struct
     int height_feature_flag;
 }FeatureDetectResult;
 
-
+extern uint8 T_index;
 extern FeatureDetectResult image_feature;
+extern FeatureDetectResult image_plan_feature;
 //enum TurnDirection {LEFT=-1, STRAIGHT=0, RIGHT=1};
 extern int stop_line;
 extern uint8 img_threshold;

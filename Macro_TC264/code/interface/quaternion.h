@@ -1,7 +1,8 @@
 #ifndef CODE_QUATERNION_H_
 #define CODE_QUATERNION_H_
 
-#include "zf_common_typedef.h"
+#include "zf_device_imu660ra.h"
+#include <math.h>
 
 typedef struct {
     float q0;
@@ -15,7 +16,6 @@ typedef struct {
 extern Quaternion attitude;
 void quaternion_init(void);
 void quaternion_update(void);
-Quaternion* get_euler_angles(void);
 
 
 

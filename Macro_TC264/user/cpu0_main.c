@@ -33,7 +33,7 @@ int core0_main(void)
     motor_interface_power_flag = 1; // 使能电机PWM输出
     motion_control_run_flag = 1;    // 发车标志位
 
-    motor_forward_speed = 920;      // 前进速度
+    motor_forward_speed = 600;      // 前进速度
     motor_fun_pwm_duty  = MOTOR_FUN_NORMAL_PWM_DUTY;      // 负压风扇PWM占空比
     
     while (TRUE)

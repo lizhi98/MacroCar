@@ -1,6 +1,4 @@
 #include "quaternion.h"
-#include "zf_device_imu660ra.h"
-#include <math.h>
 
 #define SAMPLE_TIME_MS  1.0f
 #define DEG_TO_RAD      0.017453292519943f
@@ -49,12 +47,6 @@ void quaternion_update(void)
     attitude.q3 *= norm;
 
     // 转换为欧拉角
-    attitude.roll  = atan2f(2*(q0*q1 + q2*q3), 1 - 2*(q1*q1 + q2*q2)) * (1/DEG_TO_RAD);
-    attitude.pitch = asinf(2*(q0*q2 - q3*q1)) * (1/DEG_TO_RAD);
     attitude.yaw   = atan2f(2*(q0*q3 + q1*q2), 1 - 2*(q2*q2 + q3*q3)) * (1/DEG_TO_RAD);
 }
 
-Quaternion* get_euler_angles(void)
-{
-    return &attitude;
-}
