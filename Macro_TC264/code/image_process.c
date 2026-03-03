@@ -521,7 +521,7 @@ int feature_row_l=0;
 int feature_row_r=0;
 FeatureDetectResult image_feature;
 //行特征值
-#define FEATURE_DETECT_HEIGHT 20
+#define FEATURE_DETECT_HEIGHT 15
 #define detect_left_start_col 30
 #define detect_right_start_col 150
 #define detect_existing_row_min 3
@@ -684,7 +684,7 @@ FeatureDetectResult detect_feature_line()
         {
             result.height_feature_flag=1;
         }
-    //不存在路线变短情况，但是有
+    //不存在路线变短情况，但是有路线(直线)
     else if(count_height[0]>detect_existing_row_min &&
         count_height[1]>detect_existing_row_min &&
         count_height[2]>detect_existing_row_min &&
@@ -705,40 +705,100 @@ FeatureDetectResult detect_feature_line()
     return result;
 }
 
-
-void feature_process()
+void Add_left_line()
 {
-    image_feature = detect_feature_line();
-    
-    if(image_feature.left_feature_flag==1&&image_feature.right_feature_flag==0)
+    if(stop_line<35)
     {
-        if(stop_line<35)
-        {
-    
-            Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-32,0,feature_row_l+left_count/2);
-        }
-        else
-        {
-
-            Add_Line(mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,0,feature_row_l+left_count/2);
-        }
-        
+        Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-32,0,feature_row_l+left_count/2);
     }
-    else if(image_feature.right_feature_flag==1&&image_feature.left_feature_flag==0)
+    else
     {
-        
-        if(stop_line<35)
-        {
-            Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,187,feature_row_r+right_count/2);
-        }
-        else
-        {   
-            Add_Line(mid_line_list[MT9V03X_H-32],MT9V03X_H-32,187,feature_row_r+right_count/2);
-        }
-        
+        Add_Line(mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,0,feature_row_l+left_count/2);
+    }
+}
+void Add_right_line()
+{
+    if(stop_line<35)
+    {
+        Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,187,feature_row_r+right_count/2);
+    }
+    else
+    {   
+        Add_Line(mid_line_list[MT9V03X_H-32],MT9V03X_H-32,187,feature_row_r+right_count/2);
     }
 }
 
+FeatureDetectResult image_plan_feature={0,0,0};
+void feature_process()
+{
+    image_feature = detect_feature_line();
+    //默认左转角
+    if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag==1)
+    {
+        Add_left_line(); 
+    }
+    //默认右转角
+    else if(image_feature.right_feature_flag==1 && image_feature.left_feature_flag==0 && image_feature.height_feature_flag==1)
+    {
+        Add_right_line();
+    }
+    //正T形路口
+    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==1)
+    {
+        image_plan_feature.height_feature_flag=1;
+    }
+    //左倒T型路口
+    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag==3)
+    {
+        image_plan_feature.left_feature_flag=1;
+    }
+    //右倒T型路口
+    else if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==3)
+    {
+        image_plan_feature.right_feature_flag=1;
+    }
+}
+
+uint8 T_index=0;
+uint8 T[7]={0};
+void process_T(int angle_current)
+{
+    int condition=0;
+    int angle=0;
+
+    //检测T型路口，并将condition置1，记录转向角度
+    if(image_plan_feature.left_feature_flag==1&&condition==0||image_plan_feature.right_feature_flag==1&&condition==0||image_plan_feature.height_feature_flag==1&&condition==0)
+    {
+        T_index++;
+        condition=1;
+        angle=angle_current;
+    }
+    //在condition为1的情况下，且检测到T型路口情况下执行转向处理函数
+    if(condition==1)
+    {
+        //直行
+        if(T[T_index-1]==0)
+        {
+            //暂时不补线，保持原有路线
+        }
+        else if(T[T_index-1]==-1&&image_feature.left_feature_flag==1)
+        {
+            //左转
+            Add_left_line();
+        }
+        else if(T[T_index-1]==1&&image_feature.right_feature_flag==1)
+        {
+            //右转
+            Add_right_line();
+        }
+    }
+    //检测出T型路口，通过转向角度，将condition置0，准备下一次检测
+    if(fabs(angle_current-angle)>=70)
+    {
+        condition=0;
+    }
+
+}
 
 
 uint8 mid_line_list[MT9V03X_H];
@@ -990,6 +1050,9 @@ void image_process(uint8 (*source_image)[MT9V03X_W])
     seek_list(points_count);
     get_mid_line();
     feature_process();
+    printf(" T:%d\n",image_plan_feature.height_feature_flag);
+    printf(" L:%d\n",image_plan_feature.left_feature_flag);
+    printf(" R:%d\n",image_plan_feature.right_feature_flag);
     error_image=get_error_image();
 }
 

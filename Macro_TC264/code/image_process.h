@@ -39,7 +39,7 @@ typedef struct
 }FeatureDetectResult;
 
 extern FeatureDetectResult image_feature;
-
+//enum TurnDirection {LEFT=-1, STRAIGHT=0, RIGHT=1};
 extern int stop_line;
 extern uint8 img_threshold;
 extern int points_count;
