@@ -770,6 +770,10 @@ void process_T(int angle_current)
     if(image_plan_feature.left_feature_flag==1&&condition==0||image_plan_feature.right_feature_flag==1&&condition==0||image_plan_feature.height_feature_flag==1&&condition==0)
     {
         T_index++;
+        if(T_index>7)
+        {
+            T_index=7;
+        }
         condition=1;
         angle=angle_current;
     }
