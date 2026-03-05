@@ -38,8 +38,8 @@ void quaternion_update(void)
     attitude.q3 += (-q2*gx + q1*gy + q0*gz) * 0.5f * dt;
 
     // 四元数归一化
-    float norm = sqrtf(attitude.q0*attitude.q0 + attitude.q1*attitude.q1 +
-                       attitude.q2*attitude.q2 + attitude.q3*attitude.q3);
+    float norm = sqrtf( attitude.q0*attitude.q0 + attitude.q1*attitude.q1 +
+                        attitude.q2*attitude.q2 + attitude.q3*attitude.q3);
     norm = 1.0f / norm;
     attitude.q0 *= norm;
     attitude.q1 *= norm;

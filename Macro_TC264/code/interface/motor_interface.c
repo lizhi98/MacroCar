@@ -12,7 +12,9 @@ static MotorType motor_type;
 
 uint8 motor_interface_power_flag = 0;
 
-void motor_interface_init(MotorType type){
+uint16 motor_get_speed_pit_time = 1;
+
+void motor_interface_init(MotorType type, uint16 pit_time){
     switch (type) {
         case BRUSHLESS_MOTOR:
             // 初始化无刷电机相关设置
@@ -35,8 +37,7 @@ void motor_interface_init(MotorType type){
             break;
     }
     motor_type = type;
-    // 初始化定时器中断
-    motor_interface_pit_init();
+    motor_get_speed_pit_time = pit_time;
 }
 
 void motor_get_speed(int32 * left_speed, int32 * right_speed){
@@ -91,16 +92,13 @@ void motor_fun_set_pwm(uint16 * target_pwm){
     pwm_set_duty(MOTOR_FUN_PWM_PIN, motor_fun_pwm);
 }
 
-void motor_interface_pit_init(void){
-    pit_ms_init(MOTOR_INTERFACE_PIT_INDEX, MOTOR_INTERFACE_PIT_TIME);
-}
-
 // 主要是用于获取速度
 void motor_interface_pit_callback(void){
     // 获取速度
-    motor_left_speed  = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX)  * -10 / MOTOR_INTERFACE_PIT_TIME;
-    motor_right_speed = encoder_get_count(MOTOR_RIGHT_ENCODER_INDEX) * 10  / MOTOR_INTERFACE_PIT_TIME;  // 转换速度不受PIT时间影响
+    motor_left_speed  = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX)  * -10 / motor_get_speed_pit_time;
+    motor_right_speed = encoder_get_count(MOTOR_RIGHT_ENCODER_INDEX) * 10  / motor_get_speed_pit_time;  // 转换速度不受PIT时间影响
     // 清零计数
     encoder_clear_count(MOTOR_LEFT_ENCODER_INDEX);
     encoder_clear_count(MOTOR_RIGHT_ENCODER_INDEX);
 }
+

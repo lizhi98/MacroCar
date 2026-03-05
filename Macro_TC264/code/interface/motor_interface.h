@@ -31,10 +31,6 @@
 #define MOTOR_LEFT_ENCODER_INDEX        TIM4_ENCODER
 #define MOTOR_RIGHT_ENCODER_INDEX       TIM6_ENCODER
 
-// 定时中断
-#define MOTOR_INTERFACE_PIT_INDEX       CCU60_CH1
-#define MOTOR_INTERFACE_PIT_TIME        5     // 5ms
-
 typedef enum {
     BRUSHLESS_MOTOR, // 无刷电机
     BRUSHED_MOTOR    // 有刷电机
@@ -43,11 +39,10 @@ typedef enum {
 extern uint8 motor_interface_power_flag; // 作用于PWM输出，让PWM=0
 
 void motor_interface_pit_callback(void);
-void motor_interface_pit_init(void);
 
 void motor_get_speed(int32 * left_speed, int32 * right_speed);
 void motor_set_pwm(int16 * left_pwm, int16 * right_pwm);
 void motor_fun_set_pwm(uint16 * target_pwm);
-void motor_interface_init(MotorType motor_type);
+void motor_interface_init(MotorType type, uint16 pit_time);
 
 #endif

@@ -35,6 +35,11 @@ void menu_ips_print_info(MenuPrintInfoType info_type){
     
 }
 
+void menu_key_init(void){
+    key_init(KEY_PIT_TIME);   // 按键初始化 5ms扫描一次 // 改这个需要改所处中断时间
+    pit_ms_init(MENU_KEY_PIT_INDEX, KEY_PIT_TIME); // 按键扫描PIT初始化
+}
+
 void menu_key_event_handle(void){
     if(key_get_state(KEY_1) == KEY_SHORT_PRESS){
             motor_interface_power_flag = !motor_interface_power_flag; // 切换电机PWM输出状态

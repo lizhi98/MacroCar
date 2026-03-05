@@ -1,7 +1,5 @@
 #include "motor_control.h"
 
-uint8 motion_control_pit_run_flag = 0;
-
 // 算法部分
 /* 
  *  PID计算器
@@ -75,6 +73,7 @@ PIDParam motor_steering_pid = {
 };
 
 uint8 motion_control_run_flag = 0;      // 作用于单电机速度环，让速度=0
+uint8 motion_control_pit_run_flag = 0;  // 作用于PIT回调，让电机PIT回调函数不执行
 
 int16 motion_image_steering_speed = 0;  // 图像要求的转向速度
 int16 motor_steering_speed = 0;         // 实际转向速度
@@ -93,7 +92,11 @@ uint32 motor_pit_count = 0; // PIT中断计数
 void motion_control_pit_callback(){
 
     motor_pit_count++;
+
+    // 电机接口PIT，获取速度
+    motor_interface_pit_callback();
     
+    // 负压风扇PWM设置
     if(!motion_control_run_flag){
         motor_fun_pwm_duty = 0;
     }
@@ -112,14 +115,16 @@ void motion_control_pit_callback(){
     }
     // 转向闭环
     motor_steering_speed = (int16)PID_calculate(&motor_steering_pid, (float)motion_image_steering_speed, gyro_current_data.gyro_z); // 这里的当前值需要根据具体应用修改
-    // 单电机速度环
-    // if(motor_left_speed_pid.type == PID_INC){
-    //     motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
-    //     motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
-    // }else if(motor_left_speed_pid.type == PID_POS){
-    //     motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
-    //     motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
-    // }
+    /* 
+    //单电机速度环
+    if(motor_left_speed_pid.type == PID_INC){
+        motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
+        motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
+    }else if(motor_left_speed_pid.type == PID_POS){
+        motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
+        motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
+    }
+    */
     if(motor_left_speed_pid.type == PID_INC){
         motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed  + motor_forward_speed : 0), (float)motor_left_speed);
         motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? -motor_steering_speed + motor_forward_speed : 0), (float)motor_right_speed);
@@ -138,7 +143,7 @@ void motion_control_pit_init(void){
 
 void motion_control_init(void){
     // 初始化电机接口
-    motor_interface_init(BRUSHED_MOTOR);
+    motor_interface_init(BRUSHED_MOTOR, MOTION_CONTROL_PIT_TIME);
     // 清理PID参数
     PID_clear(&motor_left_speed_pid);
     PID_clear(&motor_right_speed_pid);

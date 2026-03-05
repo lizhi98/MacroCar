@@ -9,6 +9,9 @@
 #include "zf_device_key.h"
 #include "image_process.h"
 
+#define KEY_PIT_TIME           5 // 按键扫描时间，单位ms
+#define MENU_KEY_PIT_INDEX     CCU60_CH1
+
 typedef enum _MenuPrintInfoType{
     MENU_INFO_NORMAL = 0,
     MENU_INFO_EXTEND,
@@ -19,6 +22,7 @@ void menu_ips_print_info(MenuPrintInfoType info_type);
 
 void menu_net_print_info(void);
 
+void menu_key_init(void);
 void menu_key_event_handle(void);
 
 #endif

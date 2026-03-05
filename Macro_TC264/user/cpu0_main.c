@@ -19,26 +19,27 @@ int core0_main(void)
 {
     clock_init();                   // 获取时钟频率<务必保留>
     debug_init();                   // 初始化默认调试串口
-    
-    // 外设初始化
-    key_init(MOTOR_INTERFACE_PIT_TIME);   // 按键初始化 5ms扫描一次 // 改这个需要改所处中断时间
+    system_start();                 // 启动系统计时器，计算车上电时间
 
-    motor_forward_speed = 400;      // 前进速度
+    // 外设初始化
+    menu_key_init();                // 菜单按键初始化
     gyro_init();                    // 陀螺仪初始化
-    battery_protection_init();      // 电池保护初始化
     
+    battery_protection_init();      // 电池保护初始化
     motion_control_init();          // 运动控制初始化
     
-    system_start();                 // 启动系统计时器
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
-
-    motor_fun_pwm_duty  = 0;      // 负压风扇PWM占空比
+    
+    motor_forward_speed = 400;      // 前进速度
+    motor_fun_pwm_duty  = 0;        // 负压风扇PWM初始占空比
+    
     motor_interface_power_flag = 1; // 使能电机PWM输出
-    motion_control_run_flag = 1;    // 发车标志位
-    system_delay_ms(2000);          
+    motion_control_run_flag = 1;    // 电机运动标志位，这个标志位为0时，电机速度环的目标速度为0
     
-    motion_control_pit_run_flag = 1; // 启动电机速度闭环算法
+    system_delay_ms(1000);          // 上电1s后开始运行，等待负压风扇稳定       
     
+    motion_control_pit_run_flag = 1; // 启动电机速度闭环算法，车开始跑
+
     while (TRUE)
     {
         menu_key_event_handle();
@@ -47,7 +48,7 @@ int core0_main(void)
             continue;
         }
         // 电池保护，运行1.8s后开始检测，防止电机启动电流过大导致电池电压瞬间下降误触发保护
-        if(system_getval_ms() > 1800 && battery_protection_check()){
+        if(system_getval_ms() > 3800 && battery_protection_check()){
             motor_interface_power_flag = 0; // 关闭电机PWM输出
             zf_assert(!battery_protection_check()); // 电池电压过低
         }
