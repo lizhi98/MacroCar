@@ -2,11 +2,12 @@
 #define __MENU_INTERFACE_H__
 
 #include "zf_device_ips200.h"
-#include "zf_device_wifi_spi.h"
+#include "network_interface.h"
 #include "motor_control.h"
 #include "battery_protection.h"
 #include "gyroscope_interface.h"
 #include "zf_device_key.h"
+#include "image_process.h"
 
 typedef enum _MenuPrintInfoType{
     MENU_INFO_NORMAL = 0,
@@ -15,6 +16,8 @@ typedef enum _MenuPrintInfoType{
 
 void menu_interface_init(void);
 void menu_ips_print_info(MenuPrintInfoType info_type);
+
+void menu_net_print_info(void);
 
 void menu_key_event_handle(void);
 

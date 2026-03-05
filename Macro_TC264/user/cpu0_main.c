@@ -21,26 +21,29 @@ int core0_main(void)
     debug_init();                   // 初始化默认调试串口
     
     // 外设初始化
+    key_init(MOTOR_INTERFACE_PIT_TIME);   // 按键初始化 5ms扫描一次 // 改这个需要改所处中断时间
+
+    motor_forward_speed = 400;      // 前进速度
+    gyro_init();                    // 陀螺仪初始化
+    battery_protection_init();      // 电池保护初始化
     
     motion_control_init();          // 运动控制初始化
-    battery_protection_init();      // 电池保护初始化
-    gyro_init();                    // 陀螺仪初始化
-    key_init(MOTOR_INTERFACE_PIT_TIME);   // 按键初始化 5ms扫描一次 // 改这个需要改所处中断时间
+    
     system_start();                 // 启动系统计时器
-
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
 
+    motor_fun_pwm_duty  = 0;      // 负压风扇PWM占空比
     motor_interface_power_flag = 1; // 使能电机PWM输出
     motion_control_run_flag = 1;    // 发车标志位
-
-    motor_forward_speed = 600;      // 前进速度
-    motor_fun_pwm_duty  = MOTOR_FUN_NORMAL_PWM_DUTY;      // 负压风扇PWM占空比
+    system_delay_ms(2000);          
+    
+    motion_control_pit_run_flag = 1; // 启动电机速度闭环算法
     
     while (TRUE)
     {
         menu_key_event_handle();
         // 30ms以上运行一次
-        if(system_getval_ms() % 30 != 0){
+        if(system_getval_ms() % 50 != 0){
             continue;
         }
         // 电池保护，运行1.8s后开始检测，防止电机启动电流过大导致电池电压瞬间下降误触发保护
@@ -55,6 +58,9 @@ int core0_main(void)
             menu_ips_print_info(MENU_INFO_NORMAL);
             core_busy_flag = 0;
         }
+#endif
+#ifdef SMARTCAR_DEBUG_NET_INFO
+        menu_net_print_info();
 #endif
     }
 }

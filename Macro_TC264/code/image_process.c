@@ -517,6 +517,179 @@ void Add_Line(int x1,int y1,int x2,int y2)//右补线,补的是边界
     }
 }
 
+
+
+
+//--------------------------------------------------------------------------------------------
+//求斜率和方差
+//--------------------------------------------------------------------------------------------
+
+float parameterA;
+float parameterB;
+void regression(int type, int startline, int endline)//最小二乘法拟合曲线，分别拟合中线，左线，右线,type表示拟合哪几条线
+{
+    int i = 0;
+    int sumlines = endline - startline;
+    int sumX = 0;
+    int sumY = 0;
+    float averageX = 0;
+    float averageY = 0;
+    float sumUp = 0;
+    float sumDown = 0;
+    if (type == 0)      //拟合中线
+    {
+        for (i = startline; i < endline; i++)
+        {
+            sumX += i;
+            sumY += mid_line_list[i];
+        }
+        if (sumlines != 0)
+        {
+            averageX = (float)(sumX / sumlines);     //x的平均值
+            averageY = (float)(sumY / sumlines);     //y的平均值
+        }
+        else
+        {
+            averageX = 0;     //x的平均值
+            averageY = 0;     //y的平均值
+        }
+        for (i = startline; i < endline; i++)
+        {
+            sumUp += (mid_line_list[i] - averageY) * (i - averageX);
+            sumDown += (i - averageX) * (i - averageX);
+        }
+        if (sumDown == 0) parameterB = 0;
+        else parameterB = sumUp / sumDown;
+        parameterA = averageY - parameterB * averageX;
+    }
+    else if (type == 1)//拟合左线
+    {
+        for (i = startline; i < endline; i++)
+        {
+            sumX += i;
+            sumY += left_line_list[i];
+        }
+        if (sumlines == 0) sumlines = 1;
+        averageX = (float)(sumX / sumlines);     //x的平均值
+        averageY = (float)(sumY / sumlines);     //y的平均值
+        for (i = startline; i < endline; i++)
+        {
+            sumUp += (left_line_list[i] - averageY) * (i - averageX);
+            sumDown += (i - averageX) * (i - averageX);
+        }
+        if (sumDown == 0) parameterB = 0;
+        else parameterB = sumUp / sumDown;
+        parameterA = averageY - parameterB * averageX;
+    }
+    else if (type == 2)//拟合右线
+    {
+        for (i = startline; i < endline; i++)
+        {
+            sumX += i;
+            sumY += right_line_list[i];
+        }
+        if (sumlines == 0) sumlines = 1;
+        averageX = (float)(sumX / sumlines);     //x的平均值
+        averageY = (float)(sumY / sumlines);     //y的平均值
+        for (i = startline; i < endline; i++)
+        {
+            sumUp += (right_line_list[i] - averageY) * (i - averageX);
+            sumDown += (i - averageX) * (i - averageX);
+        }
+        if (sumDown == 0) parameterB = 0;
+        else parameterB = sumUp / sumDown;
+        parameterA = averageY - parameterB * averageX;
+
+    }
+
+}
+int monileft[MT9V03X_H];
+int moniright[MT9V03X_H];
+int monimiddle[MT9V03X_H];
+void monileftfuzhi(float A, float B, int start_point, int end_point)
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
+        if ((B * m + A) >= 255) monileft[m] = 255;
+        if ((B * m + A) <= 0) monileft[m] = 0;
+        else if (0 < (B * m + A) && (B * m + A) < 255) monileft[m] = (int)(B * m + A);
+    }
+}
+void monirightfuzhi(float A, float B, int start_point, int end_point)
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
+        if ((B * m + A) >= 255) moniright[m] = 255;
+        if ((B * m + A) <= 0) moniright[m] = 0;
+        else if (0 < (B * m + A) && (B * m + A) < 255) moniright[m] = (int)(B * m + A);
+    }
+}
+
+void monizhongfuzhi(float A, float B, int start_point, int end_point)
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
+         if ((B * m + A) >= 255) monimiddle[m] = 255;
+         if ((B * m + A) <= 0) monimiddle[m] = 0;
+         else if (0 < (B * m + A) && (B * m + A) < 255) monimiddle[m] = (int)(B * m + A);
+    }
+}
+
+double pianfangleft;
+double pianfangright;
+double pianfangmid;
+void pianfangcal(int begin, int end, int type)
+{
+    int i = 0;
+    if (type == 1)//左线拟合差平方计算
+    {
+        pianfangleft = 0;
+        regression(1, begin, end);
+        monileftfuzhi(parameterA, parameterB, (int)begin, (int)end);
+        for (i = begin; i <= end; i++)
+        {
+            pianfangleft = pianfangleft + (left_line_list[i] - monileft[i]) * (left_line_list[i] - monileft[i]);
+        }
+        pianfangleft = pianfangleft / (end - begin + 1);
+    }
+    if (type == 2)//右线拟合差平方计算
+    {
+        pianfangright = 0;
+        regression(2, begin, end);
+        monirightfuzhi(parameterA, parameterB, (int)begin, (int)end);
+        for (i = begin; i <= end; i++)
+        {
+            pianfangright = pianfangright + (right_line_list[i] - moniright[i]) * (right_line_list[i] - moniright[i]);
+        }
+        pianfangright = pianfangright / (end - begin + 1);
+    }
+    if (type == 0)//中线拟合差平方计算
+    {
+        pianfangmid = 0;
+        regression(0, begin, end);
+        monizhongfuzhi(parameterA, parameterB, (int)begin, (int)end);
+        int fangjun = 0;
+        int junfang = 0;
+        for (i = begin; i <= end; i++)
+        {
+            fangjun = fangjun + (mid_line_list[i]) * (mid_line_list[i]);
+        }
+        fangjun = fangjun / (end - begin + 1);
+        for (i = begin; i <= end; i++)
+        {
+            junfang = junfang + (mid_line_list[i]);
+        }
+        junfang = junfang / (end - begin + 1);
+        junfang = junfang * junfang;
+        pianfangmid = (fangjun - junfang) * 1.0;
+    }
+
+}
+
+
 int feature_row_l=0;
 int feature_row_r=0;
 FeatureDetectResult image_feature;
@@ -731,7 +904,7 @@ void Add_right_line()
 FeatureDetectResult image_plan_feature={0,0,0};
 
 uint8 T_index=0;
-uint8 T[7]={1,-1,-1,-1,0,0,0};
+int T[7]={-1,1,1,-1,0,0,0};
 
 int condition=0;
 void process_T()
@@ -759,6 +932,7 @@ void process_T()
         else if(T[T_index-1]==-1&&image_feature.left_feature_flag==1)
         {
             //左转
+
             Add_left_line();
         }
         else if(T[T_index-1]==1&&image_feature.right_feature_flag==1)
@@ -767,11 +941,15 @@ void process_T()
             Add_right_line();
         }
     }
-    if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==0)
+    if(condition==1)
+    {
+        regression(0, min_raw_l, MT9V03X_H - 2);
+    }
+    if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==0&&fabs(parameterB)<0.15)
     {
         condition=0;
     }
-
+   
 }
 
 void feature_process()
@@ -793,12 +971,12 @@ void feature_process()
         image_plan_feature.height_feature_flag=1;
     }
     //右倒T型路口
-    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag==3)
+    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag==3||image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag==2)
     {
         image_plan_feature.right_feature_flag=1;
     }
     //左倒T型路口
-    else if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==3)
+    else if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==3||image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==2)
     {
         image_plan_feature.left_feature_flag=1;
     }
@@ -889,176 +1067,6 @@ int get_error_image(void)
 
 
 
-
-
-//--------------------------------------------------------------------------------------------
-//求斜率和方差
-//--------------------------------------------------------------------------------------------
-
-float parameterA;
-float parameterB;
-void regression(int type, int startline, int endline)//最小二乘法拟合曲线，分别拟合中线，左线，右线,type表示拟合哪几条线
-{
-    int i = 0;
-    int sumlines = endline - startline;
-    int sumX = 0;
-    int sumY = 0;
-    float averageX = 0;
-    float averageY = 0;
-    float sumUp = 0;
-    float sumDown = 0;
-    if (type == 0)      //拟合中线
-    {
-        for (i = startline; i < endline; i++)
-        {
-            sumX += i;
-            sumY += mid_line_list[i];
-        }
-        if (sumlines != 0)
-        {
-            averageX = (float)(sumX / sumlines);     //x的平均值
-            averageY = (float)(sumY / sumlines);     //y的平均值
-        }
-        else
-        {
-            averageX = 0;     //x的平均值
-            averageY = 0;     //y的平均值
-        }
-        for (i = startline; i < endline; i++)
-        {
-            sumUp += (mid_line_list[i] - averageY) * (i - averageX);
-            sumDown += (i - averageX) * (i - averageX);
-        }
-        if (sumDown == 0) parameterB = 0;
-        else parameterB = sumUp / sumDown;
-        parameterA = averageY - parameterB * averageX;
-    }
-    else if (type == 1)//拟合左线
-    {
-        for (i = startline; i < endline; i++)
-        {
-            sumX += i;
-            sumY += left_line_list[i];
-        }
-        if (sumlines == 0) sumlines = 1;
-        averageX = (float)(sumX / sumlines);     //x的平均值
-        averageY = (float)(sumY / sumlines);     //y的平均值
-        for (i = startline; i < endline; i++)
-        {
-            sumUp += (left_line_list[i] - averageY) * (i - averageX);
-            sumDown += (i - averageX) * (i - averageX);
-        }
-        if (sumDown == 0) parameterB = 0;
-        else parameterB = sumUp / sumDown;
-        parameterA = averageY - parameterB * averageX;
-    }
-    else if (type == 2)//拟合右线
-    {
-        for (i = startline; i < endline; i++)
-        {
-            sumX += i;
-            sumY += right_line_list[i];
-        }
-        if (sumlines == 0) sumlines = 1;
-        averageX = (float)(sumX / sumlines);     //x的平均值
-        averageY = (float)(sumY / sumlines);     //y的平均值
-        for (i = startline; i < endline; i++)
-        {
-            sumUp += (right_line_list[i] - averageY) * (i - averageX);
-            sumDown += (i - averageX) * (i - averageX);
-        }
-        if (sumDown == 0) parameterB = 0;
-        else parameterB = sumUp / sumDown;
-        parameterA = averageY - parameterB * averageX;
-
-    }
-
-}
-int monileft[MT9V03X_H];
-int moniright[MT9V03X_H];
-int monimiddle[MT9V03X_H];
-void monileftfuzhi(float A, float B, int start_point, int end_point)
-{
-    int m;
-    for (m = start_point; m <= end_point; m++)
-    {
-        if ((B * m + A) >= 255) monileft[m] = 255;
-        if ((B * m + A) <= 0) monileft[m] = 0;
-        else if (0 < (B * m + A) && (B * m + A) < 255) monileft[m] = (int)(B * m + A);
-    }
-}
-void monirightfuzhi(float A, float B, int start_point, int end_point)
-{
-    int m;
-    for (m = start_point; m <= end_point; m++)
-    {
-        if ((B * m + A) >= 255) moniright[m] = 255;
-        if ((B * m + A) <= 0) moniright[m] = 0;
-        else if (0 < (B * m + A) && (B * m + A) < 255) moniright[m] = (int)(B * m + A);
-    }
-}
-
-void monizhongfuzhi(float A, float B, int start_point, int end_point)
-{
-    int m;
-    for (m = start_point; m <= end_point; m++)
-    {
-         if ((B * m + A) >= 255) monimiddle[m] = 255;
-         if ((B * m + A) <= 0) monimiddle[m] = 0;
-         else if (0 < (B * m + A) && (B * m + A) < 255) monimiddle[m] = (int)(B * m + A);
-    }
-}
-
-double pianfangleft;
-double pianfangright;
-double pianfangmid;
-void pianfangcal(int begin, int end, int type)
-{
-    int i = 0;
-    if (type == 1)//左线拟合差平方计算
-    {
-        pianfangleft = 0;
-        regression(1, begin, end);
-        monileftfuzhi(parameterA, parameterB, (int)begin, (int)end);
-        for (i = begin; i <= end; i++)
-        {
-            pianfangleft = pianfangleft + (left_line_list[i] - monileft[i]) * (left_line_list[i] - monileft[i]);
-        }
-        pianfangleft = pianfangleft / (end - begin + 1);
-    }
-    if (type == 2)//右线拟合差平方计算
-    {
-        pianfangright = 0;
-        regression(2, begin, end);
-        monirightfuzhi(parameterA, parameterB, (int)begin, (int)end);
-        for (i = begin; i <= end; i++)
-        {
-            pianfangright = pianfangright + (right_line_list[i] - moniright[i]) * (right_line_list[i] - moniright[i]);
-        }
-        pianfangright = pianfangright / (end - begin + 1);
-    }
-    if (type == 0)//中线拟合差平方计算
-    {
-        pianfangmid = 0;
-        regression(0, begin, end);
-        monizhongfuzhi(parameterA, parameterB, (int)begin, (int)end);
-        int fangjun = 0;
-        int junfang = 0;
-        for (i = begin; i <= end; i++)
-        {
-            fangjun = fangjun + (mid_line_list[i]) * (mid_line_list[i]);
-        }
-        fangjun = fangjun / (end - begin + 1);
-        for (i = begin; i <= end; i++)
-        {
-            junfang = junfang + (mid_line_list[i]);
-        }
-        junfang = junfang / (end - begin + 1);
-        junfang = junfang * junfang;
-        pianfangmid = (fangjun - junfang) * 1.0;
-    }
-
-}
 
 
 

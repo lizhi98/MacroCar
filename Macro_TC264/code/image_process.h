@@ -40,6 +40,7 @@ typedef struct
     int height_feature_flag;
 }FeatureDetectResult;
 
+extern float parameterB;
 extern uint8 T_index;
 extern FeatureDetectResult image_feature;
 extern FeatureDetectResult image_plan_feature;

@@ -4,6 +4,8 @@
 #include "motor_interface.h"
 #include "image_process.h"
 #include "gyroscope_interface.h"
+#include "zf_common_clock.h"
+#include "zf_driver_delay.h"
 
 // 算法部分
 // PID算法
@@ -41,12 +43,15 @@ extern PIDParam motor_steering_pid;
 extern int16 motor_steering_speed;
 
 // 运动控制
-#define MOTION_CONTROL_PIT_TIME         10  // 单位ms
+#define MOTION_CONTROL_PIT_TIME         5  // 单位ms
 #define MOTION_CONTROL_PIT_INDEX        CCU61_CH0
 
 #define MOTOR_FUN_NORMAL_PWM_DUTY       3000 // 负压风扇正常工作PWM占空比
 
 extern uint8 motion_control_run_flag; // 作用于单电机速度环，让速度=0
+
+extern uint8 motion_control_pit_run_flag; // 电机速度闭环算法运行标志
+
 extern int16 motor_left_current_pwm_duty;
 extern int16 motor_right_current_pwm_duty;
 extern uint16 motor_fun_pwm_duty;

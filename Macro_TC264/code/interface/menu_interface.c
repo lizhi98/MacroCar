@@ -24,6 +24,8 @@ void menu_ips_print_info(MenuPrintInfoType info_type){
         sprintf(info_buffer, "F_L:%u %u %u  I_P:%u %u %u",  image_feature.left_feature_flag, image_feature.height_feature_flag, image_feature.right_feature_flag, 
                                                             image_plan_feature.left_feature_flag, image_plan_feature.height_feature_flag, image_plan_feature.right_feature_flag);
         ips200_show_string(0, 250, info_buffer);
+        sprintf(info_buffer, "para:%+8.4f", parameterB);
+        ips200_show_string(0, 270, info_buffer);
         break;
     case MENU_INFO_EXTEND:
         break;
@@ -42,4 +44,10 @@ void menu_key_event_handle(void){
         motor_fun_pwm_duty = (motor_fun_pwm_duty == 0) ? MOTOR_FUN_NORMAL_PWM_DUTY : 0; // 切换负压风扇PWM占空比
         key_clear_state(KEY_2);
     }
+}
+
+void menu_net_print_info(void){
+    static char info_buffer[128];
+    sprintf(info_buffer, "T_index:%u,%u,%u,%u\n", T_index,image_plan_feature.height_feature_flag,image_plan_feature.left_feature_flag,image_plan_feature.right_feature_flag);
+    network_vofa_send_str(info_buffer);
 }

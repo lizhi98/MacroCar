@@ -6,7 +6,7 @@
 
 #include "quaternion.h"
 
-#define GYRO_PIT_TIME         1         // 单位ms
+#define GYRO_PIT_TIME         2         // 单位ms
 #define GYRO_PIT_INDEX        CCU61_CH1
 
 typedef struct _GyroData
@@ -22,7 +22,7 @@ typedef struct _GyroData
 extern GyroData gyro_current_data;
 
 void gyro_init(void);
-void gyro_get_data();
+// void gyro_get_data();
 void gyro_pit_init(void);
 void gyro_pit_callback(void);
 

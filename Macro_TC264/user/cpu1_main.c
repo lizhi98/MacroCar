@@ -21,7 +21,7 @@ void core1_main(void)
     ips200_init(IPS200_TYPE_PARALLEL8);     // 初始化IPS200显示屏
 #endif
     mt9v03x_init();                         // 初始化总钻风摄像头
-#ifdef SMARTCAR_DEBUG_NET
+#if defined(SMARTCAR_DEBUG_NET_IMG) || defined(SMARTCAR_DEBUG_NET_INFO)
     network_interface_init();
     network_interface_seekfree_host_config(&mt9v03x_copy_image[0][0]); // 配置逐飞助手摄像头信息
 #endif
@@ -34,7 +34,7 @@ void core1_main(void)
         {
             network_interface_copy_image(mt9v03x_image[0], MT9V03X_W * MT9V03X_H); // 复制图像
             mt9v03x_finish_flag = 0; // 让摄像头继续采集下一帧图像并通过DMA传输到RAM中
-#ifdef SMARTCAR_DEBUG_NET
+#ifdef SMARTCAR_DEBUG_NET_IMG
             if(!network_status)seekfree_assistant_camera_send(); // 网络状态正常则发送数据
 #endif
             // 图像处理

@@ -9,7 +9,7 @@
 #define WIFI_SSID           "XIAOMI_GoGoGo"
 #define WIFI_PASSWORD       "9894653xxk"
 
-#define HOST_IP             "192.168.31.98"
+#define HOST_IP             "192.168.31.55"
 #define HOST_PORT           "9895"
 #define HOST_CONNECT_MODE   "TCP"
 
@@ -42,9 +42,10 @@ void network_interface_seekfree_host_config(uint8 *image_addr);
 typedef enum _NetworkVofaInfoType{
     VOFA_INFO_TYPE_ALL,
     VOFA_INFO_TYPE_SPEED,
-    VOFA_INFO
+    
 }NetworkVofaInfoType;
-void network_vofa_send_info();
+
+void network_vofa_send_str(char * str);
 
 void network_interface_test(void);
 

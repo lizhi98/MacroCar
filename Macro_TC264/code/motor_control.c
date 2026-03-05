@@ -1,5 +1,7 @@
 #include "motor_control.h"
 
+uint8 motion_control_pit_run_flag = 0;
+
 // 算法部分
 /* 
  *  PID计算器
@@ -48,14 +50,14 @@ void PID_clear(PIDParam* pid_param){
 // 单电机速度控制
 PIDParam motor_left_speed_pid   = {
     .type = PID_POS,
-    .kp = 28.0f, .ki = 0.45f, .kd = 0.0f,
-    .integral_limit = 2500.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+    .kp = 28.0f, .ki = 0.43f, .kd = 0.0f,
+    .integral_limit = 2100.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_POS,
-    .kp = 28.0f, .ki = 0.45f, .kd = 0.0f,
-    .integral_limit = 2500.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+    .kp = 28.0f, .ki = 0.43f, .kd = 0.0f,
+    .integral_limit = 2000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 图像误差要求的转向pid
@@ -68,7 +70,7 @@ PIDParam motion_image_steering_pid = {
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 3.0f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 1.8f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -86,12 +88,28 @@ int32 motor_right_speed = 0;
 
 int32 motor_forward_speed = 0;
 
+uint32 motor_pit_count = 0; // PIT中断计数
+
 void motion_control_pit_callback(){
+
+    motor_pit_count++;
+    
+    if(!motion_control_run_flag){
+        motor_fun_pwm_duty = 0;
+    }
+    motor_fun_set_pwm(&motor_fun_pwm_duty);
+
     // 获取电机速度
     motor_get_speed(&motor_left_speed, &motor_right_speed);
+
+    if(!motion_control_pit_run_flag){
+        return;
+    }
     // 图像要求的转向环
-    motion_image_steering_pid.previous_error = (float)error_image_last;
-    motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)error_image); // 这里的目标值和当前值需要根据具体应用修改
+    if(motor_pit_count % 4 == 0){ // 转向环20ms运行一次
+        motion_image_steering_pid.previous_error = (float)error_image_last;
+        motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)error_image); // 这里的目标值和当前值需要根据具体应用修改
+    }
     // 转向闭环
     motor_steering_speed = (int16)PID_calculate(&motor_steering_pid, (float)motion_image_steering_speed, gyro_current_data.gyro_z); // 这里的当前值需要根据具体应用修改
     // 单电机速度环
@@ -111,10 +129,7 @@ void motion_control_pit_callback(){
     }
     // 应用PWM
     motor_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
-    if(!motion_control_run_flag){
-        motor_fun_pwm_duty = 0;
-    }
-    motor_fun_set_pwm(&motor_fun_pwm_duty);
+
 }
 
 void motion_control_pit_init(void){

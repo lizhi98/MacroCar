@@ -75,3 +75,7 @@ void network_interface_seekfree_host_config(uint8 *image_addr){
     seekfree_assistant_interface_init(SEEKFREE_ASSISTANT_WIFI_SPI);
     seekfree_assistant_camera_information_config(SEEKFREE_ASSISTANT_MT9V03X, image_addr, MT9V03X_W, MT9V03X_H);
 }
+
+void network_vofa_send_str(char * str){
+    wifi_spi_send_buffer((const uint8 *)str, strlen(str));
+}
