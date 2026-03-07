@@ -40,6 +40,8 @@ typedef struct
     int height_feature_flag;
 }FeatureDetectResult;
 
+extern int feature_corner_l;
+extern int feature_corner_r;
 extern float parameterB;
 extern uint8 T_index;
 extern FeatureDetectResult image_feature;
@@ -56,5 +58,5 @@ extern uint8 right_line_list[MT9V03X_H];
 extern uint8 mid_line_list[MT9V03X_H];
 
 
-void image_process(uint8 (*source_image)[MT9V03X_W]);
+void image_process(uint8 (*source_image)[MT9V03X_W],float angle);
 #endif

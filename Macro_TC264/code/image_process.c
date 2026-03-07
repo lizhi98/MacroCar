@@ -707,11 +707,11 @@ void pianfangcal(int begin, int end, int type)
 //新版特征提取
 //--------------------------------------------------------------------------------------------
 FeatureDetectResult feature_new;
-uint8 feature_corner_l;
-uint8 feature_corner_r;
+int feature_corner_l;
+int feature_corner_r;
 void feature_extract()
 {
-    uint8 min_raw;
+    int min_raw;
     if(min_raw_l>min_raw_r)
     {
         min_raw=min_raw_l;
@@ -727,14 +727,14 @@ void feature_extract()
     for(int i=MT9V03X_H-2; i>min_raw+2;i--)
     {
         //左侧特征提取
-        if(left_line_list[i]-left_line_list[i-1]>10 && left_line_list[i]-left_line_list[i-2]>10 && lost_times_left!=0)
+        if(left_line_list[i]-left_line_list[i-1]>10 && left_line_list[i]-left_line_list[i-2]>10 )
         {
             feature_corner_l=i;
             feature_new.left_feature_flag=1;
             break;
         }
         //右侧特征提取
-        if(right_line_list[i-1]-right_line_list[i]>10 && right_line_list[i-2]-right_line_list[i]>10 && lost_times_right!=0)
+        if(right_line_list[i-1]-right_line_list[i]>10 && right_line_list[i-2]-right_line_list[i]>10 )
         {
             feature_corner_r=i;
             feature_new.right_feature_flag=1;
@@ -793,8 +793,8 @@ FeatureDetectResult image_feature;
 //列特征值
 #define FEATURE_DETECT_WIDTH_LEFT 15
 #define FEATURE_DETECT_WIDTH_RIGHT 175
-#define detect_height_start_row 3
-#define detect_height_end_row 90
+#define detect_height_start_row 10
+#define detect_height_end_row 80
 #define detect_existing_col_min 1
 #define detect_existing_col_max 20
 
@@ -977,8 +977,8 @@ FeatureDetectResult detect_feature_line()
 
     // }
     //检查行特征，确保不会出现断线（如电容），并且区分转角和直线
-    int height_flag=0;
-    int height_count_flag=0;
+    //int height_flag=0;
+    //int height_count_flag=0;
     int stop_line = 0;
     if(min_raw_l>min_raw_r)
     {
@@ -989,73 +989,77 @@ FeatureDetectResult detect_feature_line()
         stop_line=min_raw_r;
     }
     //检查是否存在白列变短情况
-    if(stop_line >= FEATURE_DETECT_HEIGHT+5)
+    if(stop_line >= FEATURE_DETECT_HEIGHT)
     {
-        height_flag = 1;
+        result.height_feature_flag = 1;
     }
     else
     {
-        height_flag = 0;
-    }
-    // 检查行特征
-    int row_flag_count[5] = {0};
-    int row_flag[5] = {0};
-    int row_ad_start_col = 0;
-    int row_ad_end_col = 0;
-    for (int i = FEATURE_DETECT_HEIGHT; i < FEATURE_DETECT_HEIGHT+5; i++)
-    {
-        for (int j = detect_left_start_col; j < detect_right_start_col; j++)
-        {
-            if (image[i][j - 1] == 0 && image[i][j] == 255 && image[i][j + 1] == 255)
-            {
-                row_ad_start_col = j;
-                row_flag[i - FEATURE_DETECT_HEIGHT] = 1;
-            }
-            if (row_flag[i - FEATURE_DETECT_HEIGHT] == 1)
-            {
-                if (image[i][j] == 255)
-                {
-                    row_flag_count[i - FEATURE_DETECT_HEIGHT]++;
-                }
-            }
-            if (image[i][j - 1] == 255 && image[i][j] == 255 && image[i][j + 1] == 0)
-            {
-                row_ad_end_col = j;
-                row_flag[i - FEATURE_DETECT_HEIGHT] = 0;
-            }
-        }
+        result.height_feature_flag = 0;
     }
     
-    if (row_flag_count[0] > detect_existing_row_min &&
-        row_flag_count[1] > detect_existing_row_min &&
-        row_flag_count[2] > detect_existing_row_min &&
-        row_flag_count[3] > detect_existing_row_min &&
-        row_flag_count[4] > detect_existing_row_min &&
-        row_flag_count[0] < detect_existing_row_max &&
-        row_flag_count[1] < detect_existing_row_max &&
-        row_flag_count[2] < detect_existing_row_max &&
-        row_flag_count[3] < detect_existing_row_max &&
-        row_flag_count[4] < detect_existing_row_max)
-    {
-        height_count_flag = 1;  // 
-    }
+   
+    // if(height_flag==1)
+    // {
+    //     // 检查行特征
+    //     int row_flag_count[5] = {0};
+    //     int row_flag[5] = {0};
+    //     int row_ad_start_col = 0;
+    //     int row_ad_end_col = 0;
+    //     for (int i = FEATURE_DETECT_HEIGHT; i < FEATURE_DETECT_HEIGHT+5; i++)
+    //     {
+    //         for (int j = detect_left_start_col; j < detect_right_start_col; j++)
+    //         {
+    //             if (image[i][j - 1] == 0 && image[i][j] == 255 && image[i][j + 1] == 255)
+    //             {
+    //                 row_ad_start_col = j;
+    //                 row_flag[i - FEATURE_DETECT_HEIGHT] = 1;
+    //             }
+    //             if (row_flag[i - FEATURE_DETECT_HEIGHT] == 1)
+    //             {
+    //                 if (image[i][j] == 255)
+    //                 {
+    //                     row_flag_count[i - FEATURE_DETECT_HEIGHT]++;
+    //                 }
+    //             }
+    //             if (image[i][j - 1] == 255 && image[i][j] == 255 && image[i][j + 1] == 0)
+    //             {
+    //                 row_ad_end_col = j;
+    //                 row_flag[i - FEATURE_DETECT_HEIGHT] = 0;
+    //             }
+    //         }
+    //     }
+    //     if (row_flag_count[0] > detect_existing_row_min &&
+    //     row_flag_count[1] > detect_existing_row_min &&
+    //     row_flag_count[2] > detect_existing_row_min &&
+    //     row_flag_count[3] > detect_existing_row_min &&
+    //     row_flag_count[4] > detect_existing_row_min &&
+    //     row_flag_count[0] < detect_existing_row_max &&
+    //     row_flag_count[1] < detect_existing_row_max &&
+    //     row_flag_count[2] < detect_existing_row_max &&
+    //     row_flag_count[3] < detect_existing_row_max &&
+    //     row_flag_count[4] < detect_existing_row_max)
+    //     {
+    //         height_count_flag = 1;  // 
+    //     }
+    // }
     
-    
+   
     //有元素存在，导致白列变短，并且存在路线（电容之类元素）
-    if( height_flag == 1 && height_count_flag == 1 )
-    {
-        result.height_feature_flag = 2; // 存在白列变短且有路线（电容之类元素）
-    }
-    //存在白列变短，但不存在路线（转角）
-    else if( height_flag == 1 && height_count_flag == 0 )
-    {
-        result.height_feature_flag = 1; // 白列变短，但不存在路线（转角）
-    }
-    //不存在白列变短情况，同时有路线(直线)
-    else if(height_count_flag == 1 && height_flag == 0)
-    {
-        result.height_feature_flag = 3; // 不存在路线变短情况，但是有路线(直线)
-    }
+    // if( height_flag == 1 && height_count_flag == 1 )
+    // {
+    //     result.height_feature_flag = 2; // 存在白列变短且有路线（电容之类元素）
+    // }
+    // //存在白列变短，但不存在路线（转角）
+    // else if( height_flag == 1 && height_count_flag == 0 )
+    // {
+    //     result.height_feature_flag = 1; // 白列变短，但不存在路线（转角）
+    // }
+    // //不存在白列变短情况，同时有路线(直线)
+    // else
+    // {
+    //     result.height_feature_flag = 3; // 不存在路线变短情况，但是有路线(直线)
+    // }
     // //检查是否存在路线
     // int count_height[5]={0};
     // for(int i=FEATURE_DETECT_HEIGHT-5;i<FEATURE_DETECT_HEIGHT;i++)
@@ -1135,21 +1139,24 @@ void Add_right_line()
 FeatureDetectResult image_plan_feature={0,0,0};
 
 uint8 T_index=0;
-int T[7]={-1,1,1,-1,0,0,0};
+int T[4]={-1,1,1,-1};
 
 int condition=0;
-void process_T()
+float angle_T=0;
+void process_T(float current_angle)
 {
 
     //检测T型路口，并将condition置1，记录转向角度
-    if(image_plan_feature.left_feature_flag==1&&condition==0||image_plan_feature.right_feature_flag==1&&condition==0||image_plan_feature.height_feature_flag==1&&condition==0)
+    if((image_plan_feature.left_feature_flag==1&&condition==0)||(image_plan_feature.right_feature_flag==1&&condition==0)||(image_plan_feature.height_feature_flag==1&&condition==0))
     {
+
         T_index++;
-        if(T_index>6)
+        if(T_index>4)
         {
-            T_index=6;
+            T_index=1;
         }
         condition=1;
+        angle_T=current_angle;
     }
 
     //在condition为1的情况下，且检测到T型路口情况下执行转向处理函数
@@ -1171,41 +1178,55 @@ void process_T()
             //右转
             Add_right_line();
         }
+
+
+        //左右转向退出
+        if(T[T_index-1]!=0 )
+        {
+            if(fabs(current_angle-angle_T)>70)
+            {
+                condition=0;
+            }
+            
+        }
+        //直行退出
+        else{
+            if(image_feature.left_feature_flag==0 &&image_feature.right_feature_flag==0)
+            {
+                condition=0;
+            }
+        }
+        
     }
-    if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==0)
-    {
-        condition=0;
-    }
+
    
 }
 
-void feature_process()
+void feature_process(float angle)
 {
     image_feature = detect_feature_line();
     //默认左转角
-    if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag==1)
+    if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 &&image_feature.height_feature_flag==1 )
     {
         Add_left_line(); 
     }
     //默认右转角
-    else if(image_feature.right_feature_flag==1 && image_feature.left_feature_flag==0 && image_feature.height_feature_flag==1)
+    else if(image_feature.right_feature_flag==1 && image_feature.left_feature_flag==0 && image_feature.height_feature_flag==1 )
     {
         Add_right_line();
     }
-    //正T形路口
-    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==1 && feature_corner_l!=0 && feature_corner_r!=0 && abs(feature_corner_l-feature_corner_r)<10)
+     //正T形路口
+    if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==1 && feature_corner_l!=0 && feature_corner_r!=0 && abs(feature_corner_l-feature_corner_r)<10)
     {
         image_plan_feature.height_feature_flag=1;
     }
     //右倒T型路口
-    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag ==2 && feature_new.left_feature_flag==1 && feature_new.right_feature_flag==0 ||
-            image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag ==3 && feature_new.left_feature_flag==1 && feature_new.right_feature_flag==0)
+    else if (image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag ==0 && feature_new.left_feature_flag==1 && feature_new.right_feature_flag==0)   
     {
         image_plan_feature.right_feature_flag=1;
     }
     //左倒T型路口
-    else if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag ==2 && feature_new.right_feature_flag==1 && feature_new.left_feature_flag==0 ||
-            image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag ==3 && feature_new.right_feature_flag==1 && feature_new.left_feature_flag==0)
+    else if (image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag ==0 && feature_new.right_feature_flag==1 && feature_new.left_feature_flag==0)
     {
         image_plan_feature.left_feature_flag=1;
     }
@@ -1215,7 +1236,7 @@ void feature_process()
         image_plan_feature.right_feature_flag=0;
         image_plan_feature.height_feature_flag=0;
     }
-    process_T();
+    process_T(angle);
 }
 
 uint8 mid_line_list[MT9V03X_H];
@@ -1295,7 +1316,7 @@ int get_error_image(void)
 
 
 //图像处理主函数
-void image_process(uint8 (*source_image)[MT9V03X_W])
+void image_process(uint8 (*source_image)[MT9V03X_W],float angle)
 {
     image = source_image;
     Binarization(MT9V03X_W, MT9V03X_H);
@@ -1303,17 +1324,17 @@ void image_process(uint8 (*source_image)[MT9V03X_W])
     seek_list(points_count);
     get_mid_line();
     feature_extract();
-    feature_process();
-    printf(" L:%d\n",feature_new.left_feature_flag);
-    printf(" R:%d\n",feature_new.right_feature_flag);
+    feature_process(angle);
+    // printf(" L:%d\n",feature_new.left_feature_flag);
+    // printf(" R:%d\n",feature_new.right_feature_flag);
 
-    printf(" L:%d\n",image_feature.left_feature_flag);
-    printf(" R:%d\n",image_feature.right_feature_flag);
-    printf(" H:%d\n",image_feature.height_feature_flag);
+    // printf(" L:%d\n",image_feature.left_feature_flag);
+    // printf(" R:%d\n",image_feature.right_feature_flag);
+    // printf(" H:%d\n",image_feature.height_feature_flag);
 
-    printf(" T:%d\n",image_plan_feature.height_feature_flag);
-    printf(" L:%d\n",image_plan_feature.left_feature_flag);
-    printf(" R:%d\n",image_plan_feature.right_feature_flag);
+    // printf(" T:%d\n",image_plan_feature.height_feature_flag);
+    // printf(" L:%d\n",image_plan_feature.left_feature_flag);
+    // printf(" R:%d\n",image_plan_feature.right_feature_flag);
     //image_draw_pre(points_count);
     error_image=get_error_image();
 }

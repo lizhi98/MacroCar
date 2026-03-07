@@ -1,6 +1,7 @@
 #include "zf_common_headfile.h"
 #include "image_process.h"
 #include "network_interface.h"
+#include "gyroscope_interface.h"
 
 extern uint8 core_busy_flag;
 
@@ -38,7 +39,7 @@ void core1_main(void)
             if(!network_status)seekfree_assistant_camera_send(); // 网络状态正常则发送数据
 #endif
             // 图像处理
-            image_process(mt9v03x_copy_image);
+            image_process(mt9v03x_copy_image, gyro_current_data.angle_z);
 #ifdef SMARTCAR_DEBUG_IPS
             // 多核访问控制
             if(!core_busy_flag){

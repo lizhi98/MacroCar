@@ -49,26 +49,26 @@ void PID_clear(PIDParam* pid_param){
 PIDParam motor_left_speed_pid   = {
     .type = PID_POS,
     .kp = 28.0f, .ki = 0.43f, .kd = 0.0f,
-    .integral_limit = 2100.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+    .integral_limit = 10000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_POS,
     .kp = 28.0f, .ki = 0.43f, .kd = 0.0f,
-    .integral_limit = 2000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+    .integral_limit = 10000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 图像误差要求的转向pid
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 5.0f, .ki = 0.0f, .kd = 2.0f,
+    .kp = 4.2f, .ki = 0.0f, .kd = 1.5f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.8f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 1.0f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -112,6 +112,7 @@ void motion_control_pit_callback(){
     if(motor_pit_count % 4 == 0){ // 转向环20ms运行一次
         motion_image_steering_pid.previous_error = (float)error_image_last;
         motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)error_image); // 这里的目标值和当前值需要根据具体应用修改
+        // motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)0.0); // 这里的目标值和当前值需要根据具体应用修改
     }
     // 转向闭环
     motor_steering_speed = (int16)PID_calculate(&motor_steering_pid, (float)motion_image_steering_speed, gyro_current_data.gyro_z); // 这里的当前值需要根据具体应用修改

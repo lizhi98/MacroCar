@@ -18,9 +18,9 @@ typedef enum _MenuPrintInfoType{
 }MenuPrintInfoType;
 
 void menu_interface_init(void);
-void menu_ips_print_info(MenuPrintInfoType info_type);
 
-void menu_net_print_info(void);
+void menu_ips_print_info(MenuPrintInfoType info_type);
+void menu_network_print_info(void);
 
 void menu_key_init(void);
 void menu_key_event_handle(void);
