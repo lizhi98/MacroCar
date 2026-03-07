@@ -169,7 +169,7 @@ int seek_stop_line(void)
     return count;
 }
 
-#define MAX_POINTS 350
+#define MAX_POINTS 600
 uint8 left_points_raw[MAX_POINTS] = {0};
 uint8 left_points_col[MAX_POINTS] = {0};
 uint8 right_points_raw[MAX_POINTS] = {0};
@@ -439,8 +439,12 @@ void seek_line( int height, int width)
 
 uint8 left_line_list[MT9V03X_H];
 uint8 right_line_list[MT9V03X_H];
+uint8 lost_times_left = 0;
+uint8 lost_times_right = 0;
 void seek_list(int num)
 {
+    lost_times_left = 0;
+    lost_times_right = 0;
     int max_raw;
     if(min_raw_l>min_raw_r)
     {
@@ -461,14 +465,23 @@ void seek_list(int num)
     {
         for (int i = 0; i < num; i++)
         {
+
             if (left_points_raw[i] == j && j >= max_raw)
             {
                 left_line_list[j] = left_points_col[i];
+                if(left_line_list[j]==1)
+                {
+                    lost_times_left++;
+                }
                 j--;
             }
             if (right_points_raw[i] == k && k >= max_raw)
             {
                 right_line_list[k] = right_points_col[i];
+                if(right_line_list[k]==MT9V03X_W-2)
+                {
+                    lost_times_right++;
+                }
                 k--;
             }
         }
@@ -690,134 +703,293 @@ void pianfangcal(int begin, int end, int type)
 }
 
 
-int feature_row_l=0;
-int feature_row_r=0;
+//--------------------------------------------------------------------------------------------
+//新版特征提取
+//--------------------------------------------------------------------------------------------
+FeatureDetectResult feature_new;
+uint8 feature_corner_l;
+uint8 feature_corner_r;
+void feature_extract()
+{
+    uint8 min_raw;
+    if(min_raw_l>min_raw_r)
+    {
+        min_raw=min_raw_l;
+    }
+    else
+    {
+        min_raw=min_raw_r;
+    }
+    feature_corner_l=0;
+    feature_corner_r=0;
+    feature_new.left_feature_flag=0;
+    feature_new.right_feature_flag=0;
+    for(int i=MT9V03X_H-2; i>min_raw+2;i--)
+    {
+        //左侧特征提取
+        if(left_line_list[i]-left_line_list[i-1]>10 && left_line_list[i]-left_line_list[i-2]>10 && lost_times_left!=0)
+        {
+            feature_corner_l=i;
+            feature_new.left_feature_flag=1;
+            break;
+        }
+        //右侧特征提取
+        if(right_line_list[i-1]-right_line_list[i]>10 && right_line_list[i-2]-right_line_list[i]>10 && lost_times_right!=0)
+        {
+            feature_corner_r=i;
+            feature_new.right_feature_flag=1;
+            break;
+        }
+    }
+    if(feature_new.left_feature_flag==1 && feature_new.right_feature_flag==0)
+    {
+        if(feature_corner_l>min_raw+5 && feature_corner_l<MT9V03X_H-5)
+        {
+            for(int i=feature_corner_l-3;i<feature_corner_l+3;i++)
+            {
+                if(right_line_list[i-1]-right_line_list[i]>10 && right_line_list[i-2]-right_line_list[i]>10)
+                {
+                    feature_corner_r=i;
+                    feature_new.right_feature_flag=1;
+                    break;
+                }
+            }
+        }
+
+    }
+    if(feature_new.right_feature_flag==1 && feature_new.left_feature_flag==0)
+    {
+        if(feature_corner_r>min_raw+5 && feature_corner_r<MT9V03X_H-5)
+        {
+            for(int i=feature_corner_r-3;i<feature_corner_r+3;i++)
+            {
+                if(left_line_list[i]-left_line_list[i-1]>10 && left_line_list[i]-left_line_list[i-2]>10)
+                {
+                    feature_corner_l=i;
+                    feature_new.left_feature_flag=1;
+                    break;
+                }
+            }
+        }
+        
+    }
+}
+
+
+
+
+//--------------------------------------------------------------------------------------------
+//老版特征提取
+//--------------------------------------------------------------------------------------------
+
 FeatureDetectResult image_feature;
 //行特征值
-#define FEATURE_DETECT_HEIGHT 15
+#define FEATURE_DETECT_HEIGHT 5
 #define detect_left_start_col 30
 #define detect_right_start_col 150
-#define detect_existing_row_min 3
-#define detect_existing_row_max 30
+#define detect_existing_row_min 2
+#define detect_existing_row_max 70
 
 //列特征值
 #define FEATURE_DETECT_WIDTH_LEFT 15
 #define FEATURE_DETECT_WIDTH_RIGHT 175
-#define detect_height_start_row 20
+#define detect_height_start_row 3
 #define detect_height_end_row 90
 #define detect_existing_col_min 1
-#define detect_existing_col_max 15
+#define detect_existing_col_max 20
 
-int left_count=0;
-int right_count=0;
+int left_add_row=0;
+int right_add_row=0;
 FeatureDetectResult detect_feature_line()
 {
-    feature_row_l=0;
-    feature_row_r=0;
+
     FeatureDetectResult result={0,0,0};
     
 
     //检查左列特征
-    left_count=0;
-    int left_flag=0;
     int left_flag_count[5]={0};
-    for(int i=0;i<MT9V03X_H-1;i++)
+    int left_flag[5]={0};
+    for(int j=FEATURE_DETECT_WIDTH_LEFT+4;j>=FEATURE_DETECT_WIDTH_LEFT;j--)
     {
-        if(left_count==0)
+        for(int i=detect_height_start_row;i<detect_height_end_row;i++)
         {
-            feature_row_l++;
-        }
-        if(image[i][FEATURE_DETECT_WIDTH_LEFT]==255)
-        {
-            left_count++;
-        }
-    }
-    if(left_count>1)
-    {
-        left_flag=1;
-    }
-    if(left_flag==1)
-    {
-        for(int j=FEATURE_DETECT_WIDTH_LEFT;j<FEATURE_DETECT_WIDTH_LEFT+5;j++)
-        {
-            for(int i=detect_height_start_row;i<detect_height_end_row;i++)
+            if(image[i-1][j]==0&&image[i][j]==255&&image[i+1][j]==255)                
+            {
+                left_add_row=i;
+                left_flag[j-FEATURE_DETECT_WIDTH_LEFT]=1;
+
+            }
+            if(left_flag[j-FEATURE_DETECT_WIDTH_LEFT]==1)
             {
                 if(image[i][j]==255)
                 {
-
                     left_flag_count[j-FEATURE_DETECT_WIDTH_LEFT]++;
                 }
             }
+            if(image[i-1][j]==255&&image[i][j]==255&&image[i+1][j]==0)
+            {
+                left_flag[j-FEATURE_DETECT_WIDTH_LEFT]=0;
+            }
         }
-        if( left_flag_count[0]>detect_existing_col_min &&
-            left_flag_count[1]>detect_existing_col_min &&
-            left_flag_count[2]>detect_existing_col_min &&
-            left_flag_count[3]>detect_existing_col_min &&
-            left_flag_count[4]>detect_existing_col_min &&
-            left_flag_count[0]<detect_existing_col_max &&
-            left_flag_count[1]<detect_existing_col_max &&
-            left_flag_count[2]<detect_existing_col_max &&
-            left_flag_count[3]<detect_existing_col_max &&
-            left_flag_count[4]<detect_existing_col_max)
+    }
+    if( left_flag_count[0]>detect_existing_col_min &&
+        left_flag_count[1]>detect_existing_col_min &&
+        left_flag_count[2]>detect_existing_col_min &&
+        left_flag_count[3]>detect_existing_col_min &&
+        left_flag_count[4]>detect_existing_col_min &&
+        left_flag_count[0]<detect_existing_col_max &&
+        left_flag_count[1]<detect_existing_col_max &&
+        left_flag_count[2]<detect_existing_col_max &&
+        left_flag_count[3]<detect_existing_col_max &&
+        left_flag_count[4]<detect_existing_col_max)
         {
             result.left_feature_flag=1;
         }
-        
-    }
+
+    // left_count=0;
+    // int left_flag=0;
+    // int left_flag_count[5]={0};
+    // for(int i=0;i<MT9V03X_H-1;i++)
+    // {
+    //     if(left_count==0)
+    //     {
+    //         feature_row_l++;
+    //     }
+    //     if(image[i][FEATURE_DETECT_WIDTH_LEFT]==255)
+    //     {
+    //         left_count++;
+    //     }
+    // }
+    // if(left_count>1)
+    // {
+    //     left_flag=1;
+    // }
+    // if(left_flag==1)
+    // {
+    //     for(int j=FEATURE_DETECT_WIDTH_LEFT;j<FEATURE_DETECT_WIDTH_LEFT+5;j++)
+    //     {
+    //         for(int i=detect_height_start_row;i<detect_height_end_row;i++)
+    //         {
+    //             if(image[i][j]==255)
+    //             {
+    //                 left_flag_count[j-FEATURE_DETECT_WIDTH_LEFT]++;
+    //             }
+    //         }
+    //     }
+    //     if( left_flag_count[0]>detect_existing_col_min &&
+    //         left_flag_count[1]>detect_existing_col_min &&
+    //         left_flag_count[2]>detect_existing_col_min &&
+    //         left_flag_count[3]>detect_existing_col_min &&
+    //         left_flag_count[4]>detect_existing_col_min &&
+    //         left_flag_count[0]<detect_existing_col_max &&
+    //         left_flag_count[1]<detect_existing_col_max &&
+    //         left_flag_count[2]<detect_existing_col_max &&
+    //         left_flag_count[3]<detect_existing_col_max &&
+    //         left_flag_count[4]<detect_existing_col_max)
+    //     {
+    //         result.left_feature_flag=1;
+    //     }
+    // }
 
     //检查右列特征
-    right_count=0;
-    int right_flag=0;
     int right_flag_count[5]={0};
-    for(int i=0;i<MT9V03X_H-1;i++)
+    int right_flag[5]={0};
+    for(int j=FEATURE_DETECT_WIDTH_RIGHT-5;j<FEATURE_DETECT_WIDTH_RIGHT;j++)
     {
-        if(right_count==0)
+        for(int i=detect_height_start_row;i<detect_height_end_row;i++)
         {
-            feature_row_r++;
-        }
-        if(image[i][FEATURE_DETECT_WIDTH_RIGHT]==255)
-        {
-            right_count++;
-        }
-    }
-    if(right_count>1)
-    {
-        right_flag=1;
-    }
-    //待优化
-    if(right_flag==1)
-    {
-        
-        for(int j=FEATURE_DETECT_WIDTH_RIGHT-5;j<FEATURE_DETECT_WIDTH_RIGHT;j++)
-        {
-            for(int i=detect_height_start_row;i<detect_height_end_row;i++)
+            if(image[i-1][j]==0&&image[i][j]==255&&image[i+1][j]==255)                
+            {
+                right_add_row=i;
+                right_flag[j-(FEATURE_DETECT_WIDTH_RIGHT-5)]=1;
+            }
+            if(right_flag[j-(FEATURE_DETECT_WIDTH_RIGHT-5)]==1)
             {
                 if(image[i][j]==255)
                 {
                     right_flag_count[j-(FEATURE_DETECT_WIDTH_RIGHT-5)]++;
                 }
             }
+            if(image[i-1][j]==255&&image[i][j]==255&&image[i+1][j]==0)
+            {
+                right_flag[j-(FEATURE_DETECT_WIDTH_RIGHT-5)]=0;
+            }
         }
-        if( right_flag_count[0]>detect_existing_col_min &&
-            right_flag_count[1]>detect_existing_col_min &&
-            right_flag_count[2]>detect_existing_col_min &&
-            right_flag_count[3]>detect_existing_col_min &&
-            right_flag_count[4]>detect_existing_col_min &&
-            right_flag_count[0]<detect_existing_col_max &&
-            right_flag_count[1]<detect_existing_col_max &&
-            right_flag_count[2]<detect_existing_col_max &&
-            right_flag_count[3]<detect_existing_col_max &&
-            right_flag_count[4]<detect_existing_col_max)
+    } 
+    if( right_flag_count[0]>detect_existing_col_min &&
+        right_flag_count[1]>detect_existing_col_min &&
+        right_flag_count[2]>detect_existing_col_min &&
+        right_flag_count[3]>detect_existing_col_min &&
+        right_flag_count[4]>detect_existing_col_min &&
+        right_flag_count[0]<detect_existing_col_max &&
+        right_flag_count[1]<detect_existing_col_max &&
+        right_flag_count[2]<detect_existing_col_max &&
+        right_flag_count[3]<detect_existing_col_max &&
+        right_flag_count[4]<detect_existing_col_max)
         {
             result.right_feature_flag=1;
         }
 
-    }
-    //检查行特征，确保不会出现断线（如电容），以此来作为判断转向点依据,0为白列长度正常，1为白列长度缩短，且构成转弯条件，2为白列长度缩短，但构成了电容等元素特征
+    // right_count=0;
+    // int right_flag=0;
+    // int right_flag_count[5]={0};
+    // for(int i=0;i<MT9V03X_H-1;i++)
+    // {
+    //     if(right_count==0)
+    //     {
+    //         feature_row_r++;
+    //     }
+    //     if(image[i][FEATURE_DETECT_WIDTH_RIGHT]==255)
+    //     {
+    //         right_count++;
+    //     }
+    // }
+    // if(right_count>1)
+    // {
+    //     right_flag=1;
+    // }
+    // //待优化
+    // if(right_flag==1)
+    // { 
+    //     for(int j=FEATURE_DETECT_WIDTH_RIGHT-5;j<FEATURE_DETECT_WIDTH_RIGHT;j++)
+    //     {
+    //         for(int i=detect_height_start_row;i<detect_height_end_row;i++)
+    //         {
+    //             if(image[i][j]==255)
+    //             {
+    //                 right_flag_count[j-(FEATURE_DETECT_WIDTH_RIGHT-5)]++;
+    //             }
+    //         }
+    //     }
+    //     if( right_flag_count[0]>detect_existing_col_min &&
+    //         right_flag_count[1]>detect_existing_col_min &&
+    //         right_flag_count[2]>detect_existing_col_min &&
+    //         right_flag_count[3]>detect_existing_col_min &&
+    //         right_flag_count[4]>detect_existing_col_min &&
+    //         right_flag_count[0]<detect_existing_col_max &&
+    //         right_flag_count[1]<detect_existing_col_max &&
+    //         right_flag_count[2]<detect_existing_col_max &&
+    //         right_flag_count[3]<detect_existing_col_max &&
+    //         right_flag_count[4]<detect_existing_col_max)
+    //     {
+    //         result.right_feature_flag=1;
+    //     }
+
+    // }
+    //检查行特征，确保不会出现断线（如电容），并且区分转角和直线
     int height_flag=0;
-    int stop_line = seek_stop_line();
+    int height_count_flag=0;
+    int stop_line = 0;
+    if(min_raw_l>min_raw_r)
+    {
+        stop_line=min_raw_l;
+    }
+    else
+    {
+        stop_line=min_raw_r;
+    }
     //检查是否存在白列变短情况
-    if(MT9V03X_H-2-stop_line >= FEATURE_DETECT_HEIGHT)
+    if(stop_line >= FEATURE_DETECT_HEIGHT+5)
     {
         height_flag = 1;
     }
@@ -825,54 +997,113 @@ FeatureDetectResult detect_feature_line()
     {
         height_flag = 0;
     }
-    //检查是否存在路线
-    int count_height[5]={0};
-    for(int i=10;i<15;i++)
+    // 检查行特征
+    int row_flag_count[5] = {0};
+    int row_flag[5] = {0};
+    int row_ad_start_col = 0;
+    int row_ad_end_col = 0;
+    for (int i = FEATURE_DETECT_HEIGHT; i < FEATURE_DETECT_HEIGHT+5; i++)
     {
-       for(int j=detect_left_start_col;j<detect_right_start_col;j++)
+        for (int j = detect_left_start_col; j < detect_right_start_col; j++)
         {
-            if(image[i][j]==255)
+            if (image[i][j - 1] == 0 && image[i][j] == 255 && image[i][j + 1] == 255)
             {
-                count_height[i-10]++;
+                row_ad_start_col = j;
+                row_flag[i - FEATURE_DETECT_HEIGHT] = 1;
+            }
+            if (row_flag[i - FEATURE_DETECT_HEIGHT] == 1)
+            {
+                if (image[i][j] == 255)
+                {
+                    row_flag_count[i - FEATURE_DETECT_HEIGHT]++;
+                }
+            }
+            if (image[i][j - 1] == 255 && image[i][j] == 255 && image[i][j + 1] == 0)
+            {
+                row_ad_end_col = j;
+                row_flag[i - FEATURE_DETECT_HEIGHT] = 0;
             }
         }
     }
-    //存在白列变短且有路线（电容之类元素）
-    if( count_height[0]>detect_existing_row_min &&
-        count_height[1]>detect_existing_row_min &&
-        count_height[2]>detect_existing_row_min &&
-        count_height[3]>detect_existing_row_min &&
-        count_height[4]>detect_existing_row_min &&
-        count_height[0]<detect_existing_row_max &&
-        count_height[1]<detect_existing_row_max &&
-        count_height[2]<detect_existing_row_max &&
-        count_height[3]<detect_existing_row_max &&
-        count_height[4]<detect_existing_row_max &&
-        height_flag==1 )
-        {
-            result.height_feature_flag=2;
-        }
-    //白列变短，但不存在路线（转角）
-    else if( height_flag==1)
-        {
-            result.height_feature_flag=1;
-        }
-    //不存在路线变短情况，但是有路线(直线)
-    else if(count_height[0]>detect_existing_row_min &&
-        count_height[1]>detect_existing_row_min &&
-        count_height[2]>detect_existing_row_min &&
-        count_height[3]>detect_existing_row_min &&
-        count_height[4]>detect_existing_row_min &&
-        count_height[0]<detect_existing_row_max &&
-        count_height[1]<detect_existing_row_max &&
-        count_height[2]<detect_existing_row_max &&
-        count_height[3]<detect_existing_row_max &&
-        count_height[4]<detect_existing_row_max &&
-        height_flag==0
-    )
+    
+    if (row_flag_count[0] > detect_existing_row_min &&
+        row_flag_count[1] > detect_existing_row_min &&
+        row_flag_count[2] > detect_existing_row_min &&
+        row_flag_count[3] > detect_existing_row_min &&
+        row_flag_count[4] > detect_existing_row_min &&
+        row_flag_count[0] < detect_existing_row_max &&
+        row_flag_count[1] < detect_existing_row_max &&
+        row_flag_count[2] < detect_existing_row_max &&
+        row_flag_count[3] < detect_existing_row_max &&
+        row_flag_count[4] < detect_existing_row_max)
     {
-        result.height_feature_flag=3;
+        height_count_flag = 1;  // 
     }
+    
+    
+    //有元素存在，导致白列变短，并且存在路线（电容之类元素）
+    if( height_flag == 1 && height_count_flag == 1 )
+    {
+        result.height_feature_flag = 2; // 存在白列变短且有路线（电容之类元素）
+    }
+    //存在白列变短，但不存在路线（转角）
+    else if( height_flag == 1 && height_count_flag == 0 )
+    {
+        result.height_feature_flag = 1; // 白列变短，但不存在路线（转角）
+    }
+    //不存在白列变短情况，同时有路线(直线)
+    else if(height_count_flag == 1 && height_flag == 0)
+    {
+        result.height_feature_flag = 3; // 不存在路线变短情况，但是有路线(直线)
+    }
+    // //检查是否存在路线
+    // int count_height[5]={0};
+    // for(int i=FEATURE_DETECT_HEIGHT-5;i<FEATURE_DETECT_HEIGHT;i++)
+    // {
+    //    for(int j=detect_left_start_col;j<detect_right_start_col;j++)
+    //     {
+    //         if(image[i][j]==255)
+    //         {
+    //             count_height[i-10]++;
+    //         }
+    //     }
+    // }
+    // //存在白列变短且有路线（电容之类元素）
+    // if( count_height[0]>detect_existing_row_min &&
+    //     count_height[1]>detect_existing_row_min &&
+    //     count_height[2]>detect_existing_row_min &&
+    //     count_height[3]>detect_existing_row_min &&
+    //     count_height[4]>detect_existing_row_min &&
+    //     count_height[0]<detect_existing_row_max &&
+    //     count_height[1]<detect_existing_row_max &&
+    //     count_height[2]<detect_existing_row_max &&
+    //     count_height[3]<detect_existing_row_max &&
+    //     count_height[4]<detect_existing_row_max &&
+    //     height_flag==1 )
+    //     {
+    //         result.height_feature_flag=2;
+    //     }
+    // //白列变短，但不存在路线（转角）
+    // else if( height_flag==1)
+    //     {
+    //         result.height_feature_flag=1;
+    //     }
+    // //不存在路线变短情况，但是有路线(直线)
+    // else if(count_height[0]>detect_existing_row_min &&
+    //     count_height[1]>detect_existing_row_min &&
+    //     count_height[2]>detect_existing_row_min &&
+    //     count_height[3]>detect_existing_row_min &&
+    //     count_height[4]>detect_existing_row_min &&
+    //     count_height[0]<detect_existing_row_max &&
+    //     count_height[1]<detect_existing_row_max &&
+    //     count_height[2]<detect_existing_row_max &&
+    //     count_height[3]<detect_existing_row_max &&
+    //     count_height[4]<detect_existing_row_max &&
+    //     height_flag==0
+    // )
+    // {
+    //     result.height_feature_flag=3;
+    // }
 
     
     return result;
@@ -882,22 +1113,22 @@ void Add_left_line()
 {
     if(stop_line<35)
     {
-        Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-32,0,feature_row_l+left_count/2);
+        Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-32,0,left_add_row+1);
     }
     else
     {
-        Add_Line(mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,0,feature_row_l+left_count/2);
+        Add_Line(mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,0,left_add_row+1);
     }
 }
 void Add_right_line()
 {
     if(stop_line<35)
     {
-        Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,187,feature_row_r+right_count/2);
+        Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,187,right_add_row+1);
     }
     else
     {   
-        Add_Line(mid_line_list[MT9V03X_H-32],MT9V03X_H-32,187,feature_row_r+right_count/2);
+        Add_Line(mid_line_list[MT9V03X_H-32],MT9V03X_H-32,187,right_add_row+1);
     }
 }
 
@@ -941,11 +1172,7 @@ void process_T()
             Add_right_line();
         }
     }
-    if(condition==1)
-    {
-        regression(0, min_raw_l, MT9V03X_H - 2);
-    }
-    if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==0&&fabs(parameterB)<0.15)
+    if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==0)
     {
         condition=0;
     }
@@ -966,30 +1193,30 @@ void feature_process()
         Add_right_line();
     }
     //正T形路口
-    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==1)
+    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==1 && feature_corner_l!=0 && feature_corner_r!=0 && abs(feature_corner_l-feature_corner_r)<10)
     {
         image_plan_feature.height_feature_flag=1;
     }
     //右倒T型路口
-    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag==3||image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag==2)
+    else if(image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag ==2 && feature_new.left_feature_flag==1 && feature_new.right_feature_flag==0 ||
+            image_feature.left_feature_flag==1 && image_feature.right_feature_flag==0 && image_feature.height_feature_flag ==3 && feature_new.left_feature_flag==1 && feature_new.right_feature_flag==0)
     {
         image_plan_feature.right_feature_flag=1;
     }
     //左倒T型路口
-    else if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==3||image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag==2)
+    else if(image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag ==2 && feature_new.right_feature_flag==1 && feature_new.left_feature_flag==0 ||
+            image_feature.left_feature_flag==0 && image_feature.right_feature_flag==1 && image_feature.height_feature_flag ==3 && feature_new.right_feature_flag==1 && feature_new.left_feature_flag==0)
     {
         image_plan_feature.left_feature_flag=1;
     }
-    else{
+    else
+    {
         image_plan_feature.left_feature_flag=0;
         image_plan_feature.right_feature_flag=0;
         image_plan_feature.height_feature_flag=0;
     }
     process_T();
 }
-
-
-
 
 uint8 mid_line_list[MT9V03X_H];
 int error_image;
@@ -1002,6 +1229,14 @@ void image_draw(int min_raw)
         image[i][mid_line_list[i]]  = 10;
         image[i][left_line_list[i]]  = 5;
         image[i][right_line_list[i]]  = 15;
+    }
+}
+void image_draw_pre(int num)
+{
+    for(int i = 0; i < num;i++)
+    {
+        image[left_points_raw[i]][left_points_col[i]]  = 5;
+        image[right_points_raw[i]][right_points_col[i]]  = 15;
     }
 }
 
@@ -1059,18 +1294,6 @@ int get_error_image(void)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 //图像处理主函数
 void image_process(uint8 (*source_image)[MT9V03X_W])
 {
@@ -1079,10 +1302,19 @@ void image_process(uint8 (*source_image)[MT9V03X_W])
     seek_line(MT9V03X_H,MT9V03X_W);
     seek_list(points_count);
     get_mid_line();
+    feature_extract();
     feature_process();
+    printf(" L:%d\n",feature_new.left_feature_flag);
+    printf(" R:%d\n",feature_new.right_feature_flag);
+
+    printf(" L:%d\n",image_feature.left_feature_flag);
+    printf(" R:%d\n",image_feature.right_feature_flag);
+    printf(" H:%d\n",image_feature.height_feature_flag);
+
     printf(" T:%d\n",image_plan_feature.height_feature_flag);
     printf(" L:%d\n",image_plan_feature.left_feature_flag);
     printf(" R:%d\n",image_plan_feature.right_feature_flag);
+    //image_draw_pre(points_count);
     error_image=get_error_image();
 }
 
