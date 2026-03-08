@@ -17,6 +17,8 @@ extern Quaternion attitude;
 void quaternion_init(void);
 void quaternion_update(void);
 
+// tools
+float get_angle_err(float angle);
 
 
 #endif

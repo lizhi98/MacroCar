@@ -1,6 +1,6 @@
 #include "quaternion.h"
 
-#define SAMPLE_TIME_MS  1.0f
+#define SAMPLE_TIME_MS  2.0f
 #define DEG_TO_RAD      0.017453292519943f
 
 Quaternion attitude = {1.0f, 0.0f, 0.0f, 0.0f};
@@ -50,3 +50,10 @@ void quaternion_update(void)
     attitude.yaw   = atan2f(2*(q0*q3 + q1*q2), 1 - 2*(q2*q2 + q3*q3)) * (1/DEG_TO_RAD);
 }
 
+float get_angle_err(float angle)
+{
+    float err_abs = fabs(attitude.yaw - angle);
+    float err_abs_r = 360.0 - err_abs;
+    return (err_abs > err_abs_r ? err_abs_r : err_abs);
+
+}

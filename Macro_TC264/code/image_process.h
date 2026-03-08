@@ -25,7 +25,7 @@ typedef signed int          int32;
 typedef signed long long    int64;
 #else
 #include "zf_device_mt9v03x_double.h"
-
+#include "quaternion.h"
 #endif
 
 #define image_w  (MT9V03X_W)
@@ -39,6 +39,8 @@ typedef struct
     int right_feature_flag;
     int height_feature_flag;
 }FeatureDetectResult;
+
+extern int condition;
 
 extern int feature_corner_l;
 extern int feature_corner_r;

@@ -3,8 +3,8 @@
 static int32 motor_left_speed = 0;
 static int32 motor_right_speed = 0;
 
-static int32 motor_left_pwm = 0;
-static int32 motor_right_pwm = 0;
+int32 motor_left_pwm = 0;
+int32 motor_right_pwm = 0;
 
 static uint16 motor_fun_pwm = 0;
 

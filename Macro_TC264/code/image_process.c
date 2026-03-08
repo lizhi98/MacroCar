@@ -980,6 +980,7 @@ FeatureDetectResult detect_feature_line()
     //int height_flag=0;
     //int height_count_flag=0;
     int stop_line = 0;
+    
     if(min_raw_l>min_raw_r)
     {
         stop_line=min_raw_l;
@@ -988,15 +989,18 @@ FeatureDetectResult detect_feature_line()
     {
         stop_line=min_raw_r;
     }
-    //检查是否存在白列变短情况
-    if(stop_line >= FEATURE_DETECT_HEIGHT)
-    {
-        result.height_feature_flag = 1;
-    }
-    else
-    {
-        result.height_feature_flag = 0;
-    }
+
+         //检查是否存在白列变短情况,且出现左或右横线
+        if(stop_line >= FEATURE_DETECT_HEIGHT &&result.left_feature_flag==1 ||stop_line >= FEATURE_DETECT_HEIGHT && result.right_feature_flag==1)
+        {
+            result.height_feature_flag = 1;
+        }
+        else
+        {
+            result.height_feature_flag = 0;
+        }
+    
+   
     
    
     // if(height_flag==1)
@@ -1115,18 +1119,35 @@ FeatureDetectResult detect_feature_line()
 
 void Add_left_line()
 {
-    if(stop_line<35)
+    int min_raw;
+    if(min_raw_l>min_raw_r)
     {
-        Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-32,0,left_add_row+1);
+        min_raw=min_raw_l;
+    }
+    else{
+        min_raw=min_raw_r;
+    }
+    if(min_raw>50)
+    {
+        Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,0,left_add_row+1);
     }
     else
     {
         Add_Line(mid_line_list[MT9V03X_H-2-30],MT9V03X_H-32,0,left_add_row+1);
     }
+
 }
 void Add_right_line()
 {
-    if(stop_line<35)
+    int min_raw;
+    if(min_raw_l>min_raw_r)
+    {
+        min_raw=min_raw_l;
+    }
+    else{
+        min_raw=min_raw_r;
+    }
+    if(min_raw>50)
     {
         Add_Line(mid_line_list[MT9V03X_H-2],MT9V03X_H-2,187,right_add_row+1);
     }
@@ -1134,12 +1155,13 @@ void Add_right_line()
     {   
         Add_Line(mid_line_list[MT9V03X_H-32],MT9V03X_H-32,187,right_add_row+1);
     }
+
 }
 
 FeatureDetectResult image_plan_feature={0,0,0};
 
 uint8 T_index=0;
-int T[4]={-1,1,1,-1};
+int T[11]={0,0,0,1,0,-1,0,-1,1,0,1};
 
 int condition=0;
 float angle_T=0;
@@ -1151,7 +1173,7 @@ void process_T(float current_angle)
     {
 
         T_index++;
-        if(T_index>4)
+        if(T_index>11)
         {
             T_index=1;
         }
@@ -1183,7 +1205,7 @@ void process_T(float current_angle)
         //左右转向退出
         if(T[T_index-1]!=0 )
         {
-            if(fabs(current_angle-angle_T)>70)
+            if(get_angle_err(angle_T) > 45.0)
             {
                 condition=0;
             }
@@ -1283,14 +1305,15 @@ int get_error_image(void)
     }
     image_draw(min_raw);
     int error_image = 0;
-    if(min_raw>60)
+    if(min_raw>50)
     {
         error_image=(MT9V03X_W/2-mid_line_list[(MT9V03X_H-1-min_raw)]);
     }
     else
     {
-        error_image=(MT9V03X_W/2-mid_line_list[60]);
+        error_image=(MT9V03X_W/2-mid_line_list[50]);
     }
+    error_image=error_image*0.7+error_image_last*0.3;
     
     error_image_last=error_image;
 
@@ -1308,7 +1331,7 @@ int get_error_image(void)
     // else
     // {
     //     error_image=(MT9V03X_W/2-mid_line_list[(MT9V03X_H-1+min_raw)/2]);
-    //     error_image_last=error_image;
+    //     
     // }
     //error_image=(MT9V03X_W/2-mid_line_list[min_raw+5]);
     return error_image;
