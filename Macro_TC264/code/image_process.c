@@ -65,48 +65,22 @@ uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
 
 void Binarization()
 {
-    uint8 threshold=Ostu(image);
-    if(threshold-img_threshold > 2)
+
+    
+    uint8 threshold= Ostu(image);
+    if(threshold-img_threshold>2)
     {
         img_threshold=img_threshold+2;
     }
-    else if(threshold-img_threshold < -2)
+    else if(img_threshold-threshold>2)
     {
         img_threshold=img_threshold-2;
     }
-    else{
+    else
+    {
         img_threshold=threshold;
     }
-    
-     for (int i = 0; i < MT9V03X_H; i++)
-     {
-         for (int j = 0; j < MT9V03X_W; j++)
-         {
-             if(image[i][j] > img_threshold)
-             {
-                 image[i][j] = 255;
-             }
-             else
-             {
-                 image[i][j] = 0;
-             }
-         }
-     }
-    
-    // uint8 threshold= Ostu(image);
-    // if(threshold-img_threshold>2)
-    // {
-    //     img_threshold=img_threshold+2;
-    // }
-    // else if(img_threshold-threshold>2)
-    // {
-    //     img_threshold=img_threshold-2;
-    // }
-    // else
-    // {
-    //     img_threshold=threshold;
-    // }
-    img_threshold=Ostu(image);
+    // img_threshold=Ostu(image);
     for (int i = 0; i < MT9V03X_H; i++)
     {
         for (int j = 0; j < MT9V03X_W; j++)
@@ -206,26 +180,24 @@ void right_line_offset(uint8 raw)
     }
 }
 
-uint8 feature_label=0;
+uint8 feature_label;
 #define feature_col 25
 #define feature_raw 20
-void detect_feature(float angle)
+void detect_feature()
 {
-    
+    feature_label=0;
     if((left_lost_times!=0 || right_lost_times!=0) )
     {
-        for(int i=MT9V03X_H-10;i>=10;i--)
+        for(int i=MT9V03X_H-10;i>=20;i--)
         {
             if(left_line_list[i]-left_line_list[i-1]>15 && left_line_list[i]-left_line_list[i-2]>15 && (left_line_list[i-5]==0 || left_line_list[i-4]==0 || left_line_list[i-3]==0 || left_line_list[i-2]==0 || left_line_list[i-1]==0 || left_line_list[i]==0 ||left_line_list[i+1]==0 || left_line_list[i+2]==0 || left_line_list[i+3]==0 || left_line_list[i+4]==0 || left_line_list[i+5]==0))
             {
                 feature_label = 1;
-                angle=attitude.yaw;
                 break;
             }
             else if( right_line_list[i-1]-right_line_list[i]>15 && right_line_list[i-2]-right_line_list[i]>15 && (right_line_list[i-5]==MT9V03X_W-1 || right_line_list[i-4]==MT9V03X_W-1 || right_line_list[i-3]==MT9V03X_W-1 || right_line_list[i-2]==MT9V03X_W-1 || right_line_list[i-1]==MT9V03X_W-1 || right_line_list[i]==MT9V03X_W-1 || right_line_list[i+1]==MT9V03X_W-1 || right_line_list[i+2]==MT9V03X_W-1 || right_line_list[i+3]==MT9V03X_W-1 || right_line_list[i+4]==MT9V03X_W-1 || right_line_list[i+5]==MT9V03X_W-1))
             {
                 feature_label = 1;
-                angle=attitude.yaw;
                 break;
             }
 
@@ -236,19 +208,19 @@ void detect_feature(float angle)
 }
 FeatureDetectResult image_feature;
 #define height_start_raw 8
-#define height_end_raw 90
+#define height_end_raw 100
 #define left_start_col 10
 #define right_start_col 175
 void feature_square()
 {
+    image_feature.left_feature_flag1=0;
+    image_feature.left_feature_flag2=0;
+    image_feature.right_feature_flag1=0;
+    image_feature.right_feature_flag2=0;
+    image_feature.height_feature_flag1=0;
+    image_feature.height_feature_flag2=0;
     if(feature_label==1)
     {
-        image_feature.left_feature_flag1=0;
-        image_feature.left_feature_flag2=0;
-        image_feature.right_feature_flag1=0;
-        image_feature.right_feature_flag2=0;
-        image_feature.height_feature_flag1=0;
-        image_feature.height_feature_flag2=0;
         for(int i=height_start_raw;i<height_end_raw;i++)
         {
             //左侧特征：上白下黑
@@ -309,45 +281,50 @@ void turn(uint8 direction)
 
     }
 }
-void judge_turn(float angle)
-{
-    if(corner_feature.left==1)
-    {
-        turn(1);
-        if(fabs(angle-attitude.yaw)>65.0f)
-        {
-            corner_feature.left=0;
-            feature_label=0;
-        }
-    }
-    else if(corner_feature.right==1)
-    {
-        turn(2);
-        if(fabs(angle-attitude.yaw)>65.0f)
-        {
-            corner_feature.right=0;
-            feature_label=0;
-        }
-    }
-     else if(corner_feature.T==1)
-    {
+// void judge_turn(float angle)
+// {
+//     if(corner_feature.left==1)
+//     {
+//         turn(1);
+//         if(fabs(angle-attitude.yaw)>65.0f)
+//         {
+//             corner_feature.left=0;
+//             feature_label=0;
+//         }
+//     }
+//     else if(corner_feature.right==1)
+//     {
+//         turn(2);
+//         if(fabs(angle-attitude.yaw)>65.0f)
+//         {
+//             corner_feature.right=0;
+//             feature_label=0;
+//         }
+//     }
+//      else if(corner_feature.T==1)
+//     {
         
-    }
-}
+//     }
+// }
 corner_result corner_feature={0,0,0};
 void feature_process(float angle)
 {
-    detect_feature(angle);
+    detect_feature();
     feature_square();
+    corner_feature.left=0;
+    corner_feature.right=0;
+    corner_feature.T=0;
     //纯左转
     if(image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1==0 && image_feature.right_feature_flag2==0 && image_feature.height_feature_flag1==0 && image_feature.height_feature_flag2==0)
     {
         corner_feature.left=1;
+        turn(1);
     }
     //纯右转
     else if (image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0 && image_feature.left_feature_flag1==0 && image_feature.left_feature_flag2==0 && image_feature.height_feature_flag1==0 && image_feature.height_feature_flag2==0)
     {
         corner_feature.right=1;
+        turn(2);
     }
     //正T
     else if(image_feature.height_feature_flag1==0 && image_feature.height_feature_flag2==0 && image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0)
@@ -364,18 +341,18 @@ void feature_process(float angle)
     {
         corner_feature.T=1;
     }
-    judge_turn(angle);
+    // judge_turn(angle);
 }
 
 
 
-
+#define ERROR_IMAGE_LINE 50
 int error_image;
 int error_image_last;
 void get_error_image()
 {
-    error_image=94-mid_line_list[60];
     error_image_last=error_image;
+    error_image=94-mid_line_list[ERROR_IMAGE_LINE];
 }
 
 void image_draw_pre()
