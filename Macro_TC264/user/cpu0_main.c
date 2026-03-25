@@ -30,7 +30,7 @@ int core0_main(void)
     
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
     
-    motor_forward_speed = 300;      // 前进速度
+    motor_forward_speed = 200;      // 前进速度
     motor_fun_pwm_duty  = MOTOR_FUN_NORMAL_PWM_DUTY;        // 负压风扇PWM初始占空比
     
     motor_interface_power_flag = 1; // 使能电机PWM输出
@@ -39,12 +39,11 @@ int core0_main(void)
     system_delay_ms(1000);          // 上电1s后开始运行，等待负压风扇稳定       
     
     motion_control_pit_run_flag = 1; // 启动电机速度闭环算法，车开始跑
-
     while (TRUE)
     {
         menu_key_event_handle();
         // 30ms以上运行一次
-        if(system_getval_ms() % 20 != 0){
+        if(system_getval_ms() % 50 != 0){
             continue;
         }
         // 电池保护，运行1.8s后开始检测，防止电机启动电流过大导致电池电压瞬间下降误触发保护
@@ -56,12 +55,7 @@ int core0_main(void)
         // 多核访问控制
         if(!core_busy_flag){
             core_busy_flag = 1;
-            // menu_ips_print_info(MENU_INFO_NORMAL);
-            // if(condition){
-            //     ips200_full(RGB565_WHITE);
-            // }else{
-            //     ips200_full(RGB565_BLACK);
-            // }
+            menu_ips_print_info(MENU_INFO_NORMAL);
             core_busy_flag = 0;
         }
 #endif

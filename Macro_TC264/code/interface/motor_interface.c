@@ -67,8 +67,8 @@ void motor_set_pwm(int16 * left_pwm, int16 *right_pwm){
             // 无刷电机PWM设置代码
             break;
         case BRUSHED_MOTOR:
-            gpio_set_level(MOTOR_LEFT_DIR_PIN,  (motor_left_pwm  >= 0) ? 1 : 0);
-            gpio_set_level(MOTOR_RIGHT_DIR_PIN, (motor_right_pwm >= 0) ? 1 : 0);
+            gpio_set_level(MOTOR_LEFT_DIR_PIN,  (motor_left_pwm  >= 0) ? 0 : 1);
+            gpio_set_level(MOTOR_RIGHT_DIR_PIN, (motor_right_pwm >= 0) ? 0 : 1);
             pwm_set_duty(MOTOR_LEFT_PWM_PIN,  abs(motor_left_pwm));
             pwm_set_duty(MOTOR_RIGHT_PWM_PIN, abs(motor_right_pwm));
             break;

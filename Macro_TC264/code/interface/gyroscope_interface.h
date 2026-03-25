@@ -1,7 +1,7 @@
 #ifndef __GYROSCOPE_H__
 #define __GYROSCOPE_H__
 
-#include "zf_device_imu660ra.h"
+#include "zf_device_imu660rc.h"
 #include "zf_driver_pit.h"
 
 #include "quaternion.h"

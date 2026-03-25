@@ -1,7 +1,7 @@
 #ifndef CODE_QUATERNION_H_
 #define CODE_QUATERNION_H_
 
-#include "zf_device_imu660ra.h"
+#include "zf_device_imu660rc.h"
 #include <math.h>
 
 typedef struct {

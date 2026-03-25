@@ -65,6 +65,34 @@ uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
 
 void Binarization()
 {
+    uint8 threshold=Ostu(image);
+    if(threshold-img_threshold > 2)
+    {
+        img_threshold=img_threshold+2;
+    }
+    else if(threshold-img_threshold < -2)
+    {
+        img_threshold=img_threshold-2;
+    }
+    else{
+        img_threshold=threshold;
+    }
+    
+     for (int i = 0; i < MT9V03X_H; i++)
+     {
+         for (int j = 0; j < MT9V03X_W; j++)
+         {
+             if(image[i][j] > img_threshold)
+             {
+                 image[i][j] = 255;
+             }
+             else
+             {
+                 image[i][j] = 0;
+             }
+         }
+     }
+    
     // uint8 threshold= Ostu(image);
     // if(threshold-img_threshold>2)
     // {
