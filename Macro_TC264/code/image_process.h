@@ -25,9 +25,9 @@ typedef signed int          int32;
 typedef signed long long    int64;
 #else
 #include "zf_device_mt9v03x_double.h"
-#include "quaternion.h"
-#endif
 
+#endif
+#include "quaternion.h"
 #define image_w  (MT9V03X_W)
 #define image_h  (MT9V03X_H)
 
@@ -35,30 +35,50 @@ typedef signed long long    int64;
 
 typedef struct
 {
-    int left_feature_flag;
-    int right_feature_flag;
-    int height_feature_flag;
+    int left_feature_flag1;
+    int left_feature_flag2;
+    int right_feature_flag1;
+    int right_feature_flag2;
+    int height_feature_flag1;
+    int height_feature_flag2;
 }FeatureDetectResult;
 
-extern int condition;
+typedef struct
+{
+    int left;
+    int right;
+    int T;
+}corner_result;
 
-extern int feature_corner_l;
-extern int feature_corner_r;
-extern float parameterB;
-extern uint8 T_index;
-extern FeatureDetectResult image_feature;
-extern FeatureDetectResult image_plan_feature;
-//enum TurnDirection {LEFT=-1, STRAIGHT=0, RIGHT=1};
-extern int stop_line;
-extern uint8 img_threshold;
-extern int points_count;
+
+// extern int condition;
+
+// extern int feature_corner_l;
+// extern int feature_corner_r;
+// extern float parameterB;
+// extern uint8 T_index;
+// extern FeatureDetectResult image_feature;
+// extern FeatureDetectResult image_plan_feature;
+// //enum TurnDirection {LEFT=-1, STRAIGHT=0, RIGHT=1};
+// extern int stop_line;
+// extern uint8 img_threshold;
+// extern int points_count;
+// extern int error_image;
+// extern int error_image_last;
+// extern uint8 (*image)[MT9V03X_W];
+// extern uint8 left_line_list[MT9V03X_H];
+// extern uint8 right_line_list[MT9V03X_H];
+// extern uint8 mid_line_list[MT9V03X_H];
+
+
+
+
+
+
+#define white_point 255
+#define black_point 0
+extern corner_result corner_feature;
 extern int error_image;
-extern int error_image_last;
-extern uint8 (*image)[MT9V03X_W];
-extern uint8 left_line_list[MT9V03X_H];
-extern uint8 right_line_list[MT9V03X_H];
-extern uint8 mid_line_list[MT9V03X_H];
+void image_process(uint8 (*source_image)[MT9V03X_W], float angle);
 
-
-void image_process(uint8 (*source_image)[MT9V03X_W],float angle);
 #endif

@@ -135,7 +135,6 @@ void motion_control_pit_callback(){
     }
     // 应用PWM
     motor_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
-
 }
 
 void motion_control_pit_init(void){
