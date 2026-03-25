@@ -46,7 +46,7 @@ extern int16 motor_steering_speed;
 #define MOTION_CONTROL_PIT_TIME         5  // 单位ms
 #define MOTION_CONTROL_PIT_INDEX        CCU61_CH0
 
-#define MOTOR_FUN_NORMAL_PWM_DUTY       3200 // 负压风扇正常工作PWM占空比
+#define MOTOR_FUN_NORMAL_PWM_DUTY       3000 // 负压风扇正常工作PWM占空比
 
 extern uint8 motion_control_run_flag; // 作用于单电机速度环，让速度=0
 

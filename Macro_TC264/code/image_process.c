@@ -822,7 +822,7 @@ FeatureDetectResult image_feature;
 #define FEATURE_DETECT_WIDTH_LEFT 15
 #define FEATURE_DETECT_WIDTH_RIGHT 175
 #define detect_height_start_row 10
-#define detect_height_end_row 80
+#define detect_height_end_row 68
 #define detect_existing_col_min 1
 #define detect_existing_col_max 20
 
@@ -1189,7 +1189,7 @@ void Add_right_line()
 FeatureDetectResult image_plan_feature={0,0,0};
 
 uint8 T_index=0;
-int T[4]={-1,-1,-1,-1};
+int T[14]={1,-1,1,1,0,0,0,-1,0,0,-1,0,0,1};
 
 int condition=0;
 float angle_T=0;
@@ -1201,7 +1201,7 @@ void process_T(float current_angle)
     {
 
         T_index++;
-        if(T_index>4)
+        if(T_index>14)
         {
             T_index=1;
         }
@@ -1320,7 +1320,7 @@ void get_mid_line()
     
 }
 
-#define ERROR_IMAGE_LINE 55
+#define ERROR_IMAGE_LINE 75
 
 int get_error_image(void)
 {
