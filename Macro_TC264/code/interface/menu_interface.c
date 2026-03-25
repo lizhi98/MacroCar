@@ -53,13 +53,15 @@ void menu_key_event_handle(void){
     }
 }
 
+extern uint32 image_to_image_time;
+
 void menu_network_print_info(void){
     static char info_buffer[120];
-    sprintf(info_buffer, "%u,%d,%u,%d,%d,%d,%d,%f,%d,%d,%d,%d\0", 
+    sprintf(info_buffer, "%u,%d,%u,%d,%d,%d,%d,%f,%d,%ld,%d,%d,%d\0", 
         T_index,condition,img_threshold,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
-        attitude.yaw, error_image,
+        attitude.yaw, error_image,image_to_image_time,
         image_plan_feature.left_feature_flag, image_plan_feature.height_feature_flag, image_plan_feature.right_feature_flag
     );
     network_vofa_send_str(info_buffer);

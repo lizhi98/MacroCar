@@ -5,6 +5,8 @@
 
 extern uint8 core_busy_flag;
 
+uint32 image_to_image_time = 0;
+
 #pragma section all "cpu1_dsram"
 // 将本语句与#pragma section all restore语句之间的全局变量都放在CPU1的RAM中
 
@@ -30,7 +32,7 @@ void core1_main(void)
     // gpio_init(P33_10, GPO, 1, GPO_PUSH_PULL);
     cpu_wait_event_ready();                 // 等待所有核心初始化完毕
 
-
+    uint32 image_time = 0;
     while (TRUE)
     {
         if(mt9v03x_finish_flag)
@@ -43,13 +45,13 @@ void core1_main(void)
             // 图像处理
             // image_process(mt9v03x_copy_image, gyro_current_data.angle_z);
             image_process(mt9v03x_copy_image, attitude.yaw);
-            // 根据图像结果condition控制蜂鸣器
-            // gpio_set_level(P33_10,(uint8)condition);
+            image_to_image_time = system_getval_ms() - image_time;
+            image_time = system_getval_ms();
 #ifdef SMARTCAR_DEBUG_IPS
             // 多核访问控制
             if(!core_busy_flag){
                 core_busy_flag = 1;
-                // ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像
+                ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像
                 core_busy_flag = 0;
             }
 #endif

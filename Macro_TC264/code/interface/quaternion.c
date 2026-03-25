@@ -20,9 +20,9 @@ void quaternion_update(void)
     if(!initialized) return;
 
     // 获取原始陀螺仪数据并转换为弧度/秒
-    float gx = imu660ra_gyro_transition(imu660ra_gyro_x/10*10) * DEG_TO_RAD;
-    float gy = imu660ra_gyro_transition(imu660ra_gyro_y/10*10) * DEG_TO_RAD;
-    float gz = imu660ra_gyro_transition(imu660ra_gyro_z/10*10) * DEG_TO_RAD;
+    float gx = imu660rc_gyro_transition(imu660rc_gyro_x/10*10) * DEG_TO_RAD;
+    float gy = imu660rc_gyro_transition(imu660rc_gyro_y/10*10) * DEG_TO_RAD;
+    float gz = imu660rc_gyro_transition(imu660rc_gyro_z/10*10) * DEG_TO_RAD;
 
     // 一阶龙格-库塔法积分
     float dt = SAMPLE_TIME_MS / 1000.0f;

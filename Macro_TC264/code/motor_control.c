@@ -48,27 +48,27 @@ void PID_clear(PIDParam* pid_param){
 // 单电机速度控制
 PIDParam motor_left_speed_pid   = {
     .type = PID_INC,
-    .kp = 17.0f, .ki = 0.47f, .kd = 0.0f,
+    .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_INC,
-    .kp = 17.0f, .ki = 0.47f, .kd = 0.0f,
+    .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 图像误差要求的转向pid
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 4.8f, .ki = 0.0f, .kd = 1.2f,
+    .kp = 5.8f, .ki = 0.0f, .kd = 1.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.2f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 0.95f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -116,15 +116,15 @@ void motion_control_pit_callback(){
     }
     // 转向闭环
     motor_steering_speed = (int16)PID_calculate(&motor_steering_pid, (float)motion_image_steering_speed, gyro_current_data.gyro_z); // 这里的当前值需要根据具体应用修改
-    /*
+    
     //单电机速度环
-    if(motor_left_speed_pid.type == PID_INC){
-        motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
-        motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
-    }else if(motor_left_speed_pid.type == PID_POS){
-        motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
-        motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
-    } */
+    // if(motor_left_speed_pid.type == PID_INC){
+    //     motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
+    //     motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
+    // }else if(motor_left_speed_pid.type == PID_POS){
+    //     motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
+    //     motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
+    // } 
 
     if(motor_left_speed_pid.type == PID_INC){
         motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed  + motor_forward_speed : 0), (float)motor_left_speed);

@@ -6,7 +6,8 @@ uint16 hist[GrayScale]={0};     //灰度值像素点的数量，数值存放，�
 float P[GrayScale]={0};         //每个灰度级出现的概率
 float PK[GrayScale]={0};        //概率累计和
 float MK[GrayScale]={0};        //灰度值累加均值
-uint8 img_threshold;            //输出阈值
+uint8 img_threshold=189;            //输出阈值
+
 float imgsize;                  //图像像素总量
 
 uint8 (*image)[MT9V03X_W];
@@ -65,7 +66,34 @@ uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
 
 void Binarization()
 {
-    img_threshold = Ostu(image);
+    uint8 threshold=Ostu(image);
+    if(threshold-img_threshold > 2)
+    {
+        img_threshold=img_threshold+2;
+    }
+    else if(threshold-img_threshold < -2)
+    {
+        img_threshold=img_threshold-2;
+    }
+    else{
+        img_threshold=threshold;
+    }
+    
+     for (int i = 0; i < MT9V03X_H; i++)
+     {
+         for (int j = 0; j < MT9V03X_W; j++)
+         {
+             if(image[i][j] > img_threshold)
+             {
+                 image[i][j] = 255;
+             }
+             else
+             {
+                 image[i][j] = 0;
+             }
+         }
+     }
+    
     for (int i = 0; i < MT9V03X_H; i++)
     {
         for (int j = 0; j < MT9V03X_W; j++)
@@ -1161,7 +1189,7 @@ void Add_right_line()
 FeatureDetectResult image_plan_feature={0,0,0};
 
 uint8 T_index=0;
-int T[11]={0,0,0,1,0,-1,0,-1,1,0,1};
+int T[4]={-1,-1,-1,-1};
 
 int condition=0;
 float angle_T=0;
@@ -1173,7 +1201,7 @@ void process_T(float current_angle)
     {
 
         T_index++;
-        if(T_index>11)
+        if(T_index>4)
         {
             T_index=1;
         }
@@ -1292,6 +1320,8 @@ void get_mid_line()
     
 }
 
+#define ERROR_IMAGE_LINE 55
+
 int get_error_image(void)
 {
     int min_raw;
@@ -1305,13 +1335,13 @@ int get_error_image(void)
     }
     image_draw(min_raw);
     int error_image = 0;
-    if(min_raw>50)
+    if(min_raw>ERROR_IMAGE_LINE)
     {
         error_image=(MT9V03X_W/2-mid_line_list[(MT9V03X_H-1-min_raw)]);
     }
     else
     {
-        error_image=(MT9V03X_W/2-mid_line_list[50]);
+        error_image=(MT9V03X_W/2-mid_line_list[ERROR_IMAGE_LINE]);
     }
     error_image=error_image*0.7+error_image_last*0.3;
     
