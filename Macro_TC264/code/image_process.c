@@ -343,9 +343,11 @@ void feature_process(float angle)
 
 
 int error_image;
+int error_image_last;
 void get_error_image()
 {
     error_image=94-mid_line_list[60];
+    error_image_last=error_image;
 }
 
 void image_draw_pre()
