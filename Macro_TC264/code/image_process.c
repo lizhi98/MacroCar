@@ -181,6 +181,7 @@ void right_line_offset(uint8 raw)
 }
 
 uint8 feature_label;
+uint8 feature_raw_lr;
 #define feature_col 25
 #define feature_raw 20
 void detect_feature()
@@ -193,11 +194,13 @@ void detect_feature()
             if(left_line_list[i]-left_line_list[i-1]>15 && left_line_list[i]-left_line_list[i-2]>15 && (left_line_list[i-5]==0 || left_line_list[i-4]==0 || left_line_list[i-3]==0 || left_line_list[i-2]==0 || left_line_list[i-1]==0 || left_line_list[i]==0 ||left_line_list[i+1]==0 || left_line_list[i+2]==0 || left_line_list[i+3]==0 || left_line_list[i+4]==0 || left_line_list[i+5]==0))
             {
                 feature_label = 1;
+                feature_raw_lr=i;
                 break;
             }
             else if( right_line_list[i-1]-right_line_list[i]>15 && right_line_list[i-2]-right_line_list[i]>15 && (right_line_list[i-5]==MT9V03X_W-1 || right_line_list[i-4]==MT9V03X_W-1 || right_line_list[i-3]==MT9V03X_W-1 || right_line_list[i-2]==MT9V03X_W-1 || right_line_list[i-1]==MT9V03X_W-1 || right_line_list[i]==MT9V03X_W-1 || right_line_list[i+1]==MT9V03X_W-1 || right_line_list[i+2]==MT9V03X_W-1 || right_line_list[i+3]==MT9V03X_W-1 || right_line_list[i+4]==MT9V03X_W-1 || right_line_list[i+5]==MT9V03X_W-1))
             {
                 feature_label = 1;
+                feature_raw_lr=i;
                 break;
             }
 
@@ -270,50 +273,32 @@ void turn(uint8 direction)
 {
     if(direction==1)
     {
-        left_line_offset((image_feature.left_feature_flag1+image_feature.left_feature_flag2)/2);
+        left_line_offset(feature_raw_lr);
     }
     else if(direction==2)
     {
-        right_line_offset((image_feature.right_feature_flag1+image_feature.right_feature_flag2)/2);
+        right_line_offset(feature_raw_lr);
     }
     else if(direction==0)
     {
 
     }
 }
-// void judge_turn(float angle)
-// {
-//     if(corner_feature.left==1)
-//     {
-//         turn(1);
-//         if(fabs(angle-attitude.yaw)>65.0f)
-//         {
-//             corner_feature.left=0;
-//             feature_label=0;
-//         }
-//     }
-//     else if(corner_feature.right==1)
-//     {
-//         turn(2);
-//         if(fabs(angle-attitude.yaw)>65.0f)
-//         {
-//             corner_feature.right=0;
-//             feature_label=0;
-//         }
-//     }
-//      else if(corner_feature.T==1)
-//     {
-        
-//     }
-// }
+
 corner_result corner_feature={0,0,0};
-void feature_process(float angle)
+uint8 T_index=0;
+#define index_num 12
+int T_index_list[index_num]={1,-1,1,1,1,-1,-1,0,-1,0,1,0};
+uint8 condition=0;
+float angle_T=0.0f;
+void feature_process()
 {
     detect_feature();
     feature_square();
     corner_feature.left=0;
     corner_feature.right=0;
     corner_feature.T=0;
+    
     //纯左转
     if(image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1==0 && image_feature.right_feature_flag2==0 && image_feature.height_feature_flag1==0 && image_feature.height_feature_flag2==0)
     {
@@ -326,27 +311,62 @@ void feature_process(float angle)
         corner_feature.right=1;
         turn(2);
     }
-    //正T
-    else if(image_feature.height_feature_flag1==0 && image_feature.height_feature_flag2==0 && image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0)
+    //T
+    else if(image_feature.height_feature_flag1==0 && image_feature.height_feature_flag2==0 && image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0 && condition==0 ||
+    image_feature.height_feature_flag1!=0 && image_feature.height_feature_flag2!=0 && image_feature.left_feature_flag1==0 && image_feature.left_feature_flag2==0 && image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0 && condition==0 ||
+    image_feature.height_feature_flag1!=0 && image_feature.height_feature_flag2!=0 && image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1==0 && image_feature.right_feature_flag2==0 && condition==0)
     {
         corner_feature.T=1;
+        T_index++;
+        if(T_index>index_num)
+        {
+            T_index=1;
+        }
+        condition=1;
+        angle_T=attitude.yaw;
     }
-    //左倒T
-    else if(image_feature.height_feature_flag1!=0 && image_feature.height_feature_flag2!=0 && image_feature.left_feature_flag1==0 && image_feature.left_feature_flag2==0 && image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0)
+    if( condition==1)
     {
-        corner_feature.T=1;
+        //直行
+        if(T_index_list[T_index-1]==0)
+        {
+            //暂时不补线，保持原有路线
+
+        }
+        else if(T_index_list[T_index-1]==-1)
+        {
+            //左转
+            turn(1);
+        }
+        else if(T_index_list[T_index-1]==1)
+        {
+            //右转
+            turn(2);
+        }
+        //左右转向退出
+        if(T_index_list[T_index-1]!=0 )
+        {
+            if(get_angle_err(angle_T) > 45.0f)
+            {
+                condition=0;
+            }
+            
+        }
+        //直行退出
+        else
+        {
+            if(left_lost_times==0 && right_lost_times==0)
+            {
+                condition=0;
+            }
+        }
     }
-    //右倒T
-    else if(image_feature.height_feature_flag1!=0 && image_feature.height_feature_flag2!=0 && image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1==0 && image_feature.right_feature_flag2==0)
-    {
-        corner_feature.T=1;
-    }
-    // judge_turn(angle);
+   
 }
 
 
 
-#define ERROR_IMAGE_LINE 50
+#define ERROR_IMAGE_LINE 56
 int error_image;
 int error_image_last;
 void get_error_image()
@@ -365,13 +385,13 @@ void image_draw_pre()
     }
 }
 
-void image_process(uint8 (*source_image)[MT9V03X_W], float angle)
+void image_process(uint8 (*source_image)[MT9V03X_W])
 {
     image = source_image;
     Binarization();
     remove_white_noise_filter();
     search_line();
-    feature_process(angle);
+    feature_process();
     // image_draw_pre();
     get_error_image();
 

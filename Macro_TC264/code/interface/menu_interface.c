@@ -19,7 +19,7 @@ void menu_ips_print_info(MenuPrintInfoType info_type){
         ips200_show_string(0, 190, info_buffer);
         sprintf(info_buffer, "GZ:%+6.2f YAW:%+6.2f", gyro_current_data.gyro_z, gyro_current_data.angle_z);
         ips200_show_string(0, 210, info_buffer);
-        sprintf(info_buffer, "T:%u L:%u R:%u", corner_feature.T, corner_feature.left, corner_feature.right);
+        sprintf(info_buffer, "T:%u index:%u condition:%u", corner_feature.T, T_index, condition);
         ips200_show_string(0, 230, info_buffer);
         break;
     case MENU_INFO_EXTEND:

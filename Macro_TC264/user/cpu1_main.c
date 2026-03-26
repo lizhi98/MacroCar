@@ -44,7 +44,7 @@ void core1_main(void)
 #endif
             // 图像处理
             // image_process(mt9v03x_copy_image, gyro_current_data.angle_z);
-            image_process(mt9v03x_copy_image, attitude.yaw);
+            image_process(mt9v03x_copy_image);
             image_to_image_time = system_getval_ms() - image_time;
             image_time = system_getval_ms();
 #ifdef SMARTCAR_DEBUG_IPS

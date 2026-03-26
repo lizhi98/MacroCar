@@ -1,7 +1,7 @@
 #include "Inertial_Navigation.h"
 void Inertial_Navigation_Init(void)
 {
-    imu660ra_init();
+    //imu660ra_init();
     quaternion_init();
 }
 

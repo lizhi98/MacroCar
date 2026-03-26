@@ -79,6 +79,8 @@ extern int error_image_last;
 #define black_point 0
 extern corner_result corner_feature;
 extern int error_image;
-void image_process(uint8 (*source_image)[MT9V03X_W], float angle);
+extern uint8 T_index;
+extern uint8 condition;
+void image_process(uint8 (*source_image)[MT9V03X_W]);
 
 #endif
