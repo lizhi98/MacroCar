@@ -67,6 +67,11 @@ void key_scanner (void)
     uint8 i = 0;
     for(i = 0; KEY_NUMBER > i; i ++)
     {
+        // if(key_get_state(i) != KEY_RELEASE)                                              // 长按状态保持
+        // {
+        //     key_press_time[i] = 0;
+        //     continue;
+        // }
         if(KEY_RELEASE_LEVEL != gpio_get_level(key_index[i]))                   // 按键按下
         {
             key_press_time[i] ++;

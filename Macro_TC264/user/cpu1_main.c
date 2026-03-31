@@ -2,7 +2,7 @@
 #include "image_process.h"
 #include "network_interface.h"
 #include "gyroscope_interface.h"
-
+#include "menu_interface.h"
 extern uint8 core_busy_flag;
 
 uint32 image_to_image_time = 0;
@@ -21,7 +21,7 @@ void core1_main(void)
 
     // 外设初始化
 #ifdef SMARTCAR_DEBUG_IPS
-    ips200_init(IPS200_TYPE_PARALLEL8);     // 初始化IPS200显示屏
+    ips200_init(IPS200_TYPE_SPI);     // 初始化IPS200显示屏
 #endif
     mt9v03x_init();                         // 初始化总钻风摄像头
 #if defined(SMARTCAR_DEBUG_NET_IMG) || defined(SMARTCAR_DEBUG_NET_INFO)
@@ -52,6 +52,7 @@ void core1_main(void)
             if(!core_busy_flag){
                 core_busy_flag = 1;
                 ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像
+                image_show_line();
                 core_busy_flag = 0;
             }
 #endif

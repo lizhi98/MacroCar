@@ -30,15 +30,17 @@ int core0_main(void)
     
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
     
-    motor_forward_speed = 400;      // 前进速度
-    motor_fun_pwm_duty  = MOTOR_FUN_NORMAL_PWM_DUTY;        // 负压风扇PWM初始占空比
+    // motor_forward_speed = 700;      // 前进速度
+    // motor_forward_speed = 700; // 科目2
+    motor_forward_speed = 600; // 科目3
+    motor_fun_pwm_duty  = 0;       // 负压风扇PWM初始占空比
     
     motor_interface_power_flag = 1; // 使能电机PWM输出
     motion_control_run_flag = 1;    // 电机运动标志位，这个标志位为0时，电机速度环的目标速度为0
     
     system_delay_ms(1000);          // 上电1s后开始运行，等待负压风扇稳定       
     
-    motion_control_pit_run_flag = 1; // 启动电机速度闭环算法，车开始跑
+    motion_control_pit_run_flag = 0; // 启动电机速度闭环算法，车开始跑
     while (TRUE)
     {
         menu_key_event_handle();

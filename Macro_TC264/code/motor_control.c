@@ -58,17 +58,20 @@ PIDParam motor_right_speed_pid  = {
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
-// 图像误差要求的转向pid
+// 图像误差要求的转向pid   //6.2   1.0   1.0   0.0
+// 6.7 1.5 1.1 0.05 // 科目1
+// 6.75 2.0 1.1 0.1 // 科目2
+// 6.4 1.7 1.1 0.08 // 科目3
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 6.0f, .ki = 0.0f, .kd = 1.0f,
+    .kp = 6.4, .ki = 0.0f, .kd = 1.7f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.0f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 1.1f, .ki = 0.0f, .kd = 0.08f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 

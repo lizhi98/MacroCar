@@ -9,6 +9,7 @@
 #include "zf_device_key.h"
 #include "image_process.h"
 #include "quaternion.h"
+#include "zf_common_font.h"
 
 #define KEY_PIT_TIME           5 // 按键扫描时间，单位ms
 #define MENU_KEY_PIT_INDEX     CCU60_CH1
@@ -28,5 +29,8 @@ void menu_network_print_info(void);
 
 void menu_key_init(void);
 void menu_key_event_handle(void);
+
+void image_show_line(void);
+
 
 #endif
