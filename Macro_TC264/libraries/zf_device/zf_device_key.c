@@ -83,7 +83,7 @@ void key_scanner (void)
             }
             else
             {
-                key_state[i] = KEY_RELEASE;
+                // key_state[i] = KEY_RELEASE;
             }
             key_press_time[i] = 0;
         }

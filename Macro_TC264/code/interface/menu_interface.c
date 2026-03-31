@@ -43,18 +43,18 @@ void menu_key_init(void){
 
 void menu_key_event_handle(void){
     if((key_get_state(KEY_1) == KEY_SHORT_PRESS) || (key_get_state(KEY_1) == KEY_LONG_PRESS)){
-            motor_interface_power_flag = !motor_interface_power_flag; // 切换电机PWM输出状态
-            key_clear_state(KEY_1);
+        motor_interface_power_flag = !motor_interface_power_flag; // 切换电机PWM输出状态
+        key_clear_state(KEY_1);
     }
     if((key_get_state(KEY_2) == KEY_SHORT_PRESS) || (key_get_state(KEY_2) == KEY_SHORT_PRESS)){
         motor_fun_pwm_duty = (motor_fun_pwm_duty == 0) ? MOTOR_FUN_NORMAL_PWM_DUTY : 0; // 切换负压风扇PWM占空比
         key_clear_state(KEY_2);
     }
-    if((key_get_state(KEY_3) == KEY_SHORT_PRESS) || (key_get_state(KEY_3) == KEY_SHORT_PRESS)){
+    if((key_get_state(KEY_4) == KEY_SHORT_PRESS) || (key_get_state(KEY_4) == KEY_SHORT_PRESS)){
         motor_fun_pwm_duty  = MOTOR_FUN_NORMAL_PWM_DUTY;       // 负压风扇PWM初始占空比
         system_delay_ms(1000);
         motion_control_pit_run_flag = 1;
-        key_clear_state(KEY_3);
+        key_clear_state(KEY_4);
     }
 }
 
