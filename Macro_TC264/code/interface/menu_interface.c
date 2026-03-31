@@ -19,7 +19,7 @@ void menu_ips_print_info(MenuPrintInfoType info_type){
         ips200_show_string(0, 190, info_buffer);
         sprintf(info_buffer, "GZ:%+6.2f YAW:%+6.2f", gyro_current_data.gyro_z, gyro_current_data.angle_z);
         ips200_show_string(0, 210, info_buffer);
-        sprintf(info_buffer, "T:%4u i:%4u con:%4u", corner_feature.T, T_index, condition_T);
+        sprintf(info_buffer, "i:%2u con:%1u,L:%1u,R:%1u,H:%1u", T_index, condition_T,result_feature.left,result_feature.right,result_feature.height);
         ips200_show_string(0, 230, info_buffer);
         sprintf(info_buffer, "TH:%4u", img_threshold);
         ips200_show_string(0, 250, info_buffer);
@@ -58,10 +58,10 @@ extern uint32 image_to_image_time;
 
 void menu_network_print_info(void){
     static char info_buffer[120];
-    sprintf(info_buffer, "%d,%d,%d,%d,%f,%d,%ld,%u,%u,%u\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%f,%d,%ld,%u,%u\0",
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
-        attitude.yaw, error_image,image_to_image_time,corner_feature.T,condition_T,T_index
+        attitude.yaw, error_image,image_to_image_time,condition_T,T_index
     );
     network_vofa_send_str(info_buffer);
 }

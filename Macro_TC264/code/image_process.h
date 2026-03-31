@@ -42,6 +42,12 @@ typedef struct
     int height_feature_flag1;
     int height_feature_flag2;
 }FeatureDetectResult;
+typedef struct
+{
+    uint8 left;
+    uint8 right;
+    uint8 height;
+}feature_result;
 
 typedef struct
 {
@@ -73,11 +79,11 @@ extern uint8 mid_line_list[MT9V03X_H];
 
 
 
-
+extern feature_result result_feature;
 
 #define white_point 255
 #define black_point 0
-extern corner_result corner_feature;
+
 extern int error_image;
 extern uint8 T_index;
 extern uint8 condition_T;

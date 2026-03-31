@@ -240,12 +240,16 @@ uint8 feature_label;
 uint8 feature_raw_l;
 uint8 feature_raw_r;
 #define feature_raw 20      //20-90
+uint8 detect_feature_row=0;
 void detect_feature()
 {
     feature_label=0;
+    feature_raw_r=0;
+    feature_raw_l=0;
+    detect_feature_row=0;
     if((left_lost_times!=0 || right_lost_times!=0) )
     {
-        for(int i=MT9V03X_H-30;i>=feature_raw;i--)
+        for(int i=MT9V03X_H-20;i>=feature_raw;i--)
         {
             if(left_line_list[i]-left_line_list[i-1]>15 && left_line_list[i]-left_line_list[i-2]>18 && (left_line_list[i-5]==0 || left_line_list[i-4]==0 || left_line_list[i-3]==0 || left_line_list[i-2]==0 || left_line_list[i-1]==0 || left_line_list[i]==0 ||left_line_list[i+1]==0 || left_line_list[i+2]==0 || left_line_list[i+3]==0 || left_line_list[i+4]==0 || left_line_list[i+5]==0))
             {
@@ -259,7 +263,28 @@ void detect_feature()
                 feature_raw_r=i;
                 break;
             }
-
+        }
+    }
+    if(feature_raw_l!=0)
+    {
+        for(int i=feature_raw_l;i>=3;i--)
+        {
+            if(image[i-1][left_line_list[feature_raw_l-1]]==black_point)
+            {
+                detect_feature_row=i;
+                break;
+            }
+        }
+    }
+    else if(feature_raw_r!=0)
+    {
+        for(int i=feature_raw_r;i>=5;i--)
+        {
+            if(image[i-1][right_line_list[feature_raw_r-1]]==black_point)
+            {
+                detect_feature_row=i;
+                break;
+            }
         }
     }
 
@@ -267,8 +292,9 @@ void detect_feature()
 }
 
 FeatureDetectResult image_feature;
-#define height_start_raw 5          //5
-#define height_end_raw 90
+feature_result result_feature={0,0,0};
+#define height_start_raw 10          
+#define height_end_raw 100
 #define left_start_col 5
 #define right_start_col 183
 void feature_square()
@@ -279,34 +305,66 @@ void feature_square()
     image_feature.right_feature_flag2=0;
     image_feature.height_feature_flag1=0;
     image_feature.height_feature_flag2=0;
-    if(feature_label==1)
+    result_feature.left=0;
+    result_feature.right=0;
+    result_feature.height=0;
+    if(feature_label==1 && detect_feature_row!=0)
     {
-        for(int i=height_start_raw;i<height_end_raw;i++)
+        int detect_row=0;
+        if(detect_feature_row>15)
         {
-            //左侧特征：上白下黑
-            if(image[i-1][left_start_col]==black_point && image[i][left_start_col]==white_point && image[i+1][left_start_col]==white_point &&left_line_list[i+1]==0)
+            detect_row=height_start_raw;
+        }
+        else
+        {
+            detect_row=detect_feature_row-3;
+        }
+        int left_feature_col_count[3]={0};
+        for(int j=left_start_col;j<left_start_col+5;j+=2)
+        {
+            for(int i=detect_row;i<height_end_raw;i++)
             {
-                image_feature.left_feature_flag1=i;
+                //左侧特征：上白下黑
+                if(image[i-1][j]==black_point && image[i][j]==white_point && image[i+1][j]==white_point )
+                {
+                    image_feature.left_feature_flag1=i;
+                }
+                else if(image[i-1][j]==white_point && image[i][j]==white_point && image[i+1][j]==black_point)
+                {
+                    image_feature.left_feature_flag2=i;
+                }
             }
-            else if(image[i-1][left_start_col]==white_point && image[i][left_start_col]==white_point && image[i+1][left_start_col]==black_point &&left_line_list[i-1]==0)
+            left_feature_col_count[(j-left_start_col)/2]=image_feature.left_feature_flag2-image_feature.left_feature_flag1;
+        }
+        int right_feature_col_count[3]={0};
+        for(int j=right_start_col-5;j<right_start_col;j+=2)
+        {
+            for(int i=detect_row;i<height_end_raw;i++)
             {
-                image_feature.left_feature_flag2=i;
+                //右侧特征：上白下黑
+                if(image[i-1][j]==black_point && image[i][j]==white_point && image[i+1][j]==white_point)
+                {
+                    image_feature.right_feature_flag1=i;
+                }
+                else if(image[i-1][j]==white_point && image[i][j]==white_point && image[i+1][j]==black_point)
+                {
+                    image_feature.right_feature_flag2=i;
+                }
             }
-            //右侧特征：上白下黑
-            if(image[i-1][right_start_col]==black_point && image[i][right_start_col]==white_point && image[i+1][right_start_col]==white_point &&right_line_list[i+1]==MT9V03X_W-1)
-            {
-                image_feature.right_feature_flag1=i;
-            }
-            else if(image[i-1][right_start_col]==white_point && image[i][right_start_col]==white_point && image[i+1][right_start_col]==black_point && right_line_list[i-1]==MT9V03X_W-1)
-            {
-                image_feature.right_feature_flag2=i;
-            }
-            
+            right_feature_col_count[(j-(right_start_col-5))/2]=image_feature.right_feature_flag2-image_feature.right_feature_flag1;
+        }
+        if(abs(left_feature_col_count[0]-left_feature_col_count[1])<3 && abs(left_feature_col_count[0]-left_feature_col_count[2])<3 && abs(left_feature_col_count[1]-left_feature_col_count[2])<3 &&left_feature_col_count[0]>3 && left_feature_col_count[1]>3 && left_feature_col_count[2]>3)
+        {
+            result_feature.left=1;
+        }
+        if(abs(right_feature_col_count[0]-right_feature_col_count[1])<3 && abs(right_feature_col_count[0]-right_feature_col_count[2])<3 && abs(right_feature_col_count[1]-right_feature_col_count[2])<3 && right_feature_col_count[0]>3 && right_feature_col_count[1]>3 && right_feature_col_count[2]>3)
+        {
+            result_feature.right=1;
         }
         for(int i=left_start_col;i<right_start_col;i++)
         {
             //上行特征：左白右黑（从左向右）
-            if(image[height_start_raw][i-1]==black_point && image[height_start_raw][i]==white_point && image[height_start_raw][i+1]==white_point)
+            if(image[detect_row][i-1]==black_point && image[detect_row][i]==white_point && image[detect_row][i+1]==white_point)
             {
                 image_feature.height_feature_flag1=i;
                 break;
@@ -315,11 +373,15 @@ void feature_square()
         for(int i=right_start_col-1;i>left_start_col+1;i--)
         {
             //上行特征：左白右黑（从右向左）
-            if(image[height_start_raw][i-1]==white_point && image[height_start_raw][i]==white_point && image[height_start_raw][i+1]==black_point)
+            if(image[detect_row][i-1]==white_point && image[detect_row][i]==white_point && image[detect_row][i+1]==black_point)
             {
                 image_feature.height_feature_flag2=i;
                 break;
             }
+        }
+        if(image_feature.height_feature_flag2!=0&&image_feature.height_feature_flag1!=0)
+        {
+            result_feature.height=1;
         }
     }
 }
@@ -353,14 +415,13 @@ void turn(uint8 direction)
         {
             Add_Line(94,119,(image_feature.height_feature_flag1+image_feature.height_feature_flag2)/2,5);
         }
-        
     }
 }
 
-corner_result corner_feature={0,0,0};
+
 uint8 T_index=0;
-// #define index_num 6
-// int T_index_list[index_num]={-1,1,1,-1,0,0};
+#define index_num 6
+int T_index_list[index_num]={-1,1,1,-1,0,0};
 // int T_index_list[index_num]={-1,1,1,-1};
 // #define index_num 12
 // int T_index_list[index_num]={1,-1,1,1,1,-1,-1,0,-1,0,1,0};
@@ -370,11 +431,11 @@ uint8 T_index=0;
 // int T_index_list[index_num]={0,-1,0,1,1,0,-1,-1,1,1,1,-1};
 // #define index_num 10
 // int T_index_list[index_num]={1,-1,1,1,0,-1,-1,1,-1,1}; //正极出发
-#define index_num 13
+// #define index_num 13
 // int T_index_list[index_num]={-1,1,1,-1,-1,1,0,1,-1,-1,-1,-1,0}; //正极出发
 // #define index_num 12
 // int T_index_list[index_num]={-1,1,1,-1,0,0,-1,0,-1,-1,0,0}; //正极出发
-int T_index_list[index_num]={-1,1,1,-1,-1,0,-1,0,0,-1,-1,-1,0}; //正极出发
+// int T_index_list[index_num]={-1,1,1,-1,-1,0,-1,0,0,-1,-1,-1,0}; //正极出发
 
 int T_corner=0;
 float angle_T=0.0f;
@@ -383,28 +444,21 @@ void feature_process()
 {
     detect_feature();
     feature_square();
-    corner_feature.left=0;
-    corner_feature.right=0;
-    corner_feature.T=0;
-    
     //纯左转
-    if(image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1==0 && image_feature.right_feature_flag2==0 && image_feature.height_feature_flag1==0 && image_feature.height_feature_flag2==0 &&condition_corner==0 &&condition_T==0)
+    if(result_feature.left==1  && result_feature.right==0 && result_feature.height==0 &&condition_corner==0 &&condition_T==0)
     {
-        corner_feature.left=1;
         condition_corner=1;
         angle_corner=attitude.yaw;
     }
     //纯右转
-    else if (image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0 && image_feature.left_feature_flag1==0 && image_feature.left_feature_flag2==0 && image_feature.height_feature_flag1==0 && image_feature.height_feature_flag2==0&& condition_corner==0 && condition_T==0 )
+    else if (result_feature.right==1 &&  result_feature.left==0 && result_feature.height==0 && condition_corner==0 && condition_T==0 )
     {
-        corner_feature.right=1;
         condition_corner=2;
         angle_corner=attitude.yaw;
     }
     // T
-    else if(image_feature.height_feature_flag1==0 && image_feature.height_feature_flag2==0 && image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0 && condition_T==0 &&condition_corner==0 )
+    else if(result_feature.height==0&& result_feature.left==1 && result_feature.right==1 && condition_T==0 &&condition_corner==0 )
     {
-        corner_feature.T=1;
         T_index++;
         if(T_index>index_num)
         {
@@ -413,9 +467,8 @@ void feature_process()
         condition_T=1;
         angle_T=attitude.yaw;
     }
-    else if(image_feature.height_feature_flag1!=0 && image_feature.height_feature_flag2!=0 && image_feature.left_feature_flag1==0 && image_feature.left_feature_flag2==0 && image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0 && condition_T==0 && condition_corner==0)
+    else if(result_feature.height==1 && result_feature.left==0 && result_feature.right==1 && condition_T==0 && condition_corner==0)
     {
-        corner_feature.T=1;
         T_corner=2;
         T_index++;
         if(T_index>index_num)
@@ -425,11 +478,9 @@ void feature_process()
         condition_T=1;
         angle_T=attitude.yaw;
     }
-    else if(image_feature.height_feature_flag1!=0 && image_feature.height_feature_flag2!=0 && image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.right_feature_flag1==0 && image_feature.right_feature_flag2==0 && condition_T==0 && condition_corner==0)
+    else if(result_feature.height==1 && result_feature.left==1 && result_feature.right==0 && condition_T==0 && condition_corner==0)
     {
-        corner_feature.T=1;
         T_corner=1;
-
         T_index++;
         if(T_index>index_num)
         {
@@ -445,7 +496,6 @@ void feature_process()
         {
             condition_corner=0;
         }
-        
     }
     else if(condition_corner==2)
     {
@@ -462,7 +512,7 @@ void feature_process()
         if(T_index_list[T_index-1]==0)
         {
             //暂时不补线，保持原有路线
-            turn(0);
+            turn(0);    
         }
         else if(T_index_list[T_index-1]==-1)
         {
@@ -481,7 +531,6 @@ void feature_process()
             {
                 condition_T=0;
             }
-            
         }
         //直行退出
         else
@@ -507,9 +556,8 @@ void feature_process()
 
 
 
-// #define ERROR_IMAGE_LINE 40     // 科目1
-#define ERROR_IMAGE_LINE 60     // 科目2
-// #define ERROR_IMAGE_LINE 58
+
+#define ERROR_IMAGE_LINE 50     
 int error_image;
 int error_image_last;
 void get_error_image()
@@ -535,7 +583,7 @@ void image_process(uint8 (*source_image)[MT9V03X_W])
     remove_white_noise_filter();
     search_line();
     feature_process();
-    // image_draw_pre();
+    image_draw_pre();
     get_error_image();
 
 }
