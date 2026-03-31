@@ -535,7 +535,7 @@ void image_process(uint8 (*source_image)[MT9V03X_W])
     remove_white_noise_filter();
     search_line();
     feature_process();
-    // image_draw_pre();
+    image_draw_pre();
     get_error_image();
 
 }

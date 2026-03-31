@@ -71,6 +71,7 @@
 #include "zf_driver_spi.h"
 #include "zf_device_ips200.h"
 
+
        uint16                   ips200_width_max    = 240;
        uint16                   ips200_height_max   = 320;
 static uint16                   ips200_pencolor     = IPS200_DEFAULT_PENCOLOR;          // 画笔颜色(字体色)
@@ -1284,3 +1285,58 @@ void ips200_init (ips200_type_enum type_select)
     ips200_debug_init();
 }
 
+extern uint8 image_process_flag;
+
+void ips200_show_binary_image_with_line(uint16 x, uint16 y, const uint8 *image, uint16 width, uint16 height)
+{
+    // 如果程序在输出了断言信息 并且提示出错位置在这里
+    // 那么一般是屏幕显示的时候超过屏幕分辨率范围了
+    zf_assert(x < ips200_width_max);
+    zf_assert(y < ips200_height_max);
+    zf_assert(NULL != image);
+
+    uint32 i = 0, j = 0;
+    uint16 temp = 0;
+    uint16 data_buffer[width];
+    const uint8 *image_temp;
+
+    if(IPS200_TYPE_SPI == ips200_display_type)
+    {
+        IPS200_CS(0);
+    }
+    ips200_set_region(x, y, x + width - 1, y + height - 1);                      // 设置显示区域
+
+    for(j = 0; j < height; j ++)
+    {
+        image_temp = image + j * width;                        // 直接对 image 操作会 Hardfault 暂时不知道为什么
+        for(i = 0; i < width; i ++)
+        {
+            while(image_process_flag == 0);
+            temp = *(image_temp + i);                       // 读取像素点
+            if(temp == 0)
+            {
+                data_buffer[i] = (RGB565_BLACK);
+            }
+            else if(temp == 5)
+            {
+                data_buffer[i] = (RGB565_GREEN);
+            }else if (temp == 10)
+            {
+                data_buffer[i] = (RGB565_RED);
+            }else if(temp == 15)
+            {
+                data_buffer[i] = (RGB565_BLUE);
+            }
+            else
+            {
+                data_buffer[i] = (RGB565_WHITE);
+            }
+            
+        }
+        ips200_write_16bit_data_array(data_buffer, width);
+    }
+    if(IPS200_TYPE_SPI == ips200_display_type)
+    {
+        IPS200_CS(1);
+    }
+}

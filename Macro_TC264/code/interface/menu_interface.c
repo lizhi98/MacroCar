@@ -1,7 +1,7 @@
 #include "menu_interface.h"
 
 void menu_interface_init(){
-
+    menu_key_init();
 }
 
 void menu_ips_print_info(MenuPrintInfoType info_type){
@@ -9,6 +9,12 @@ void menu_ips_print_info(MenuPrintInfoType info_type){
     switch (info_type)
     {
     case MENU_INFO_NORMAL:
+        sprintf(info_buffer, "L_S:%+4d   R_S:%+4d ", motor_left_speed, motor_right_speed);
+        ips200_show_string(0, 130, info_buffer);
+        sprintf(info_buffer, "I_E:%+5d", error_image);
+        ips200_show_string(0, 150, info_buffer);
+        break;
+    case MENU_INFO_EXTEND:
         sprintf(info_buffer, "L_S:%+4d   R_S:%+4d ", motor_left_speed, motor_right_speed);
         ips200_show_string(0, 130, info_buffer);
         sprintf(info_buffer, "L_P:%+5d  R_P:%+5d", motor_left_current_pwm_duty, motor_right_current_pwm_duty);
@@ -23,8 +29,6 @@ void menu_ips_print_info(MenuPrintInfoType info_type){
         ips200_show_string(0, 230, info_buffer);
         sprintf(info_buffer, "TH:%4u", img_threshold);
         ips200_show_string(0, 250, info_buffer);
-        break;
-    case MENU_INFO_EXTEND:
         break;
     default:
         break;
@@ -73,4 +77,8 @@ void image_show_line(void)
     {
         ips200_draw_point(mid_line_list[i], i, RGB565_RED);
     }
+}
+
+void menu_main(void){
+    
 }
