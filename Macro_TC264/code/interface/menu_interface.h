@@ -19,6 +19,31 @@ typedef enum _MenuPrintInfoType{
     MENU_INFO_EXTEND,
 }MenuPrintInfoType;
 
+// typedef enum _MenuObjectType{
+//     MENU_OBJECT_PARENT,
+//     MENU_OBJECT_VARIABLE,
+//     MENU_OBJECT_FUNCTION,
+// }MenuObjectType;
+
+// typedef enum _MenuObjectIndex{
+    
+// }MenuObjectIndex;
+
+// typedef struct _ParentMenuObjectData{
+//     MenuObjectIndex child_menu_index_list[9]; // 最多10个子菜单
+// }MenuObjectParentData;
+
+
+// typedef union _MenuObjectData{
+
+// }
+
+// typedef struct _MenuObject{
+//     MenuObjectType type;
+//     char show_name[16];
+
+// }
+
 extern int32 motor_left_pwm;
 extern int32 motor_right_pwm;
 
@@ -31,6 +56,8 @@ void menu_key_init(void);
 void menu_key_event_handle(void);
 
 void image_show_line(void);
+
+void menu_main(void);
 
 
 #endif

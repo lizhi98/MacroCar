@@ -6,7 +6,7 @@
 #include "gyroscope_interface.h"
 #include "menu_interface.h"
 
-uint8 core_busy_flag = 0; // 核心忙标志
+extern uint8 image_process_flag;
 
 #pragma section all "cpu0_dsram"
 // 将本语句与#pragma section all restore语句之间的全局变量都放在CPU0的RAM中
@@ -22,7 +22,11 @@ int core0_main(void)
     system_start();                 // 启动系统计时器，计算车上电时间
 
     // 外设初始化
-    menu_key_init();                // 菜单按键初始化
+#ifdef SMARTCAR_DEBUG_IPS
+    ips200_init(IPS200_TYPE_SPI);     // 初始化IPS200显示屏
+    menu_interface_init();            // 菜单初始化
+#endif
+    
     gyro_init();                    // 陀螺仪初始化
     
     battery_protection_init();      // 电池保护初始化
@@ -40,26 +44,25 @@ int core0_main(void)
     
     system_delay_ms(1000);          // 上电1s后开始运行，等待负压风扇稳定       
     
-    motion_control_pit_run_flag = 0; // 启动电机速度闭环算法，车开始跑
+    motion_control_pit_run_flag = 0; // 电机速度闭环算法运行标志位
     while (TRUE)
     {
         menu_key_event_handle();
-        // 30ms以上运行一次
-        if(system_getval_ms() % 50 != 0){
-            continue;
-        }
+        // // 10ms以上运行一次
+        // if(system_getval_ms() % 10 != 0){
+        //     continue;
+        // }
         // 电池保护，运行1.8s后开始检测，防止电机启动电流过大导致电池电压瞬间下降误触发保护
         if(system_getval_ms() > 3800 && battery_protection_check()){
             motor_interface_power_flag = 0; // 关闭电机PWM输出
             zf_assert(!battery_protection_check()); // 电池电压过低
         }
 #ifdef SMARTCAR_DEBUG_IPS
-        // 多核访问控制
-        if(!core_busy_flag){
-            core_busy_flag = 1;
-            menu_ips_print_info(MENU_INFO_NORMAL);
-            core_busy_flag = 0;
+        if(image_process_flag){ // 确保CPU1已经处理完图像了，CPU0可以访问图像数据了
+            ips200_show_binary_image_with_line(0, 0, mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像并带辅助线
+            // ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H);
         }
+        menu_ips_print_info(MENU_INFO_EXTEND); // 显示扩展信息
 #endif
 #ifdef SMARTCAR_DEBUG_NET_INFO
         menu_network_print_info();

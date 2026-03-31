@@ -3,7 +3,7 @@
 #include "network_interface.h"
 #include "gyroscope_interface.h"
 #include "menu_interface.h"
-extern uint8 core_busy_flag;
+uint8 image_process_flag = 0; // 图像处理标志位，0表示CPU1正在处理图像，1表示CPU1处理完图像了，CPU0可以访问图像数据了
 
 uint32 image_to_image_time = 0;
 
@@ -20,9 +20,6 @@ void core1_main(void)
     interrupt_global_enable(0);             // 打开全局中断
 
     // 外设初始化
-#ifdef SMARTCAR_DEBUG_IPS
-    ips200_init(IPS200_TYPE_SPI);     // 初始化IPS200显示屏
-#endif
     mt9v03x_init();                         // 初始化总钻风摄像头
 #if defined(SMARTCAR_DEBUG_NET_IMG) || defined(SMARTCAR_DEBUG_NET_INFO)
     network_interface_init();
@@ -37,6 +34,7 @@ void core1_main(void)
     {
         if(mt9v03x_finish_flag)
         {
+            image_process_flag = 0;
             network_interface_copy_image(mt9v03x_image[0], MT9V03X_W * MT9V03X_H); // 复制图像
             mt9v03x_finish_flag = 0; // 让摄像头继续采集下一帧图像并通过DMA传输到RAM中
 #ifdef SMARTCAR_DEBUG_NET_IMG
@@ -45,18 +43,10 @@ void core1_main(void)
             // 图像处理
             // image_process(mt9v03x_copy_image, gyro_current_data.angle_z);
             image_process(mt9v03x_copy_image);
+            image_process_flag = 1;
+
             image_to_image_time = system_getval_ms() - image_time;
             image_time = system_getval_ms();
-#ifdef SMARTCAR_DEBUG_IPS
-            // 多核访问控制
-            if(!core_busy_flag){
-                core_busy_flag = 1;
-                ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像
-                image_show_line();
-                core_busy_flag = 0;
-            }
-#endif
-
         }
     }
 }
