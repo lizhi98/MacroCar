@@ -24,9 +24,9 @@ int core0_main(void)
     // 外设初始化
 #ifdef SMARTCAR_DEBUG_IPS
     ips200_init(IPS200_TYPE_SPI);     // 初始化IPS200显示屏
-    menu_interface_init();            // 菜单初始化
+
 #endif
-    
+    menu_interface_init();            // 菜单初始化
     gyro_init();                    // 陀螺仪初始化
     
     battery_protection_init();      // 电池保护初始化
@@ -36,7 +36,7 @@ int core0_main(void)
     
     // motor_forward_speed = 700;      // 前进速度
     // motor_forward_speed = 700; // 科目2
-    motor_forward_speed = 600; // 科目3
+    motor_forward_speed = 700; // 科目3
     motor_fun_pwm_duty  = 0;       // 负压风扇PWM初始占空比
     
     motor_interface_power_flag = 1; // 使能电机PWM输出
