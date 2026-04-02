@@ -62,21 +62,22 @@ PIDParam motor_right_speed_pid  = {
 // 6.7 1.5 1.1 0.05 // 科目1
 // 6.75 2.0 1.1 0.1 // 科目2
 // 6.4 1.7 1.1 0.08 // 科目3
+//7.2 1.9 1.1 0.1
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 6.4, .ki = 0.0f, .kd = 1.7f,
+    .kp = 6.9f, .ki = 0.0f, .kd = 2.8f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.1f, .ki = 0.0f, .kd = 0.08f,
+    .kp = 1.1f, .ki = 0.0f, .kd = 0.12f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 uint8 motion_control_run_flag = 0;      // 作用于单电机速度环，让速度=0
-uint8 motion_control_pit_run_flag = 0;  // 作用于PIT回调，让电机PIT回调函数不执行
+uint8 motion_control_pit_run_flag = 0;  // 作用于PIT回调，让行进电机PIT回调函数不执行
 
 int16 motion_image_steering_speed = 0;  // 图像要求的转向速度
 int16 motor_steering_speed = 0;         // 实际转向速度
@@ -92,6 +93,8 @@ int32 motor_forward_speed = 0;
 
 uint32 motor_pit_count = 0; // PIT中断计数
 
+uint8 motor_soft_start_flag = 0; // 电机软启动标志位 0 表示需要软启动,1表示软启动完成
+
 void motion_control_pit_callback(){
 
     motor_pit_count++;
@@ -102,6 +105,7 @@ void motion_control_pit_callback(){
     // 负压风扇PWM设置
     if(!motion_control_run_flag){
         motor_fun_pwm_duty = 0;
+        motor_soft_start_flag = 0; // 需要软启动
     }
     motor_fun_set_pwm(&motor_fun_pwm_duty);
 
@@ -109,6 +113,7 @@ void motion_control_pit_callback(){
     motor_get_speed(&motor_left_speed, &motor_right_speed);
 
     if(!motion_control_pit_run_flag){
+        motor_soft_start_flag = 0; // 需要软启动
         return;
     }
     // 图像要求的转向环
@@ -136,6 +141,20 @@ void motion_control_pit_callback(){
         motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed  + motor_forward_speed : 0), (float)motor_left_speed);
         motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? -motor_steering_speed + motor_forward_speed : 0), (float)motor_right_speed);
     }
+    // 电机软启动限幅
+    if(!motor_soft_start_flag){
+        // 限制PWM最大值
+        if(abs(motor_left_current_pwm_duty) > MOTOR_SOFT_START_PWM){
+            motor_left_current_pwm_duty = (motor_left_current_pwm_duty > 0) ? MOTOR_SOFT_START_PWM : -MOTOR_SOFT_START_PWM;
+        }
+        if(abs(motor_right_current_pwm_duty) > MOTOR_SOFT_START_PWM){
+            motor_right_current_pwm_duty = (motor_right_current_pwm_duty > 0) ? MOTOR_SOFT_START_PWM : -MOTOR_SOFT_START_PWM;
+        }
+        // 当电机转速大于前进速度时，认为软启动完成
+        if(motor_left_speed > motor_forward_speed && motor_right_speed > motor_forward_speed){
+            motor_soft_start_flag = 1;
+        }
+    }
     // 应用PWM
     motor_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
 }
@@ -154,4 +173,12 @@ void motion_control_init(void){
     PID_clear(&motor_steering_pid);
     // 初始化计算定时器中断
     motion_control_pit_init();
+}
+
+void motor_fun_soft_start(void){
+    for(uint16 i = MOTOR_FUN_MIN_PWM_DUTY; i < MOTOR_FUN_NORMAL_PWM_DUTY; i++){
+        motor_fun_pwm_duty = i;
+        motor_fun_set_pwm(&motor_fun_pwm_duty);
+        system_delay_ms(2); // 每2ms增加一次PWM占空比
+    }
 }

@@ -72,8 +72,8 @@ extern uint8 img_threshold;
 // extern int error_image;
 extern int error_image_last;
 // extern uint8 (*image)[MT9V03X_W];
-// extern uint8 left_line_list[MT9V03X_H];
-// extern uint8 right_line_list[MT9V03X_H];
+extern uint8 left_line_list[MT9V03X_H];
+extern uint8 right_line_list[MT9V03X_H];
 extern uint8 mid_line_list[MT9V03X_H];
 
 
