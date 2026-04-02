@@ -107,7 +107,6 @@ void remove_white_noise_filter() {
                 if (image[i + 1][j] == white_point) white_neighbor_count++;
                 if (image[i][j - 1] == white_point) white_neighbor_count++;
                 if (image[i][j + 1] == white_point) white_neighbor_count++;
-
                 if (white_neighbor_count < 2) {
                     image[i][j] = black_point;
                 }
