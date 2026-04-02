@@ -46,7 +46,10 @@ extern int16 motor_steering_speed;
 #define MOTION_CONTROL_PIT_TIME         5  // 单位ms
 #define MOTION_CONTROL_PIT_INDEX        CCU61_CH0
 
-#define MOTOR_FUN_NORMAL_PWM_DUTY       3200 // 负压风扇正常工作PWM占空比
+#define MOTOR_FUN_MIN_PWM_DUTY          2500 // 负压风扇最小工作PWM占空比
+#define MOTOR_FUN_NORMAL_PWM_DUTY       3000 // 负压风扇正常工作PWM占空比
+
+#define MOTOR_SOFT_START_PWM            2500// 电机软启动PWM占空比
 
 extern uint8 motion_control_run_flag; // 作用于单电机速度环，让速度=0
 
@@ -64,5 +67,7 @@ extern int32 motor_forward_speed;
 void motion_control_pit_callback(void);
 void motion_control_pit_init(void);
 void motion_control_init(void);
+
+void motor_fun_soft_start(void); // 负压风扇软启动
 
 #endif

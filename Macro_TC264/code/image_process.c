@@ -250,7 +250,7 @@ void detect_feature()
         for(int i=MT9V03X_H-20;i>=feature_raw;i--)
         {
             if(left_line_list[i]-left_line_list[i-1]>15 && left_line_list[i]-left_line_list[i-2]>18 && (left_line_list[i-5]==0 || left_line_list[i-4]==0 || left_line_list[i-3]==0 || left_line_list[i-2]==0 || left_line_list[i-1]==0 || left_line_list[i]==0 ||left_line_list[i+1]==0 || left_line_list[i+2]==0 || left_line_list[i+3]==0 || left_line_list[i+4]==0 || left_line_list[i+5]==0))
-            {
+            {   
                 feature_label = 1;
                 feature_raw_l=i;
                 break;
@@ -306,19 +306,19 @@ void feature_square()
     result_feature.left=0;
     result_feature.right=0;
     result_feature.height=0;
-    if(feature_label==1 && detect_feature_row!=0||condition_T!=0)
+    if((feature_label==1 && detect_feature_row!=0)||condition_T!=0)
     {
         int detect_row=0;
         if(detect_feature_row>15)
         {
-            detect_row=height_start_raw;
+            detect_row=height_start_raw-3;
         }
         else if(detect_feature_row!=0)
         {
             detect_row=detect_feature_row-3;
         }
         else{
-            detect_row=height_start_raw+15;
+            detect_row=height_start_raw+10;
         }
         int left_feature_col_count[3]={0};
         for(int j=left_start_col;j<left_start_col+5;j+=2)
@@ -392,22 +392,22 @@ void turn(uint8 direction)
 {
     if(direction==1)
     {
-        if(image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0)
+        if(image_feature.left_feature_flag2!=0)
         {
-            left_line_offset(image_feature.left_feature_flag2);
+            left_line_offset(image_feature.left_feature_flag2+5);
         }
         else{
-            left_line_offset(feature_raw_l);
+            left_line_offset(feature_raw_l+5);
         }
     }
     else if(direction==2)
     {
-        if(image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0)
+        if(image_feature.right_feature_flag2!=0)
         {
-            right_line_offset(image_feature.right_feature_flag2);
+            right_line_offset(image_feature.right_feature_flag2+5);
         }
         else{
-            right_line_offset(feature_raw_r);
+            right_line_offset(feature_raw_r+5);
         }
     }
     else if(direction==0)
@@ -530,7 +530,7 @@ void feature_process()
         //左右转向退出
         if(T_index_list[T_index-1]!=0 )
         {
-            if(get_angle_err(angle_T) > 45.0f)
+            if(get_angle_err(angle_T) > 50.0f)
             {
                 condition_T=0;
             }
@@ -560,7 +560,7 @@ void feature_process()
 
 
 
-#define ERROR_IMAGE_LINE 48     
+#define ERROR_IMAGE_LINE 40     
 int error_image;
 int error_image_last;
 void get_error_image()
