@@ -362,7 +362,7 @@ void feature_square()
         {
             result_feature.right=1;
         }
-        for(int i=left_start_col;i<right_start_col;i++)
+        for(int i=left_start_col+35;i<right_start_col-35;i++)
         {
             //上行特征：左白右黑（从左向右）
             if(image[detect_row][i-1]==black_point && image[detect_row][i]==white_point && image[detect_row][i+1]==white_point)
@@ -371,7 +371,7 @@ void feature_square()
                 break;
             }
         }
-        for(int i=right_start_col-1;i>left_start_col+1;i--)
+        for(int i=right_start_col-35;i>left_start_col+35;i--)
         {
             //上行特征：左白右黑（从右向左）
             if(image[detect_row][i-1]==white_point && image[detect_row][i]==white_point && image[detect_row][i+1]==black_point)

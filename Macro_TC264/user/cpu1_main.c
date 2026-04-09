@@ -47,7 +47,7 @@ void core1_main(void)
             image_time = system_getval_ms();
             image_process(mt9v03x_copy_image);
             image_process_flag = 1;
-            image_process_time = (system_getval_ms() - image_time) > image_process_time ? (system_getval_ms() - image_time) : image_process_time; // 记录最长的图像处理时间000
+            image_process_time = system_getval_ms() - image_time; // 记录最长的图像处理时间000
         }
     }
 }
