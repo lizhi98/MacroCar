@@ -83,7 +83,7 @@ uint8 motor_soft_start_flag = 0; // 电机软启动标志位 0 表示需要软�
 
 // 算法部分
 // 模糊PID参数计算
-FuzzyKPID fuzzy_pid_update(PIDParam* pid_param){
+void fuzzy_pid_update(PIDParam* pid_param){
     // 计算隶属度
     // 先确保误差和误差变化率在设定的范围内
     float error_i = (pid_param->error > pid_param->error_max) ? (pid_param->error_max) : 
@@ -133,18 +133,15 @@ FuzzyKPID fuzzy_pid_update(PIDParam* pid_param){
     float delta_ki = (w1 * dki1 + w2 * dki2 + w3 * dki3 + w4 * dki4) / sum_w;
     float delta_kd = (w1 * dkd1 + w2 * dkd2 + w3 * dkd3 + w4 * dkd4) / sum_w;
     // 更新PID参数
-    FuzzyKPID fuzzy_kpid;
-    fuzzy_kpid.kp = pid_param->kp + delta_kp;
-    fuzzy_kpid.ki = pid_param->ki + delta_ki;
-    fuzzy_kpid.kd = pid_param->kd + delta_kd;
-    
-    return fuzzy_kpid;
+    pid_param->fuzzy_kp = pid_param->kp + delta_kp;
+    pid_param->fuzzy_ki = pid_param->ki + delta_ki;
+    pid_param->fuzzy_kd = pid_param->kd + delta_kd;
 }
 
 void pid_param_check(PIDParam* pid_param){
     // 确保模糊参数合理
-    if((pid_param->type == FUZZY_PID_POS || pid_param->type == FUZZY_PID_INC) && 
-       (pid_param->error_max <= 0 || pid_param->error_min >= 0 || pid_param->error_delta_max <= 0 || pid_param->error_delta_min >= 0)){
+    if( (pid_param->type == FUZZY_PID_POS || pid_param->type == FUZZY_PID_INC) && 
+        (pid_param->error_max <= 0 || pid_param->error_min >= 0 || pid_param->error_delta_max <= 0 || pid_param->error_delta_min >= 0)){
         zf_assert(0); // 模糊PID参数正负错误
     }
 }
@@ -181,15 +178,15 @@ float PID_calculate(PIDParam* pid_param, float target, float current){
         pid_param->previous_previous_error = pid_param->previous_error;
     }else if(pid_param->type == FUZZY_PID_POS){
         // 模糊位置式PID
-        FuzzyKPID fuzzy_kpid = fuzzy_pid_update(pid_param);
+        fuzzy_pid_update(pid_param);
         // 积分计算和限幅
-        pid_param->integral +=  fuzzy_kpid.kp * pid_param->error;
+        pid_param->integral +=  pid_param->fuzzy_kp * pid_param->error;
         pid_param->integral =   (pid_param->integral > pid_param->integral_limit) ? 
                                 (pid_param->integral_limit) : 
                                 ((pid_param->integral < -pid_param->integral_limit) ? -pid_param->integral_limit : pid_param->integral);
-        output = fuzzy_kpid.kp * pid_param->error
-               + fuzzy_kpid.ki * pid_param->integral
-               + fuzzy_kpid.kd * pid_param->error_delta;
+        output = pid_param->fuzzy_kp * pid_param->error
+               + pid_param->fuzzy_ki * pid_param->integral
+               + pid_param->fuzzy_kd * pid_param->error_delta;
     }else{
         // 未写
         zf_assert(0); // PID类型错误
@@ -219,7 +216,8 @@ void motion_control_pit_callback(){
 
     // 电机接口PIT，获取速度
     motor_interface_pit_callback();
-    
+    motor_get_speed(&motor_left_speed, &motor_right_speed);
+
     // 负压风扇PWM设置
     if(!motion_control_run_flag){
         motor_fun_pwm_duty = 0;
@@ -227,8 +225,8 @@ void motion_control_pit_callback(){
     }
     motor_fun_set_pwm(&motor_fun_pwm_duty);
 
-    // 获取电机速度
-    motor_get_speed(&motor_left_speed, &motor_right_speed);
+    // 速度决策
+    forward_speed_decision();
 
     if(!motion_control_pit_run_flag){
         motor_soft_start_flag = 0; // 需要软启动
@@ -311,4 +309,9 @@ void motor_traveling_soft_start(void){
             motor_soft_start_flag = 1;
         }
     }
+}
+
+// 速度决策
+void forward_speed_decision(void){
+    motor_forward_speed = MOTOR_FORWARD_NORMAL_SPEED; 
 }
