@@ -42,6 +42,7 @@ int core0_main(void)
 #ifdef SMARTCAR_DEBUG_IPS
     menu_show_main();                   // 显示主菜单
 #endif
+
     while (TRUE)
     {
 #ifdef SMARTCAR_DEBUG_IPS

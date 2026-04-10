@@ -6,13 +6,22 @@
 #include "gyroscope_interface.h"
 #include "zf_common_clock.h"
 #include "zf_driver_delay.h"
+#include "math.h"
 
 // 算法部分
 // PID算法
 typedef enum _PIDType{
     PID_INC, // 增量式PID
     PID_POS, // 位置式PID
+    FUZZY_PID_POS, // 模糊位置式PID
+    FUZZY_PID_INC  // 模糊增量式PID
 } PIDType;
+
+typedef struct _FuzzyKPID{
+    float kp;
+    float ki;
+    float kd;
+} FuzzyKPID;
 
 typedef struct _PIDParam{
     PIDType type;
@@ -21,12 +30,24 @@ typedef struct _PIDParam{
     float ki;
     float kd;
 
+    // error
+    float error;
+    float error_delta; // 误差变化率
+
     // 限幅
     float integral_limit;
 
+    // 模糊PID用到的
+    float error_max;
+    float error_min;
+    float error_delta_max;
+    float error_delta_min;
+
+    // 记录
     float previous_error;
     float previous_previous_error;
     float integral;
+    float output;
 } PIDParam;
 
 float   PID_calculate(PIDParam* pid_param, float target, float current);
@@ -64,10 +85,13 @@ extern int32 motor_right_speed;
 
 extern int32 motor_forward_speed;
 
+FuzzyKPID fuzzy_pid_update(PIDParam* pid_param);
+void pid_param_check(PIDParam* pid_param);
 void motion_control_pit_callback(void);
 void motion_control_pit_init(void);
 void motion_control_init(void);
 
 void motor_fun_soft_start(void); // 负压风扇软启动
+void motor_traveling_soft_start(void); // 行进电机软启动
 
 #endif
