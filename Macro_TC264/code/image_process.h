@@ -3,6 +3,9 @@
 
 #ifdef _VSCODE
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <math.h>
 
 #define MT9V03X_W               (188)                                           // 图像宽度     范围 [1-752]
 #define MT9V03X_H               (120)                                           // 图像高度     范围 [1-480]
@@ -27,7 +30,7 @@ typedef signed long long    int64;
 #include "zf_device_mt9v03x_double.h"
 
 #endif
-#include "quaternion.h"
+// #include "quaternion.h"
 #define image_w  (MT9V03X_W)
 #define image_h  (MT9V03X_H)
 
