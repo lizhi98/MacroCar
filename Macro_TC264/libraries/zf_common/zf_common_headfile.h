@@ -2,7 +2,7 @@
 #define _zf_common_headfile_h_
 //=====================================================用户层======================================================
 // Debug选项
-// #define SMARTCAR_DEBUG_NET_IMG
+#define SMARTCAR_DEBUG_NET_IMG
 // #define SMARTCAR_DEBUG_NET_INFO
 #define SMARTCAR_DEBUG_IPS   
 //=====================================================用户层======================================================

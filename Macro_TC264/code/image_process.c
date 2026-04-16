@@ -151,14 +151,18 @@ void search_line()
                 right_line_list[i]=MT9V03X_W-1;
             }
         }
-        if(left_line_list[i]==0)
+        if(i<101)
         {
-            left_lost_times++;
+            if(left_line_list[i]==0 &&image[i][left_line_list[i]]==white_point)
+            {
+                left_lost_times++;
+            }
+            if(right_line_list[i]==MT9V03X_W-1&&image[i][MT9V03X_W-2]==white_point)
+            {
+                right_lost_times++;
+            }
         }
-        if(right_line_list[i]==MT9V03X_W-1)
-        {
-            right_lost_times++;
-        }
+
         mid_line_list[i]=(uint8)(((uint16)left_line_list[i]+(uint16)right_line_list[i])/2);
     }
 }
@@ -237,28 +241,32 @@ void detect_longest_col()
 uint8 feature_label;
 uint8 feature_raw_l;
 uint8 feature_raw_r;
-#define feature_raw 20      //20-90
+#define feature_raw 20      //20-100
 uint8 detect_feature_row=0;
 void detect_feature()
 {
     feature_label=0;
     feature_raw_r=0;
-    feature_raw_l=0;
+    feature_raw_l=0; 
     detect_feature_row=0;
     if((left_lost_times!=0 || right_lost_times!=0) )
     {
         for(int i=MT9V03X_H-20;i>=feature_raw;i--)
         {
-            if(left_line_list[i]-left_line_list[i-1]>15 && left_line_list[i]-left_line_list[i-2]>18 && (left_line_list[i-5]==0 || left_line_list[i-4]==0 || left_line_list[i-3]==0 || left_line_list[i-2]==0 || left_line_list[i-1]==0 || left_line_list[i]==0 ||left_line_list[i+1]==0 || left_line_list[i+2]==0 || left_line_list[i+3]==0 || left_line_list[i+4]==0 || left_line_list[i+5]==0))
+            if((left_line_list[i]-left_line_list[i-1]>15 || left_line_list[i]-left_line_list[i-2]>15 ||left_line_list[i]-left_line_list[i-3]>15 || left_line_list[i]-left_line_list[i-4]>15)
+                && (left_line_list[i-5]==0 || left_line_list[i-4]==0 || left_line_list[i-3]==0 || left_line_list[i-2]==0 || left_line_list[i-1]==0 || left_line_list[i]==0 ||left_line_list[i+1]==0 || left_line_list[i+2]==0 || left_line_list[i+3]==0 || left_line_list[i+4]==0 || left_line_list[i+5]==0 
+                    ||left_line_list[i-6]==0 || left_line_list[i+6]==0 || left_line_list[i-7]==0 || left_line_list[i+7]==0 || left_line_list[i-8]==0 || left_line_list[i+8]==0 || left_line_list[i-9]==0 || left_line_list[i+9]==0 || left_line_list[i-10]==0 || left_line_list[i+10]==0))
             {   
                 feature_label = 1;
-                feature_raw_l=i;
+                feature_raw_l=(uint8)i;
                 break;
             }
-            else if( right_line_list[i-1]-right_line_list[i]>15 && right_line_list[i-2]-right_line_list[i]>18 && (right_line_list[i-5]==MT9V03X_W-1 || right_line_list[i-4]==MT9V03X_W-1 || right_line_list[i-3]==MT9V03X_W-1 || right_line_list[i-2]==MT9V03X_W-1 || right_line_list[i-1]==MT9V03X_W-1 || right_line_list[i]==MT9V03X_W-1 || right_line_list[i+1]==MT9V03X_W-1 || right_line_list[i+2]==MT9V03X_W-1 || right_line_list[i+3]==MT9V03X_W-1 || right_line_list[i+4]==MT9V03X_W-1 || right_line_list[i+5]==MT9V03X_W-1))
+            else if((right_line_list[i-1]-right_line_list[i]>15 || right_line_list[i-2]-right_line_list[i]>15 || right_line_list[i-3]-right_line_list[i]>15 || right_line_list[i-4]-right_line_list[i]>15) &&
+                    (right_line_list[i-5]==MT9V03X_W-1 || right_line_list[i-4]==MT9V03X_W-1 || right_line_list[i-3]==MT9V03X_W-1 || right_line_list[i-2]==MT9V03X_W-1 || right_line_list[i-1]==MT9V03X_W-1 || right_line_list[i]==MT9V03X_W-1 || right_line_list[i+1]==MT9V03X_W-1 || right_line_list[i+2]==MT9V03X_W-1 || right_line_list[i+3]==MT9V03X_W-1 || right_line_list[i+4]==MT9V03X_W-1 || right_line_list[i+5]==MT9V03X_W-1 
+                    ||right_line_list[i-6]==MT9V03X_W-1 || right_line_list[i+6]==MT9V03X_W-1 || right_line_list[i-7]==MT9V03X_W-1 || right_line_list[i+7]==MT9V03X_W-1 || right_line_list[i-8]==MT9V03X_W-1 || right_line_list[i+8]==MT9V03X_W-1 || right_line_list[i-9]==MT9V03X_W-1 || right_line_list[i+9]==MT9V03X_W-1 || right_line_list[i-10]==MT9V03X_W-1 || right_line_list[i+10]==MT9V03X_W-1))
             {
-                feature_label = 1;
-                feature_raw_r=i;
+                 feature_label = 1;
+                feature_raw_r=(uint8)i;
                 break;
             }
         }
@@ -269,7 +277,7 @@ void detect_feature()
         {
             if(image[i-1][left_line_list[feature_raw_l-1]]==black_point)
             {
-                detect_feature_row=i;
+                detect_feature_row=(uint8)i;
                 break;
             }
         }
@@ -280,7 +288,7 @@ void detect_feature()
         {
             if(image[i-1][right_line_list[feature_raw_r-1]]==black_point)
             {
-                detect_feature_row=i;
+                detect_feature_row=(uint8)i;
                 break;
             }
         }
@@ -362,7 +370,7 @@ void feature_square()
         {
             result_feature.right=1;
         }
-        for(int i=left_start_col;i<right_start_col;i++)
+        for(int i=left_start_col+35;i<right_start_col-35;i++)
         {
             //上行特征：左白右黑（从左向右）
             if(image[detect_row][i-1]==black_point && image[detect_row][i]==white_point && image[detect_row][i+1]==white_point)
@@ -371,7 +379,7 @@ void feature_square()
                 break;
             }
         }
-        for(int i=right_start_col-1;i>left_start_col+1;i--)
+        for(int i=right_start_col-35;i>left_start_col+35;i--)
         {
             //上行特征：左白右黑（从右向左）
             if(image[detect_row][i-1]==white_point && image[detect_row][i]==white_point && image[detect_row][i+1]==black_point)
@@ -422,22 +430,16 @@ void turn(uint8 direction)
 
 uint8 T_index=0;
 // #define index_num 6
-// int T_index_list[index_num]={-1,1,1,-1,0,0};
+// int T_index_list[index_num]={1,-1,-1,1,0,0};
 // int T_index_list[index_num]={-1,1,1,-1};
+// 科目三方案1
 #define index_num 12
 int T_index_list[index_num]={1,-1,1,1,1,-1,-1,0,-1,0,1,0};
-// #define index_num 11
-// int T_index_list[index_num]={0,0,0,1,0,-1,0,-1,1,0,1};
-// #define index_num 12
-// int T_index_list[index_num]={0,-1,0,1,1,0,-1,-1,1,1,1,-1};
-// #define index_num 10
-// int T_index_list[index_num]={1,-1,1,1,0,-1,-1,1,-1,1}; //正极出发
+// 科目三方案2
 // #define index_num 13
-// int T_index_list[index_num]={-1,1,1,-1,-1,1,0,1,-1,-1,-1,-1,0}; //正极出发
-// #define index_num 12
-// int T_index_list[index_num]={-1,1,1,-1,0,0,-1,0,-1,-1,0,0}; //正极出发
-// int T_index_list[index_num]={-1,1,1,-1,-1,0,-1,0,0,-1,-1,-1,0}; //正极出发
+// int T_index_list[index_num]={0,0,0,1,0,-1,-1,1,1,1,0,0,1};
 
+uint8 speed_select_label=0;
 int T_corner=0;
 float angle_T=0.0f;
 float angle_corner=0.0f;
@@ -449,6 +451,7 @@ void feature_process()
     if(result_feature.left==1  && result_feature.right==0 && result_feature.height==0  &&condition_T==0)
     {
         turn(1);
+        speed_select_label=1;
         // condition_corner=1;
         // angle_corner=attitude.yaw;
     }
@@ -456,12 +459,14 @@ void feature_process()
     else if (result_feature.right==1 &&  result_feature.left==0 && result_feature.height==0 && condition_T==0 )
     {
         turn(2);
+        speed_select_label=1;
         // condition_corner=2;
         // angle_corner=attitude.yaw;
     }
     // T
     else if(result_feature.height==0&& result_feature.left==1 && result_feature.right==1 && condition_T==0  )
     {
+        
         T_index++;
         if(T_index>index_num)
         {
@@ -472,6 +477,7 @@ void feature_process()
     }
     else if(result_feature.height==1 && result_feature.left==0 && result_feature.right==1 && condition_T==0)
     {
+        
         T_corner=2;
         T_index++;
         if(T_index>index_num)
@@ -483,6 +489,7 @@ void feature_process()
     }
     else if(result_feature.height==1 && result_feature.left==1 && result_feature.right==0 && condition_T==0)
     {
+        
         T_corner=1;
         T_index++;
         if(T_index>index_num)
@@ -492,6 +499,7 @@ void feature_process()
         condition_T=1;
         angle_T=attitude.yaw;
     }
+    
     // if(condition_corner==1)
     // {
     //     turn(1);
@@ -511,19 +519,20 @@ void feature_process()
     // }
     if( condition_T==1)
     {
-        //直行
         if(T_index_list[T_index-1]==0)
         {
-            //暂时不补线，保持原有路线
+            //直行
             turn(0);    
         }
         else if(T_index_list[T_index-1]==-1)
         {
+            speed_select_label=1;
             //左转
             turn(1);
         }
         else if(T_index_list[T_index-1]==1)
         {
+            speed_select_label=1;
             //右转
             turn(2);
         }
@@ -560,7 +569,7 @@ void feature_process()
 
 
 
-#define ERROR_IMAGE_LINE 50     
+#define ERROR_IMAGE_LINE 48
 int error_image;
 int error_image_last;
 void get_error_image()

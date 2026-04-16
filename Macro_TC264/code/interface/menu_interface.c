@@ -76,10 +76,12 @@ void menu_ips_print_info(void){
     ips200_show_string(0, 190, info_buffer);
     sprintf(info_buffer, "GZ:%+6.2f YAW:%+6.2f", gyro_current_data.gyro_z, gyro_current_data.angle_z);
     ips200_show_string(0, 210, info_buffer);
-    sprintf(info_buffer, "i:%2u con:%1u,L:%1u,R:%1u,H:%1u", T_index, condition_T,result_feature.left,result_feature.right,result_feature.height);
+    sprintf(info_buffer, "Index:%2u Con:%1u", T_index, condition_T);
     ips200_show_string(0, 230, info_buffer);
-    sprintf(info_buffer, "TH:%3u I_T:%2lu I_P:%2lu", img_threshold, image_to_image_time, image_process_time);
+    sprintf(info_buffer, "L:%2u R:%2u,H %2u",result_feature.left, result_feature.right, result_feature.height);
     ips200_show_string(0, 250, info_buffer);
+    sprintf(info_buffer, "TH:%3u I_T:%2lu L:%3u R:%3u", img_threshold, image_to_image_time, left_lost_times, right_lost_times);
+    ips200_show_string(0, 270, info_buffer);
 }
 
 void menu_key_init(void){
@@ -128,10 +130,11 @@ void no_screen_key_event_handle(void){
 
 void menu_network_print_info(void){
     static char info_buffer[120];
-    sprintf(info_buffer, "%d,%d,%d,%d,%f,%u,%u,%d,%ld,%u,%u\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%f,%f,%u,%u,%d,%ld,%u,%u\0",
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
-        attitude.yaw, left_line_list[45],right_line_list[45],error_image,image_to_image_time,condition_T,T_index
+        attitude.yaw, gyro_current_data.gyro_z,
+        left_line_list[45],right_line_list[45],error_image,image_to_image_time,condition_T,T_index
     );
     network_vofa_send_str(info_buffer);
 }

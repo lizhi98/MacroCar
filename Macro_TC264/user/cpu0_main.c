@@ -33,9 +33,6 @@ int core0_main(void)
     
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
     
-    // motor_forward_speed = 700;      // 前进速度
-    // motor_forward_speed = 700; // 科目2
-    motor_forward_speed = 550; // 科目3
     motor_fun_pwm_duty  = 0;       // 负压风扇PWM初始占空比
     
     motor_interface_power_flag = 0;     // 使能所有电机PWM输出
@@ -45,6 +42,7 @@ int core0_main(void)
 #ifdef SMARTCAR_DEBUG_IPS
     menu_show_main();                   // 显示主菜单
 #endif
+    uint8 battery_check_flag = 0;
     while (TRUE)
     {
 #ifdef SMARTCAR_DEBUG_IPS
@@ -53,10 +51,15 @@ int core0_main(void)
 #else
         no_screen_key_event_handle(); // 没有屏幕时的按键事件处理
 #endif
-        // 电池保护，运行2s后开始检测，防止电机启动电流过大导致电池电压瞬间下降误触发保护
-        if(system_getval_ms() > 2000 && battery_protection_check()){
-            motor_interface_power_flag = 0; // 关闭电机PWM输出
-            zf_assert(!battery_protection_check()); // 电池电压过低
+        // 电池保护，运行1s后检测，防止电机启动电流过大导致电池电压瞬间下降误触发保护
+        if(system_getval_ms() > 1000 && !battery_check_flag){
+            // 电压检测
+            if(battery_protection_check()){
+                motor_interface_power_flag = 0; // 关闭电机PWM输出
+                zf_assert(!battery_protection_check()); // 电池电压过低
+                while(1);
+            }
+            battery_check_flag = 1;
         }
 #ifdef SMARTCAR_DEBUG_NET_INFO
         // 每隔4ms发送一次网络调试信息

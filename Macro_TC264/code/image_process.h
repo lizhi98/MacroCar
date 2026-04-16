@@ -56,7 +56,8 @@ typedef struct
     uint8 T;
 }corner_result;
 
-
+extern uint8 left_lost_times;
+extern uint8 right_lost_times;
 // extern int condition;
 
 // extern int feature_corner_l;
