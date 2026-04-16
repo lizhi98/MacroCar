@@ -10,11 +10,11 @@
 
 // 有刷电机接口
 // 有刷电机PWM输出
-#define MOTOR_LEFT_PWM_PIN              ATOM2_CH7_P11_12
-#define MOTOR_RIGHT_PWM_PIN             ATOM2_CH5_P11_10
+#define MOTOR_LEFT_PWM_PIN              ATOM3_CH5_P11_10
+#define MOTOR_RIGHT_PWM_PIN             ATOM2_CH7_P11_12
 
-#define MOTOR_LEFT_DIR_PIN              P11_11
-#define MOTOR_RIGHT_DIR_PIN             P11_9
+#define MOTOR_LEFT_DIR_PIN              P11_9
+#define MOTOR_RIGHT_DIR_PIN             P11_11
 
 #define MOTOR_FUN_PWM_PIN               ATOM1_CH0_P21_2
 

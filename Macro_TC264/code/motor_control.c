@@ -2,13 +2,13 @@
 
 // 规则表
 static const float fuzzy_pid_rule_table_kp[7][7] = {
-    {0.0,	0.0,	0.1,	0.15,	0.2,	0.25,	0.3f},
-    {0.0,	0.1,	0.15,	0.2,	0.25,	0.3,	0.35f},
-    {-0.1,	0.0,	0.1,	0.15,	0.2,	0.25,	0.3f},
-    {-0.15,	-0.1,	0.0,	0.0,	0.1,	0.15,	0.2f},
-    {-0.2,	-0.15,	-0.1,	0.0,	0.0,	0.1,	0.15f},
-    {-0.25,	-0.2,	-0.15,	-0.1,	0.0,	0.0,	0.1f},
-    {-0.3,	-0.25,	-0.2,	-0.15,	-0.1,	0.0,	0.0f}
+    { 0.0f,  0.0f,  0.1f,  0.15f,  0.2f,  0.25f,  0.3f },
+    { 0.0f,  0.1f,  0.15f, 0.2f,   0.25f, 0.3f,   0.35f},
+    {-0.1f,  0.0f,  0.1f,  0.15f,  0.2f,  0.25f,  0.3f },
+    {-0.15f,-0.1f,  0.0f,  0.0f,   0.1f,  0.15f,  0.2f },
+    {-0.2f, -0.15f,-0.1f,  0.0f,   0.0f,  0.1f,   0.15f},
+    {-0.25f,-0.2f, -0.15f,-0.1f,   0.0f,  0.0f,   0.1f },
+    {-0.3f, -0.25f,-0.2f, -0.15f, -0.1f,  0.0f,   0.0f }
 };
 
 static const float fuzzy_pid_rule_table_ki[7][7] = {
@@ -22,25 +22,36 @@ static const float fuzzy_pid_rule_table_ki[7][7] = {
 };
 
 static const float fuzzy_pid_rule_table_kd[7][7] = {
-    {0.4,	0.35,	0.3,	0.25,	0.2,	0.15,	0.1f},	
-    {0.35,	0.3,	0.25,	0.2,	0.15,	0.1,	0.0f},	
-    {0.3,	0.25,	0.2,	0.15,	0.1,	0.0,	-0.1f},	
-    {0.25,	0.2,	0.15,	0.0,	-0.1,	-0.15,	-0.2f},	
-    {0.2,	0.15,	0.1,	-0.1,	-0.15,	-0.2,	-0.25f},	
-    {0.15,	0.1,	0.0,	-0.15,	-0.2,	-0.25,	-0.3f},	
-    {0.1,	0.0,	-0.1,	-0.2,	-0.25,	-0.3,	-0.35f}
+    { 0.15f, 0.12f, 0.10f, 0.08f, 0.05f, 0.0f,  -0.05f},
+    { 0.12f, 0.10f, 0.08f, 0.05f, 0.0f,  -0.05f,-0.10f},
+    { 0.10f, 0.08f, 0.05f, 0.0f,  -0.05f,-0.10f,-0.15f},
+    { 0.08f, 0.05f, 0.0f,  -0.05f,-0.10f,-0.15f,-0.20f},
+    { 0.05f, 0.0f,  -0.05f,-0.10f,-0.15f,-0.20f,-0.25f},
+    { 0.0f,  -0.05f,-0.10f,-0.15f,-0.20f,-0.25f,-0.30f},
+    {-0.05f,-0.10f,-0.15f,-0.20f,-0.25f,-0.30f,-0.35f}
 };
 
 // 单电机速度控制
+// PIDParam motor_left_speed_pid   = {
+//     .type = PID_INC,
+//     .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
+//     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+// };
+
+// PIDParam motor_right_speed_pid  = {
+//     .type = PID_INC,
+//     .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
+//     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+// };
 PIDParam motor_left_speed_pid   = {
     .type = PID_INC,
-    .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
+    .kp = 2.2f, .ki = 0.55f, .kd = 0.0f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_INC,
-    .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
+    .kp = 2.2f, .ki = 0.55f, .kd = 0.0f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -51,14 +62,15 @@ PIDParam motor_right_speed_pid  = {
 //7.2 1.9 1.1 0.1
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 6.7f, .ki = 0.0f, .kd = 1.8f,
-    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+    .kp = 7.0f, .ki = 0.0f, .kd = 0.5f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
 
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.05f, .ki = 0.0f, .kd = 0.12f,
+    .kp = 2.0f, .ki = 0.0f, .kd = 0.11f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -133,9 +145,15 @@ void fuzzy_pid_update(PIDParam* pid_param){
     float delta_ki = (w1 * dki1 + w2 * dki2 + w3 * dki3 + w4 * dki4) / sum_w;
     float delta_kd = (w1 * dkd1 + w2 * dkd2 + w3 * dkd3 + w4 * dkd4) / sum_w;
     // 更新PID参数
-    pid_param->fuzzy_kp = pid_param->kp + delta_kp;
-    pid_param->fuzzy_ki = pid_param->ki + delta_ki;
-    pid_param->fuzzy_kd = pid_param->kd + delta_kd;
+    if(fabs(pid_param->kp) >= 0.01f){    
+        pid_param->fuzzy_kp = pid_param->kp + delta_kp;
+    }
+    if(fabs(pid_param->ki) >= 0.01f){    
+        pid_param->fuzzy_ki = pid_param->ki + delta_ki;
+    }
+    if(fabs(pid_param->kd) >= 0.01f){    
+        pid_param->fuzzy_kd = pid_param->kd + delta_kd;
+    }
 }
 
 void pid_param_check(PIDParam* pid_param){
@@ -179,6 +197,7 @@ float PID_calculate(PIDParam* pid_param, float target, float current){
     }else if(pid_param->type == FUZZY_PID_POS){
         // 模糊位置式PID
         fuzzy_pid_update(pid_param);
+        
         // 积分计算和限幅
         pid_param->integral +=  pid_param->fuzzy_kp * pid_param->error;
         pid_param->integral =   (pid_param->integral > pid_param->integral_limit) ? 
@@ -241,7 +260,7 @@ void motion_control_pit_callback(){
     // 转向闭环
     motor_steering_speed = (int16)PID_calculate(&motor_steering_pid, (float)motion_image_steering_speed, gyro_current_data.gyro_z); // 这里的当前值需要根据具体应用修改
     
-    /*单电机速度环
+    // /*单电机速度环
     // if(motor_left_speed_pid.type == PID_INC){
     //     motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
     //     motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
@@ -249,7 +268,7 @@ void motion_control_pit_callback(){
     //     motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
     //     motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
     // }
-    */ 
+    // */ 
 
     if(motor_left_speed_pid.type == PID_INC){
         motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_steering_speed  + motor_forward_speed : 0), (float)motor_left_speed);
@@ -259,9 +278,9 @@ void motion_control_pit_callback(){
         motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? -motor_steering_speed + motor_forward_speed : 0), (float)motor_right_speed);
     }
     motor_traveling_soft_start(); // 行进电机软启动
+    // motor_left_current_pwm_duty = -2500;
+    // motor_right_current_pwm_duty = -2500 ;
     // 应用PWM
-    // motor_left_current_pwm_duty     = -2000;
-    // motor_right_current_pwm_duty    = -2000;
     motor_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
 }
 
@@ -287,10 +306,10 @@ void motion_control_init(void){
 }
 
 void motor_fun_soft_start(void){
-    for(uint16 i = MOTOR_FUN_MIN_PWM_DUTY; i < MOTOR_FUN_NORMAL_PWM_DUTY; i++){
+    for(uint16 i = MOTOR_FUN_MIN_PWM_DUTY; i <= MOTOR_FUN_NORMAL_PWM_DUTY; i++){
         motor_fun_pwm_duty = i;
         motor_fun_set_pwm(&motor_fun_pwm_duty);
-        system_delay_ms(2); // 每2ms增加一次PWM占空比
+        system_delay_ms(3); // 每3ms增加一次PWM占空比
     }
 }
 

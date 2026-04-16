@@ -17,12 +17,6 @@ typedef enum _PIDType{
     FUZZY_PID_INC  // 模糊增量式PID
 } PIDType;
 
-typedef struct _FuzzyKPID{
-    float kp;
-    float ki;
-    float kd;
-} FuzzyKPID;
-
 typedef struct _PIDParam{
     PIDType type;
 
@@ -52,6 +46,9 @@ typedef struct _PIDParam{
     float previous_previous_error;
     float integral;
     float output;
+
+    // 限幅
+    float output_max;
 } PIDParam;
 
 float   PID_calculate(PIDParam* pid_param, float target, float current);
@@ -74,9 +71,9 @@ extern int16 motor_steering_speed;
 #define MOTOR_FUN_MIN_PWM_DUTY          2500 // 负压风扇最小工作PWM占空比
 #define MOTOR_FUN_NORMAL_PWM_DUTY       3000 // 负压风扇正常工作PWM占空比
 
-#define MOTOR_SOFT_START_PWM            2500// 电机软启动PWM占空比
+#define MOTOR_SOFT_START_PWM            2800// 电机软启动PWM占空比
 
-#define MOTOR_FORWARD_NORMAL_SPEED      700 // 前进正常速度
+#define MOTOR_FORWARD_NORMAL_SPEED      900 // 前进正常速度
 
 extern uint8 motion_control_run_flag; // 作用于单电机速度环，让速度=0
 
