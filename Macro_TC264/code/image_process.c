@@ -569,7 +569,7 @@ void feature_process()
 
 
 
-#define ERROR_IMAGE_LINE 45
+#define ERROR_IMAGE_LINE 48
 int error_image;
 int error_image_last;
 void get_error_image()
