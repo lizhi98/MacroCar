@@ -18,7 +18,8 @@ int core0_main(void)
     clock_init();                   // 获取时钟频率<务必保留>
     debug_init();                   // 初始化默认调试串口
     system_start();                 // 启动系统计时器，计算车上电时间
-
+    // gpio_init(P20_8, GPO, 0, GPO_PUSH_PULL);                    // 初始化GPIO
+    // gpio_init(P20_9, GPO, 0, GPO_PUSH_PULL);                    // 初始化GPIO
     // 外设初始化
 #ifdef SMARTCAR_DEBUG_IPS
     ips200_init(IPS200_TYPE_SPI);   // 初始化IPS200显示屏
@@ -34,7 +35,7 @@ int core0_main(void)
     
     // motor_forward_speed = 700;      // 前进速度
     // motor_forward_speed = 700; // 科目2
-    motor_forward_speed = 900; // 科目3
+    motor_forward_speed = 550; // 科目3
     motor_fun_pwm_duty  = 0;       // 负压风扇PWM初始占空比
     
     motor_interface_power_flag = 0;     // 使能所有电机PWM输出

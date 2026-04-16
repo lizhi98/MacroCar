@@ -22,8 +22,8 @@ void motor_interface_init(MotorType type, uint16 pit_time){
         case BRUSHED_MOTOR:
             // 初始化有刷电机相关设置
             // PWM输出初始化
-            gpio_init(MOTOR_LEFT_DIR_PIN,  GPO, 0, GPO_PUSH_PULL);
-            gpio_init(MOTOR_RIGHT_DIR_PIN, GPO, 0, GPO_PUSH_PULL);
+            gpio_init(MOTOR_LEFT_DIR_PIN,  GPO, 1, GPO_PUSH_PULL);
+            gpio_init(MOTOR_RIGHT_DIR_PIN, GPO, 1, GPO_PUSH_PULL);
             pwm_init(MOTOR_LEFT_PWM_PIN,  MOTOR_PWM_FREQUENCY, MOTOR_PWM_INIT_DUTY);
             pwm_init(MOTOR_RIGHT_PWM_PIN, MOTOR_PWM_FREQUENCY, MOTOR_PWM_INIT_DUTY);
             // 负压风扇

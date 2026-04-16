@@ -63,16 +63,17 @@ PIDParam motor_right_speed_pid  = {
 // 6.75 2.0 1.1 0.1 // 科目2
 // 6.4 1.7 1.1 0.08 // 科目3
 //7.2 1.9 1.1 0.1
+//6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 6.9f, .ki = 0.0f, .kd = 2.8f,
+    .kp = 6.4f, .ki = 0.0f, .kd = 1.5f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.1f, .ki = 0.0f, .kd = 0.12f,
+    .kp = 1.0f, .ki = 0.0f, .kd = 0.08f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 

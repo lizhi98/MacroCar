@@ -59,8 +59,9 @@ IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
     interrupt_global_enable(0);                     // 开启中断嵌套
     pit_clear_flag(CCU61_CH0);
 
-    motion_control_pit_callback();
-
+    //motion_control_pit_callback();
+    pwm_set_duty(ATOM2_CH7_P11_12,  2000);
+    pwm_set_duty(ATOM2_CH5_P11_10, 2000);
 }
 
 IFX_INTERRUPT(cc61_pit_ch1_isr, 0, CCU6_1_CH1_ISR_PRIORITY)

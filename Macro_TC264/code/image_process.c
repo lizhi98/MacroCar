@@ -421,11 +421,11 @@ void turn(uint8 direction)
 
 
 uint8 T_index=0;
-#define index_num 6
-int T_index_list[index_num]={-1,1,1,-1,0,0};
+// #define index_num 6
+// int T_index_list[index_num]={-1,1,1,-1,0,0};
 // int T_index_list[index_num]={-1,1,1,-1};
-// #define index_num 12
-// int T_index_list[index_num]={1,-1,1,1,1,-1,-1,0,-1,0,1,0};
+#define index_num 12
+int T_index_list[index_num]={1,-1,1,1,1,-1,-1,0,-1,0,1,0};
 // #define index_num 11
 // int T_index_list[index_num]={0,0,0,1,0,-1,0,-1,1,0,1};
 // #define index_num 12
@@ -560,7 +560,7 @@ void feature_process()
 
 
 
-#define ERROR_IMAGE_LINE 40     
+#define ERROR_IMAGE_LINE 50     
 int error_image;
 int error_image_last;
 void get_error_image()
