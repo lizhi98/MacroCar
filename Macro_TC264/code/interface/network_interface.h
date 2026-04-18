@@ -45,4 +45,6 @@ void network_interface_seekfree_host_config(uint8 *image_addr);
 
 void network_vofa_send_str(char * str);
 
+void network_print_info(void);
+
 #endif

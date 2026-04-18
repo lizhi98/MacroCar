@@ -13,14 +13,15 @@ uint8 (*image)[MT9V03X_W];
 
 uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
 {
-    uint8 threshold;
+    uint8 threshold = img_threshold;
     imgsize = MT9V03X_H * MT9V03X_W;    //总像素个数
     uint8 images_value_temp;            //中间变量暂时存储
 
     float sumPK = 0;
     float sumMK = 0;
-    float var = 0;
+    float var = -1.0f;
     float vartmp = 0;
+    const float eps = 1e-6f;
 
    //清零
     for(uint16 i=0;i<GrayScale;i++)
@@ -53,8 +54,20 @@ uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
    //求解最大类间方差的阈值
     for(uint8 i=5;i<245;i++)
     {
-        vartmp = ((MK[GrayScale-1] * PK[i] - MK[i]) * (MK[GrayScale - 1] * PK[i] - MK[i])) / (PK[i] * (1 - PK[i]));
-        if(vartmp>var)
+        float w0 = PK[i];
+        float w1 = 1.0f - w0;
+        float denom = w0 * w1;
+
+        // 避免分母为 0 导致 NaN/Inf，跳过无效阈值
+        if(denom <= eps)
+        {
+            continue;
+        }
+
+        float diff = MK[GrayScale-1] * w0 - MK[i];
+        vartmp = (diff * diff) / denom;
+
+        if(vartmp > var)
         {
             var = vartmp;
             threshold = i;      //输出阈值
@@ -207,7 +220,7 @@ void search_line()
                 }
             }
         }
-        if(i<101)
+        if(i<90)
         {
             if(left_line_list[i]==0 &&image[i][left_line_list[i]]==white_point)
             {
@@ -323,7 +336,7 @@ void detect_longest_col()
 uint8 feature_label;
 uint8 feature_raw_l;
 uint8 feature_raw_r;
-#define feature_raw 20      //20-100
+#define feature_raw 20      //20-90
 uint8 detect_feature_row=0;
 void detect_feature()
 {
@@ -334,7 +347,7 @@ void detect_feature()
     // printf("left_lost_times=%d, right_lost_times=%d\n",left_lost_times,right_lost_times);
     if((left_lost_times!=0 || right_lost_times!=0) )
     {
-        for(int i=MT9V03X_H-20;i>=feature_raw;i--)
+        for(int i=MT9V03X_H-31;i>=feature_raw;i--)
         {
             if((left_line_list[i]-left_line_list[i-1]>15 || left_line_list[i]-left_line_list[i-2]>15 ||left_line_list[i]-left_line_list[i-3]>15 || left_line_list[i]-left_line_list[i-4]>15)
                 && (left_line_list[i-5]==0 || left_line_list[i-4]==0 || left_line_list[i-3]==0 || left_line_list[i-2]==0 || left_line_list[i-1]==0 || left_line_list[i]==0 ||left_line_list[i+1]==0 || left_line_list[i+2]==0 || left_line_list[i+3]==0 || left_line_list[i+4]==0 || left_line_list[i+5]==0 
@@ -383,7 +396,7 @@ void detect_feature()
 FeatureDetectResult image_feature;
 feature_result result_feature={0,0,0};
 #define height_start_raw 10          
-#define height_end_raw 100
+#define height_end_raw 90
 #define left_start_col 5
 #define right_start_col 183
 void feature_square()
@@ -456,7 +469,7 @@ void feature_square()
         {
             result_feature.right=1;
         }
-        for(int i=left_start_col+35;i<right_start_col-35;i++)
+        for(int i=left_start_col+20;i<right_start_col-20;i++)
         {
             //上行特征：左白右黑（从左向右）
             if(image[detect_row][i-1]==black_point && image[detect_row][i]==white_point && image[detect_row][i+1]==white_point)
@@ -484,24 +497,28 @@ uint8 condition_T=0;
 uint8 condition_corner=0;
 void turn(uint8 direction)
 {
+    // printf("index=%d\n",T_index);
+    // printf("condition=%d",condition_T);
+    // printf("direction=%d\n",direction);
     if(direction==1)
     {
         if(image_feature.left_feature_flag2!=0)
         {
-            left_line_offset(image_feature.left_feature_flag2+5);
+            left_line_offset(image_feature.left_feature_flag2+15);
         }
         else{
-            left_line_offset(feature_raw_l+5);
+            left_line_offset(feature_raw_l+15);
         }
     }
     else if(direction==2)
     {
+        // printf("right_feature_flag2=%d, feature_raw_r=%d\n",image_feature.right_feature_flag2,feature_raw_r);
         if(image_feature.right_feature_flag2!=0)
         {
-            right_line_offset(image_feature.right_feature_flag2+5);
+            right_line_offset(image_feature.right_feature_flag2+15);
         }
         else{
-            right_line_offset(feature_raw_r+5);
+            right_line_offset(feature_raw_r+15);
         }
     }
     else if(direction==0)
@@ -515,25 +532,38 @@ void turn(uint8 direction)
 
 
 uint8 T_index=0;
+#define ERROR_IMAGE_LINE 47
 // #define index_num 6
 // int T_index_list[index_num]={1,-1,-1,1,0,0};
 // int T_index_list[index_num]={-1,1,1,-1};
 // 科目三方案1
-#define index_num 12
-int T_index_list[index_num]={1,-1,1,1,1,-1,-1,0,-1,0,1,0};
+// #define index_num 12
+// int T_index_list[index_num]={1,-1,1,1,1,-1,-1,0,-1,0,1,0};
 // 科目三方案2
 // #define index_num 13
 // int T_index_list[index_num]={0,0,0,1,0,-1,-1,1,1,1,0,0,1};
 
-uint8 speed_select_label=0;
+// 校赛1 科目3
+#define index_num 15
+int T_index_list[index_num]={1,-1,1,1,0,1,-1,-1,-1,0,0,1,0,0,0};
+
+// 校赛1 科目3 
+// #define index_num 16
+// int T_index_list[index_num]={1,-1,1,0,1,-1,1,-1,-1,-1,0,0,1,0,0,0};
+
+
+uint8 speed_select_label = 0;
+float speed_select_angle = 0.0f;
 int T_corner=0;
 float angle_T=0.0f;
 float angle_corner=0.0f;
+int times_T=0;
+uint8 condition_T_angle=0;
 void feature_process()
 {
     detect_feature();
     feature_square();
-    printf("feature: left=%d, right=%d, height=%d\n",result_feature.left,result_feature.right,result_feature.height);
+    // printf("feature: left=%d, right=%d, height=%d\n",result_feature.left,result_feature.right,result_feature.height);
     //纯左转
     if(result_feature.left==1  && result_feature.right==0 && result_feature.height==0  &&condition_T==0)
     {
@@ -560,7 +590,6 @@ void feature_process()
             T_index=1;
         }
         condition_T=1;
-        // angle_T=attitude.yaw;
     }
     else if(result_feature.height==1 && result_feature.left==0 && result_feature.right==1 && condition_T==0)
     {
@@ -572,7 +601,6 @@ void feature_process()
             T_index=1;
         }
         condition_T=1;
-        // angle_T=attitude.yaw;
     }
     else if(result_feature.height==1 && result_feature.left==1 && result_feature.right==0 && condition_T==0)
     {
@@ -584,7 +612,6 @@ void feature_process()
             T_index=1;
         }
         condition_T=1;
-        // angle_T=attitude.yaw;
     }
     
     // if(condition_corner==1)
@@ -602,7 +629,6 @@ void feature_process()
     //     {
     //         condition_corner=0;
     //     }
-        
     // }
     if( condition_T==1)
     {
@@ -614,39 +640,49 @@ void feature_process()
         else if(T_index_list[T_index-1]==-1)
         {
             speed_select_label=1;
+            if(condition_T_angle==0 && (image_feature.left_feature_flag2>ERROR_IMAGE_LINE-15||feature_raw_l>ERROR_IMAGE_LINE-15))
+            {
+                condition_T_angle=1;
+                angle_T=attitude.yaw;
+            }
             //左转
             turn(1);
         }
         else if(T_index_list[T_index-1]==1)
         {
             speed_select_label=1;
+            if(condition_T_angle==0 && (image_feature.right_feature_flag2>ERROR_IMAGE_LINE-15||feature_raw_r>ERROR_IMAGE_LINE-15))
+            {
+                condition_T_angle=1;
+                angle_T=attitude.yaw;
+            }
             //右转
             turn(2);
         }
         //左右转向退出
-        if(T_index_list[T_index-1]!=0 )
+        if(T_index_list[T_index-1]!=0 && condition_T_angle==1)
         {
-            // if(get_angle_err(angle_T) > 50.0f)
-            // {
-            //     condition_T=0;
-            // }
+            if(get_angle_err(angle_T) > 60.0f)
+            {
+                condition_T=0;
+                condition_T_angle=0;
+            }
         }
         //直行退出
         else
         {
-            // if(left_lost_times==0 && right_lost_times==0)
-            // {
-            //     condition_T=0;
-            // }
-            if(T_corner==1&&left_lost_times==0)
+            times_T++;
+            if(T_corner==1&&left_lost_times==0 &&times_T>3)
             {
                 T_corner=0;
                 condition_T=0;
+                times_T=0;
             }
-            else if(T_corner==2&&right_lost_times==0)
+            else if(T_corner==2&&right_lost_times==0 &&times_T>3)
             {
                 T_corner=0;
                 condition_T=0;
+                times_T=0;
             }
         }
     }
@@ -656,13 +692,13 @@ void feature_process()
 
 
 
-#define ERROR_IMAGE_LINE 48
+
 int error_image;
 int error_image_last;
 void get_error_image()
 {
     error_image_last=error_image;
-    error_image=94-mid_line_list[ERROR_IMAGE_LINE];
+    error_image=93-mid_line_list[ERROR_IMAGE_LINE];
 }
 
 void image_draw_pre()

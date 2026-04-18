@@ -1,6 +1,10 @@
 #ifndef __MENU_INTERFACE_H__
 #define __MENU_INTERFACE_H__
 
+#include "common_headfile.h"
+
+// #ifdef SMARTCAR_DEBUG_IPS
+
 #include "zf_device_ips200.h"
 #include "network_interface.h"
 #include "motor_control.h"
@@ -96,13 +100,12 @@ typedef enum _KeyCmd{
 extern MenuObjectIndex  current_menu_index; // 当前使用或显示的菜单项目索引
 extern MenuObject       menu_object_list[]; // 菜单项目列表
 
-extern int32 motor_left_pwm;
-extern int32 motor_right_pwm;
+
 
 void menu_interface_init(void);
 
 void menu_ips_print_info(void);
-void menu_network_print_info(void);
+void network_print_info(void);
 
 void menu_key_init(void);
 void menu_key_event_handle(void);
@@ -119,4 +122,5 @@ void menu_run_3(void);
 void menu_event_handle(void);
 void menu_refresh_screen(void);
 
+// #endif
 #endif

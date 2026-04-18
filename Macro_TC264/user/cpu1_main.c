@@ -33,6 +33,7 @@ void core1_main(void)
     uint32 image_time = 0;
     while (TRUE)
     {
+        
         if(mt9v03x_finish_flag)
         {
             image_process_flag = 0;

@@ -1,0 +1,10 @@
+#ifndef __COMMON_HEADFILE_H__
+#define __COMMON_HEADFILE_H__
+
+// Debug选项
+// #define SMARTCAR_DEBUG_NET_IMG
+#define SMARTCAR_DEBUG_NET_INFO
+// #define SMARTCAR_DEBUG_IPS
+// #define SMARTCAR_DEBUG_IPS_PRO
+
+#endif

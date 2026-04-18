@@ -7,6 +7,7 @@
 #include "zf_common_clock.h"
 #include "zf_driver_delay.h"
 #include <math.h>
+#include "zf_driver_timer.h"
 
 // 算法部分
 // PID算法
@@ -69,11 +70,18 @@ extern int16 motor_steering_speed;
 #define MOTION_CONTROL_PIT_INDEX        CCU61_CH0
 
 #define MOTOR_FUN_MIN_PWM_DUTY          2500 // 负压风扇最小工作PWM占空比
-#define MOTOR_FUN_NORMAL_PWM_DUTY       3000 // 负压风扇正常工作PWM占空比
+#define MOTOR_FUN_NORMAL_PWM_DUTY       4000 // 负压风扇正常工作PWM占空比
 
-#define MOTOR_SOFT_START_PWM            2800// 电机软启动PWM占空比
+#define MOTOR_SOFT_START_PWM            2400// 电机软启动PWM占空比
 
-#define MOTOR_FORWARD_NORMAL_SPEED      900 // 前进正常速度
+// 不进行速度决策
+#define MOTOR_FORWARD_NORMAL_SPEED      1100 // 前进正常速度
+
+// 进行速度决策
+#define MOTOR_FORWARD_LINEAR_SPEED      1200 // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       900  // 前进转角速度
+
+#define CURVE_SPEED_EXIT_ANGLE_TH       60.0f // 转弯速度锁定解除转角阈值
 
 extern uint8 motion_control_run_flag; // 作用于单电机速度环，让速度=0
 
@@ -87,6 +95,8 @@ extern int32 motor_left_speed;
 extern int32 motor_right_speed;
 
 extern int32 motor_forward_speed;
+
+extern uint8 forward_speed_decision_enable; // 0表示不执行速度决策，1表示执行速度决策
 
 void fuzzy_pid_update(PIDParam* pid_param);
 void pid_param_check(PIDParam* pid_param);

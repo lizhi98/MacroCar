@@ -1,4 +1,7 @@
 #include "menu_interface.h"
+
+// #ifdef SMARTCAR_DEBUG_IPS
+
 extern uint32 image_to_image_time;
 extern uint32 image_process_time;
 
@@ -62,7 +65,7 @@ extern volatile uint8 image_process_flag; // 图像处理标志位，0表示CPU1
 
 void menu_ips_print_info(void){
     if(image_process_flag){ // 确保CPU1已经处理完图像了，CPU0可以访问图像数据了
-        ips200_show_binary_image_with_line(0, 0, mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像并带辅助线
+        // ips200_show_binary_image_with_line(0, 0, mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像并带辅助线
         // ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H);
     }
     static char info_buffer[64];
@@ -80,7 +83,7 @@ void menu_ips_print_info(void){
     ips200_show_string(0, 230, info_buffer);
     sprintf(info_buffer, "L:%2u R:%2u,H %2u",result_feature.left, result_feature.right, result_feature.height);
     ips200_show_string(0, 250, info_buffer);
-    sprintf(info_buffer, "TH:%3u I_T:%2lu L:%3u R:%3u", img_threshold, image_to_image_time, left_lost_times, right_lost_times);
+    sprintf(info_buffer, "TH:%3u I_T:%2lu L:%3u R:%3u", img_threshold, image_process_time, left_lost_times, right_lost_times);
     ips200_show_string(0, 270, info_buffer);
 }
 
@@ -128,13 +131,15 @@ void no_screen_key_event_handle(void){
 }
 
 
-void menu_network_print_info(void){
+void network_print_info(void){
     static char info_buffer[120];
-    sprintf(info_buffer, "%d,%d,%d,%d,%f,%f,%u,%u,%d,%ld,%u,%u\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%f,%f,%u,%u,%d,%ld,%u,%u,%d,%d,%u,%u,%u,%u,%u \0",
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
         attitude.yaw, gyro_current_data.gyro_z,
-        left_line_list[45],right_line_list[45],error_image,image_to_image_time,condition_T,T_index
+        left_line_list[45],right_line_list[45],error_image,image_to_image_time,condition_T,T_index,
+        imu660rc_gyro_z,battery_protection_adc_value,img_threshold,image_feature.right_feature_flag2,image_feature.left_feature_flag2,
+        feature_raw_l,feature_raw_r
     );
     network_vofa_send_str(info_buffer);
 }
@@ -371,3 +376,5 @@ void menu_interface_init(){
         }
     }
 }
+
+// #endif

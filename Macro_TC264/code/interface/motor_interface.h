@@ -19,7 +19,7 @@
 #define MOTOR_FUN_PWM_PIN               ATOM1_CH0_P21_2
 
 #define MOTOR_PWM_FREQUENCY             17000  // 17kHz
-#define MOTOR_PWM_MAX_DUTY              6000   // 最大占空比
+#define MOTOR_PWM_MAX_DUTY              7000   // 最大占空比
 #define MOTOR_PWM_INIT_DUTY             0  // 最小占空比
 
 // 编码器引脚
@@ -37,7 +37,8 @@ typedef enum {
 } MotorType;
 
 extern uint8 motor_interface_power_flag; // 作用于PWM输出，让PWM=0
-
+extern int32 motor_left_pwm;
+extern int32 motor_right_pwm;
 void motor_interface_pit_callback(void);
 
 void motor_get_speed(int32 * left_speed, int32 * right_speed);

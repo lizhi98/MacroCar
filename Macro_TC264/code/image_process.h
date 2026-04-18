@@ -30,7 +30,7 @@ typedef signed long long    int64;
 #include "zf_device_mt9v03x_double.h"
 
 #endif
-// #include "quaternion.h"
+#include "quaternion.h"
 #define image_w  (MT9V03X_W)
 #define image_h  (MT9V03X_H)
 
@@ -61,6 +61,9 @@ typedef struct
 
 extern uint8 left_lost_times;
 extern uint8 right_lost_times;
+extern uint8 feature_raw_l;
+extern uint8 feature_raw_r;
+extern FeatureDetectResult image_feature;
 // extern int condition;
 
 // extern int feature_corner_l;
@@ -80,8 +83,7 @@ extern uint8 left_line_list[MT9V03X_H];
 extern uint8 right_line_list[MT9V03X_H];
 extern uint8 mid_line_list[MT9V03X_H];
 
-
-
+extern uint8 speed_select_label;
 
 extern feature_result result_feature;
 

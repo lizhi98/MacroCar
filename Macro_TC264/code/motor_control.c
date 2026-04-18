@@ -37,12 +37,12 @@ static const float fuzzy_pid_rule_table_kd[7][7] = {
 //     .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
 //     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 // };
-
 // PIDParam motor_right_speed_pid  = {
 //     .type = PID_INC,
 //     .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
 //     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 // };
+
 PIDParam motor_left_speed_pid   = {
     .type = PID_INC,
     .kp = 2.2f, .ki = 0.55f, .kd = 0.0f,
@@ -63,7 +63,7 @@ PIDParam motor_right_speed_pid  = {
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 7.0f, .ki = 0.0f, .kd = 0.5f,
+    .kp = 6.9f, .ki = 0.0f, .kd = 0.66f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -71,7 +71,7 @@ PIDParam motion_image_steering_pid = {
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 2.0f, .ki = 0.0f, .kd = 0.11f,
+    .kp = 1.4f, .ki = 0.0f, .kd = 0.16f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -80,6 +80,7 @@ uint8 motion_control_pit_run_flag = 0;  // 作用于PIT回调，让行进电机P
 
 int16 motion_image_steering_speed = 0;  // 图像要求的转向速度
 int16 motor_steering_speed = 0;         // 实际转向速度
+
 // 电机
 int16 motor_left_current_pwm_duty = 0;
 int16 motor_right_current_pwm_duty = 0;
@@ -166,13 +167,12 @@ void pid_param_check(PIDParam* pid_param){
 }
 
 
-/* 
- *  PID计算器
+/* PID计算器
  *  pid_param: PID参数结构体指针
  *  target: 目标值
  *  current: 当前值
- *  返回值: 位置式PID返回输出，增量式PID返回增量
-*/
+ *  返回值: 位置式PID返回输出，增量式PID返回增量 
+ * */
 float PID_calculate(PIDParam* pid_param, float target, float current){
     float output = 0.0f;
     // 算出误差和误差变化率
@@ -253,7 +253,7 @@ void motion_control_pit_callback(){
         return;
     }
     // 图像要求的转向环
-    if(motor_pit_count % 4 == 0){ // 转向环20ms运行一次
+    if(motor_pit_count % 2 == 0){ // 转向环10ms运行一次
         motion_image_steering_pid.previous_error = (float)error_image_last;
         motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)error_image); // 这里的目标值和当前值需要根据具体应用修改
         // motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)0.0); // 这里的目标值和当前值需要根据具体应用修改
@@ -279,8 +279,10 @@ void motion_control_pit_callback(){
         motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? -motor_steering_speed + motor_forward_speed : 0), (float)motor_right_speed);
     }
     motor_traveling_soft_start(); // 行进电机软启动
+
     // motor_left_current_pwm_duty = -2500;
-    // motor_right_current_pwm_duty = -2500 ;
+    // motor_right_current_pwm_duty = -2500;
+
     // 应用PWM
     motor_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
 }
@@ -331,7 +333,43 @@ void motor_traveling_soft_start(void){
     }
 }
 
+uint8 forward_speed_decision_enable = 0; // 0表示不执行速度决策，1表示执行速度决策
+
+static uint8    curve_speed_lock = 0;
+static float    curve_speed_lock_angle = 0.0f; // 锁定转弯速度时的转向角
+static uint32   turn_time_start = 0; // 转弯开始时间
 // 速度决策
 void forward_speed_decision(void){
-    motor_forward_speed = MOTOR_FORWARD_NORMAL_SPEED; 
+    if(!forward_speed_decision_enable){
+        motor_forward_speed = MOTOR_FORWARD_NORMAL_SPEED;
+        return;
+    }else{
+        if(speed_select_label){ // 进行速度决策
+            curve_speed_lock_angle = attitude.yaw; // 记录当前转向角
+            turn_time_start = system_getval_ms(); // 记录转弯开始时间
+            curve_speed_lock = 1;
+        }
+        if(!curve_speed_lock){
+            motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED; // 直线行驶时正常速度
+        }else{
+            motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED; // 转弯时降低速度
+            // 当弯道转角达到限度时，解除转弯速度锁定
+            // if(speed_select_label == 0  && fabs(get_angle_err(curve_speed_lock_angle)) > CURVE_SPEED_EXIT_ANGLE_TH){
+            //     curve_speed_lock = 0;
+            // }
+            if(fabs(get_angle_err(curve_speed_lock_angle)) > CURVE_SPEED_EXIT_ANGLE_TH){
+                curve_speed_lock = 0;
+                speed_select_label = 0; // 解除转弯速度锁定后，根据当前图像结果重新选择速度
+            }
+            // 转弯超时停车
+            if(system_getval_ms() > turn_time_start){ // 防止系统时钟溢出导致车辆误停车
+                if(system_getval_ms() - turn_time_start > 3000){ // 转弯超过3秒
+                    motion_control_run_flag = 0; // 停车
+                }
+            }
+        }
+        
+        
+        
+    }
 }
