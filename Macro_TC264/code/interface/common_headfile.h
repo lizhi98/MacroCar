@@ -3,8 +3,8 @@
 
 // Debug选项
 // #define SMARTCAR_DEBUG_NET_IMG
-#define SMARTCAR_DEBUG_NET_INFO
-// #define SMARTCAR_DEBUG_IPS
+// #define SMARTCAR_DEBUG_NET_INFO
+#define SMARTCAR_DEBUG_IPS
 // #define SMARTCAR_DEBUG_IPS_PRO
 
 #endif
