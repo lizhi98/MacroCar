@@ -5,7 +5,7 @@
 #include "battery_protection.h"
 #include "gyroscope_interface.h"
 #include "menu_interface.h"
-#include "menu_pro.h"
+// #include "menu_pro.h"
 
 #pragma section all "cpu0_dsram"
 // 将本语句与#pragma section all restore语句之间的全局变量都放在CPU0的RAM中
@@ -20,12 +20,8 @@ int core0_main(void)
     debug_init();                   // 初始化默认调试串口
     system_start();                 // 启动系统计时器，计算车上电时间
     // 外设初始化
-#ifdef SMARTCAR_DEBUG_IPS
-    ips200_init(IPS200_TYPE_SPI);   // 初始化IPS200显示屏
+#if defined(SMARTCAR_DEBUG_IPS) || defined(SMARTCAR_DEBUG_IPS_PRO)
     menu_interface_init();          // 菜单初始化
-#endif
-#ifdef SMARTCAR_DEBUG_IPS_PRO
-    menu_pro_init();               // 菜单初始化
 #endif
     menu_key_init();                // 按键初始化
     gyro_init();                    // 陀螺仪初始化
@@ -35,33 +31,34 @@ int core0_main(void)
     
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
     
-    motor_fun_pwm_duty  = 0;       // 负压风扇PWM初始占空比
-    
-    motor_interface_power_flag = 0;     // 使能所有电机PWM输出
-    motion_control_run_flag = 1;        // 电机运动标志位，这个标志位为0时，电机速度环的目标速度为0
-    
-    motion_control_pit_run_flag = 0;    // 电机速度闭环算法运行标志位
+    motor_interface_power_flag = 0;     // 全部电机PWM输出标志位，0:PWM输出为0  1:PWM输出正常
+    motion_control_run_flag = 1;        // 行进电机运动标志位，0:电机速度环的目标速度为0，负压不变  1:电机速度盒负压电压受到算法控制
+    motion_control_pit_run_flag = 0;    // 行进电机速度闭环算法运行标志位，0:速度闭环算法不运行，PWM输出不再变化!!! 1:速度闭环算法运行
+    forward_speed_decision_enable = 0;  // 速度决策标志位，0:不执行速度决策  1:执行速度决策
 #ifdef SMARTCAR_DEBUG_IPS
     menu_show_main();                   // 显示主菜单
 #endif
-    uint8 battery_check_flag = 0;
+    uint8 battery_checked_flag = 0;
     while (TRUE)
     {
+        // if(T_index == 7){
+        //     motor_interface_power_flag = 0;
+        // }
 #ifdef SMARTCAR_DEBUG_IPS
-        menu_key_event_handle();
+        menu_get_key_event();
         menu_event_handle(); // 菜单事件处理函数，根据按键状态切换菜单和修改变量值
 #else
         no_screen_key_event_handle(); // 没有屏幕时的按键事件处理
 #endif
         // 电池保护，运行1s后检测，防止电机启动电流过大导致电池电压瞬间下降误触发保护
-        if(system_getval_ms() > 1000 && !battery_check_flag){
+        if(system_getval_ms() > 1000 && !battery_checked_flag){
             // 电压检测
             if(battery_protection_check()){
                 motor_interface_power_flag = 0; // 关闭电机PWM输出
                 zf_assert(!battery_protection_check()); // 电池电压过低
                 while(1);
             }
-            battery_check_flag = 1;
+            battery_checked_flag = 1;
         }
 #ifdef SMARTCAR_DEBUG_NET_INFO
         // 每隔4ms发送一次网络调试信息

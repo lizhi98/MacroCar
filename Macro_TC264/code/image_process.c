@@ -220,7 +220,7 @@ void search_line()
                 }
             }
         }
-        if(i<90)
+        if(i<80)
         {
             if(left_line_list[i]==0 &&image[i][left_line_list[i]]==white_point)
             {
@@ -349,15 +349,15 @@ void detect_feature()
     {
         for(int i=MT9V03X_H-31;i>=feature_raw;i--)
         {
-            if((left_line_list[i]-left_line_list[i-1]>15 || left_line_list[i]-left_line_list[i-2]>15 ||left_line_list[i]-left_line_list[i-3]>15 || left_line_list[i]-left_line_list[i-4]>15)
-                && (left_line_list[i-5]==0 || left_line_list[i-4]==0 || left_line_list[i-3]==0 || left_line_list[i-2]==0 || left_line_list[i-1]==0 || left_line_list[i]==0 ||left_line_list[i+1]==0 || left_line_list[i+2]==0 || left_line_list[i+3]==0 || left_line_list[i+4]==0 || left_line_list[i+5]==0 
-                    ||left_line_list[i-6]==0 || left_line_list[i+6]==0 || left_line_list[i-7]==0 || left_line_list[i+7]==0 || left_line_list[i-8]==0 || left_line_list[i+8]==0 || left_line_list[i-9]==0 || left_line_list[i+9]==0 || left_line_list[i-10]==0 || left_line_list[i+10]==0))
+            if((left_line_list[i]-left_line_list[i-1]>20 || left_line_list[i]-left_line_list[i-2]>20 ||left_line_list[i]-left_line_list[i-3]>20 || left_line_list[i]-left_line_list[i-4]>20 || left_line_list[i]-left_line_list[i-5]>20 || left_line_list[i]-left_line_list[i-6]>20 || left_line_list[i]-left_line_list[i-7]>20 || left_line_list[i]-left_line_list[i-8]>20 || left_line_list[i]-left_line_list[i-9]>20 || left_line_list[i]-left_line_list[i-10]>20) &&
+                (left_line_list[i-5]==0 || left_line_list[i-4]==0 || left_line_list[i-3]==0 || left_line_list[i-2]==0 || left_line_list[i-1]==0 || left_line_list[i]==0 ||left_line_list[i+1]==0 || left_line_list[i+2]==0 || left_line_list[i+3]==0 || left_line_list[i+4]==0 || left_line_list[i+5]==0 
+                ||left_line_list[i-6]==0 || left_line_list[i+6]==0 || left_line_list[i-7]==0 || left_line_list[i+7]==0 || left_line_list[i-8]==0 || left_line_list[i+8]==0 || left_line_list[i-9]==0 || left_line_list[i+9]==0 || left_line_list[i-10]==0 || left_line_list[i+10]==0))
             {   
                 feature_label = 1;
                 feature_raw_l=(uint8)i;
                 break;
             }
-            else if((right_line_list[i-1]-right_line_list[i]>15 || right_line_list[i-2]-right_line_list[i]>15 || right_line_list[i-3]-right_line_list[i]>15 || right_line_list[i-4]-right_line_list[i]>15) &&
+            else if((right_line_list[i-1]-right_line_list[i]>20 || right_line_list[i-2]-right_line_list[i]>20 || right_line_list[i-3]-right_line_list[i]>20 || right_line_list[i-4]-right_line_list[i]>20) &&
                     (right_line_list[i-5]==MT9V03X_W-1 || right_line_list[i-4]==MT9V03X_W-1 || right_line_list[i-3]==MT9V03X_W-1 || right_line_list[i-2]==MT9V03X_W-1 || right_line_list[i-1]==MT9V03X_W-1 || right_line_list[i]==MT9V03X_W-1 || right_line_list[i+1]==MT9V03X_W-1 || right_line_list[i+2]==MT9V03X_W-1 || right_line_list[i+3]==MT9V03X_W-1 || right_line_list[i+4]==MT9V03X_W-1 || right_line_list[i+5]==MT9V03X_W-1 
                     ||right_line_list[i-6]==MT9V03X_W-1 || right_line_list[i+6]==MT9V03X_W-1 || right_line_list[i-7]==MT9V03X_W-1 || right_line_list[i+7]==MT9V03X_W-1 || right_line_list[i-8]==MT9V03X_W-1 || right_line_list[i+8]==MT9V03X_W-1 || right_line_list[i-9]==MT9V03X_W-1 || right_line_list[i+9]==MT9V03X_W-1 || right_line_list[i-10]==MT9V03X_W-1 || right_line_list[i+10]==MT9V03X_W-1))
             {
@@ -369,18 +369,20 @@ void detect_feature()
     }
     if(feature_raw_l!=0)
     {
-        for(int i=feature_raw_l;i>=5;i--)
-        {
-            if(image[i-1][left_line_list[feature_raw_l-1]]==black_point)
-            {
-                detect_feature_row=(uint8)i;
-                break;
-            }
-        }
+        //问题所在，无法得到detect_feature_row
+        // for(int i=feature_raw_l;i>=10;i--)
+        // {
+        //     if(image[i-1][left_line_list[feature_raw_l-1]]==black_point)
+        //     {
+        //         detect_feature_row=(uint8)i;
+        //         break;
+        //     }
+        // }
+        detect_feature_row=feature_raw_l-10;
     }
     else if(feature_raw_r!=0)
     {
-        for(int i=feature_raw_r;i>=5;i--)
+        for(int i=feature_raw_r;i>=10;i--)
         {
             if(image[i-1][right_line_list[feature_raw_r-1]]==black_point)
             {
@@ -416,15 +418,16 @@ void feature_square()
     if((feature_label==1 && detect_feature_row!=0)||condition_T!=0)
     {
         int detect_row=0;
-        if(detect_feature_row>15)
+        if(detect_feature_row>20)
         {
-            detect_row=height_start_raw-3;
+            detect_row=height_start_raw-5;
         }
-        else if(detect_feature_row!=0)
+        // else if(detect_feature_row!=0)
+        // {
+        //     detect_row=detect_feature_row-5;
+        // }
+       else if(detect_feature_row==0)    
         {
-            detect_row=detect_feature_row-3;
-        }
-        else{
             detect_row=height_start_raw+10;
         }
         int left_feature_col_count[3]={0};
@@ -440,6 +443,10 @@ void feature_square()
                 else if(image[i-1][j]==white_point && image[i][j]==white_point && image[i+1][j]==black_point)
                 {
                     image_feature.left_feature_flag2=i;
+                }
+                if(image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0)
+                {
+                    break;
                 }
             }
             left_feature_col_count[(j-left_start_col)/2]=image_feature.left_feature_flag2-image_feature.left_feature_flag1;
@@ -458,10 +465,14 @@ void feature_square()
                 {
                     image_feature.right_feature_flag2=i;
                 }
+                if(image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0)
+                {
+                    break;
+                }
             }
             right_feature_col_count[(j-(right_start_col-5))/2]=image_feature.right_feature_flag2-image_feature.right_feature_flag1;
         }
-        if(abs(left_feature_col_count[0]-left_feature_col_count[1])<3 && abs(left_feature_col_count[0]-left_feature_col_count[2])<3 && abs(left_feature_col_count[1]-left_feature_col_count[2])<3 &&left_feature_col_count[0]>2 && left_feature_col_count[1]>2 && left_feature_col_count[2]>2)
+        if(abs(left_feature_col_count[0]-left_feature_col_count[1])<5 && abs(left_feature_col_count[0]-left_feature_col_count[2])<5 && abs(left_feature_col_count[1]-left_feature_col_count[2])<5 &&left_feature_col_count[0]>1 && left_feature_col_count[1]>1 && left_feature_col_count[2]>1)
         {
             result_feature.left=1;
         }
@@ -532,10 +543,15 @@ void turn(uint8 direction)
 
 
 uint8 T_index=0;
-#define ERROR_IMAGE_LINE 47
-// #define index_num 6
-// int T_index_list[index_num]={1,-1,-1,1,0,0};
-// int T_index_list[index_num]={-1,1,1,-1};
+#define ERROR_IMAGE_LINE 40
+#define index_sum_num 6
+// int T_index_list[index_num]={0,0,0,0,0,0};   
+// int T_index_list[index_sum_num]={1,-1,-1,1,0,0};
+int T_index_list[index_sum_num]={-1,1,1,-1,0,0};
+// #define index_sum_num 8
+// int T_index_list[index_sum_num]={-1,1,1,-1,-1,1,1,-1};
+// #define index_num 8
+// int T_index_list[index_num]={1,-1,-1,1,1,-1,-1,1};
 // 科目三方案1
 // #define index_num 12
 // int T_index_list[index_num]={1,-1,1,1,1,-1,-1,0,-1,0,1,0};
@@ -544,12 +560,19 @@ uint8 T_index=0;
 // int T_index_list[index_num]={0,0,0,1,0,-1,-1,1,1,1,0,0,1};
 
 // 校赛1 科目3
-#define index_num 15
-int T_index_list[index_num]={1,-1,1,1,0,1,-1,-1,-1,0,0,1,0,0,0};
+// #define index_num 15
+// int T_index_list[index_num]={1,-1,1,1,0,1,-1,-1,-1,0,0,1,0,0,0};
 
 // 校赛1 科目3 
 // #define index_num 16
 // int T_index_list[index_num]={1,-1,1,0,1,-1,1,-1,-1,-1,0,0,1,0,0,0};
+
+// 校赛2 科目3 
+// #define index_sum_num 6
+// int T_index_list[index_sum_num]={0,0,0,-1,-1,0};
+// #define index_sum_num 6
+// int T_index_list[index_sum_num]={0,1,1,0,0,0};
+// int * T_index_list = {0};
 
 
 uint8 speed_select_label = 0;
@@ -559,6 +582,7 @@ float angle_T=0.0f;
 float angle_corner=0.0f;
 int times_T=0;
 uint8 condition_T_angle=0;
+#define FEATURE_T_GYRO_Z_THRESHOLD 800
 void feature_process()
 {
     detect_feature();
@@ -581,33 +605,33 @@ void feature_process()
         // angle_corner=attitude.yaw;
     }
     // T
-    else if(result_feature.height==0&& result_feature.left==1 && result_feature.right==1 && condition_T==0  )
+    else if(result_feature.height==0&& result_feature.left==1 && result_feature.right==1 && condition_T==0 )
     {
         
         T_index++;
-        if(T_index>index_num)
+        if(T_index>index_sum_num)
         {
             T_index=1;
         }
         condition_T=1;
     }
-    else if(result_feature.height==1 && result_feature.left==0 && result_feature.right==1 && condition_T==0)
+    else if(result_feature.height==1 && result_feature.left==0 && result_feature.right==1 && condition_T==0 )
     {
         
         T_corner=2;
         T_index++;
-        if(T_index>index_num)
+        if(T_index>index_sum_num)
         {
             T_index=1;
         }
         condition_T=1;
     }
-    else if(result_feature.height==1 && result_feature.left==1 && result_feature.right==0 && condition_T==0)
+    else if(result_feature.height==1 && result_feature.left==1 && result_feature.right==0 && condition_T==0 )
     {
         
         T_corner=1;
         T_index++;
-        if(T_index>index_num)
+        if(T_index>index_sum_num)
         {
             T_index=1;
         }
@@ -635,7 +659,19 @@ void feature_process()
         if(T_index_list[T_index-1]==0)
         {
             //直行
-            turn(0);    
+            turn(0);   
+            if(T_corner==1&&left_lost_times==0)
+            {
+                T_corner=0;
+                condition_T=0;
+                times_T=0;
+            }
+            else if(T_corner==2&&right_lost_times==0)
+            {
+                T_corner=0;
+                condition_T=0;
+                times_T=0;
+            } 
         }
         else if(T_index_list[T_index-1]==-1)
         {
@@ -666,25 +702,26 @@ void feature_process()
             {
                 condition_T=0;
                 condition_T_angle=0;
+                T_corner=0;
             }
         }
         //直行退出
-        else
-        {
-            times_T++;
-            if(T_corner==1&&left_lost_times==0 &&times_T>3)
-            {
-                T_corner=0;
-                condition_T=0;
-                times_T=0;
-            }
-            else if(T_corner==2&&right_lost_times==0 &&times_T>3)
-            {
-                T_corner=0;
-                condition_T=0;
-                times_T=0;
-            }
-        }
+        // else
+        // {
+        //     times_T++;
+        //     if(T_corner==1&&left_lost_times==0)
+        //     {
+        //         T_corner=0;
+        //         condition_T=0;
+        //         times_T=0;
+        //     }
+        //     else if(T_corner==2&&right_lost_times==0)
+        //     {
+        //         T_corner=0;
+        //         condition_T=0;
+        //         times_T=0;
+        //     }
+        // }
     }
    
 }

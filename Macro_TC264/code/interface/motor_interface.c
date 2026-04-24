@@ -67,8 +67,8 @@ void motor_set_pwm(int16 * left_pwm, int16 *right_pwm){
             // 无刷电机PWM设置代码
             break;
         case BRUSHED_MOTOR:
-            gpio_set_level(MOTOR_LEFT_DIR_PIN,  (motor_left_pwm  > 0) ? 1 : 0);
-            gpio_set_level(MOTOR_RIGHT_DIR_PIN, (motor_right_pwm > 0) ? 1 : 0);
+            gpio_set_level(MOTOR_LEFT_DIR_PIN,  (motor_left_pwm  >= 0) ? 0 : 1);
+            gpio_set_level(MOTOR_RIGHT_DIR_PIN, (motor_right_pwm >= 0) ? 0 : 1);
             pwm_set_duty(MOTOR_LEFT_PWM_PIN,  abs(motor_left_pwm));
             pwm_set_duty(MOTOR_RIGHT_PWM_PIN, abs(motor_right_pwm));
             break;
@@ -95,7 +95,7 @@ void motor_fun_set_pwm(uint16 * target_pwm){
 // 主要是用于获取速度
 void motor_interface_pit_callback(void){
     // 获取速度
-    motor_left_speed  = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX)  * -10 / motor_get_speed_pit_time;
+    motor_left_speed  = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX)  * 10 / motor_get_speed_pit_time;
     motor_right_speed = encoder_get_count(MOTOR_RIGHT_ENCODER_INDEX) * -10  / motor_get_speed_pit_time;  // 转换速度不受PIT时间影响
     // 清零计数
     encoder_clear_count(MOTOR_LEFT_ENCODER_INDEX);

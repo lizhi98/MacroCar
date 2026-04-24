@@ -6,10 +6,10 @@
 #include "seekfree_assistant_interface.h"
 #include "zf_device_mt9v03x_double.h"
 
-#define WIFI_SSID           "XIAOMI_GoGoGo"
-#define WIFI_PASSWORD       "9894653xxk"
+#define WIFI_SSID           "TianGang"
+#define WIFI_PASSWORD       "12341234"
 
-#define HOST_IP             "192.168.31.98"
+#define HOST_IP             "192.168.110.62"
 #define HOST_PORT           "9895"
 #define HOST_CONNECT_MODE   "TCP"
 
