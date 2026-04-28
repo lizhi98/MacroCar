@@ -9,7 +9,7 @@
 #define WIFI_SSID           "TianGang"
 #define WIFI_PASSWORD       "12341234"
 
-#define HOST_IP             "192.168.110.62"
+#define HOST_IP             "192.168.110.61"
 #define HOST_PORT           "9895"
 #define HOST_CONNECT_MODE   "TCP"
 

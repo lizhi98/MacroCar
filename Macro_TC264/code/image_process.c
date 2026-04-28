@@ -544,10 +544,10 @@ void turn(uint8 direction)
 
 uint8 T_index=0;
 #define ERROR_IMAGE_LINE 40
-#define index_sum_num 6
+// #define index_sum_num 6
 // int T_index_list[index_num]={0,0,0,0,0,0};   
 // int T_index_list[index_sum_num]={1,-1,-1,1,0,0};
-int T_index_list[index_sum_num]={-1,1,1,-1,0,0};
+// int T_index_list[index_sum_num]={-1,1,1,-1,0,0};
 // #define index_sum_num 8
 // int T_index_list[index_sum_num]={-1,1,1,-1,-1,1,1,-1};
 // #define index_num 8
@@ -568,8 +568,8 @@ int T_index_list[index_sum_num]={-1,1,1,-1,0,0};
 // int T_index_list[index_num]={1,-1,1,0,1,-1,1,-1,-1,-1,0,0,1,0,0,0};
 
 // 校赛2 科目3 
-// #define index_sum_num 6
-// int T_index_list[index_sum_num]={0,0,0,-1,-1,0};
+#define index_sum_num 6
+int T_index_list[index_sum_num]={0,0,0,-1,-1,0};
 // #define index_sum_num 6
 // int T_index_list[index_sum_num]={0,1,1,0,0,0};
 // int * T_index_list = {0};
