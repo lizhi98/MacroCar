@@ -280,8 +280,8 @@ void motion_control_pit_callback(){
     }
     motor_traveling_soft_start(); // 行进电机软启动
 
-    // motor_left_current_pwm_duty = -2500;
-    // motor_right_current_pwm_duty = -2500;
+    motor_left_current_pwm_duty = 0;
+    motor_right_current_pwm_duty = 0;
 
     // 应用PWM
     motor_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
