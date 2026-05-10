@@ -31,18 +31,20 @@ int core0_main(void)
     
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
     
-    motor_interface_power_flag = 0;     // 全部电机PWM输出标志位，0:PWM输出为0  1:PWM输出正常
+    motor_traveling_power_flag = 0;     // 全部电机PWM输出标志位，0:PWM输出为0  1:PWM输出正常
     motion_control_run_flag = 1;        // 行进电机运动标志位，0:电机速度环的目标速度为0，负压不变  1:电机速度盒负压电压受到算法控制
-    motion_control_pit_run_flag = 0;    // 行进电机速度闭环算法运行标志位，0:速度闭环算法不运行，PWM输出不再变化!!! 1:速度闭环算法运行
     forward_speed_decision_enable = 0;  // 速度决策标志位，0:不执行速度决策  1:执行速度决策
 #ifdef SMARTCAR_DEBUG_IPS
     menu_show_main();                   // 显示主菜单
 #endif
     uint8 battery_checked_flag = 0;
+
+    // 延迟一段时间，等待负压自检
+    system_delay_ms(500);
     while (TRUE)
     {
         // if(T_index == 7){
-        //     motor_interface_power_flag = 0;
+        //     motor_traveling_power_flag = 0;
         // }
 #ifdef SMARTCAR_DEBUG_IPS
         menu_get_key_event();
@@ -54,7 +56,7 @@ int core0_main(void)
         if(system_getval_ms() > 1000 && !battery_checked_flag){
             // 电压检测
             if(battery_protection_check()){
-                motor_interface_power_flag = 0; // 关闭电机PWM输出
+                motor_traveling_power_flag = 0; // 关闭电机PWM输出
                 zf_assert(!battery_protection_check()); // 电池电压过低
                 while(1);
             }

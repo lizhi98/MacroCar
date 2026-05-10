@@ -349,10 +349,9 @@ void menu_run_1(void){
 }
 
 void menu_run_2(void){
-    motor_interface_power_flag = 1; // 使能电机PWM输出
-    motor_fun_soft_start(); // 负压风扇软启动
-    system_delay_ms(500);
-    motion_control_pit_run_flag = 1;
+    motor_fun_soft_start();         // 负压风扇软启动
+    motor_traveling_power_flag = 1; // 使能行进电机PWM输出
+    motor_traveling_pid_run_flag = 1; // 使能行进电机速度环运行
 }
 
 void menu_run_3(void){
@@ -368,13 +367,13 @@ void menu_key_init(void){
 void network_print_info(void){
     static char info_buffer[120];
     sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%u,%u,%d,%ld,%u,%u,%d,%d,%u,%u,%u,%u,%u,%u,%d,%u,%u,%u,%u\0",
-        motor_forward_speed,
-        motor_left_speed,motor_right_speed,
-        motor_left_pwm, motor_right_pwm,
-        attitude.yaw, gyro_current_data.gyro_z,
-        left_line_list[45],right_line_list[45],error_image,image_to_image_time,condition_T,T_index,
-        imu660rc_gyro_z,battery_protection_adc_value,img_threshold,image_feature.right_feature_flag2,image_feature.left_feature_flag2,
-        feature_raw_l,feature_raw_r,left_lost_times,right_lost_times,detect_feature_row,result_feature.left,result_feature.right,result_feature.height
+        motor_forward_speed, // 1
+        motor_left_speed, motor_right_speed, // 2 3
+        motor_left_pwm, motor_right_pwm, // 4 5
+        attitude.yaw, gyro_current_data.gyro_z, // 6 7
+        left_line_list[45], right_line_list[45], error_image, image_to_image_time, condition_T, T_index, // 8 9 10 11 12 13
+        imu660rc_gyro_z,battery_protection_adc_value,img_threshold,image_feature.right_feature_flag2,image_feature.left_feature_flag2, // 14 15 16 17 18
+        feature_raw_l,feature_raw_r,left_lost_times,right_lost_times,detect_feature_row,result_feature.left,result_feature.right,result_feature.height // 19 20 21 22 23 24 25 26
     );
     network_vofa_send_str(info_buffer);
 }
@@ -394,7 +393,7 @@ void no_screen_key_event_handle(void){
     }
     if((key_get_state(KEY_4) == KEY_SHORT_PRESS) || (key_get_state(KEY_4) == KEY_LONG_PRESS)){
         // 保留这个按键作为紧急停止按键，按下就停止电机运动
-        motor_interface_power_flag = 0; // 关闭所有电机PWM输出
+        motor_traveling_power_flag = 0; // 关闭所有电机PWM输出
         key_clear_state(KEY_4);
     }
 }

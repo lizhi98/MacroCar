@@ -29,7 +29,7 @@
 //     }
 //     if((key_get_state(KEY_4) == KEY_SHORT_PRESS) || (key_get_state(KEY_4) == KEY_LONG_PRESS)){
 //         // 保留这个按键作为紧急停止按键，按下就停止电机运动
-//         motor_interface_power_flag = 0; // 关闭所有电机PWM输出
+//         motor_traveling_power_flag = 0; // 关闭所有电机PWM输出
 //         key_clear_state(KEY_4);
 //     }
 // }
@@ -39,7 +39,7 @@
 // }
 
 // void menu_run_2(void){
-//     motor_interface_power_flag = 1; // 使能电机PWM输出
+//     motor_traveling_power_flag = 1; // 使能电机PWM输出
 //     motor_fun_soft_start(); // 负压风扇软启动
 //     system_delay_ms(500);
 //     motion_control_pit_run_flag = 1;

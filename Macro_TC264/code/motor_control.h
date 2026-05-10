@@ -69,24 +69,21 @@ extern int16 motor_steering_speed;
 #define MOTION_CONTROL_PIT_TIME         5  // 单位ms
 #define MOTION_CONTROL_PIT_INDEX        CCU61_CH0
 
-#define MOTOR_FUN_MIN_PWM_DUTY          2500 // 负压风扇最小工作PWM占空比
-#define MOTOR_FUN_NORMAL_PWM_DUTY       4800 // 负压风扇正常工作PWM占空比
-
-#define MOTOR_SOFT_START_PWM            2800// 电机软启动PWM占空比
+#define MOTOR_SOFT_START_PWM            2400// 电机软启动PWM占空比
 
 // 不进行速度决策
-#define MOTOR_FORWARD_NORMAL_SPEED      1200  // 前进正常速度
-
+#define MOTOR_FORWARD_NORMAL_SPEED      800  // 前进正常速度
 
 // 进行速度决策
 #define MOTOR_FORWARD_LINEAR_SPEED      1600    // 前进直线速度
-#define MOTOR_FORWARD_CURVE_SPEED       1200  // 前进转角速度
+#define MOTOR_FORWARD_CURVE_SPEED       1200    // 前进转角速度
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   33      // 负压风扇直线行驶开度
+#define MOTOR_FUN_CURVE_OPEN_PERCENT    35      // 负压风扇转弯行驶开度
 
 #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 
 extern uint8 motion_control_run_flag; // 作用于单电机速度环，让速度=0
-
-extern uint8 motion_control_pit_run_flag; // 电机速度闭环算法运行标志
+extern uint8 motor_traveling_pid_run_flag; // 作用于行进电机速度环，不让速度环运行
 
 extern int16 motor_left_current_pwm_duty;
 extern int16 motor_right_current_pwm_duty;
