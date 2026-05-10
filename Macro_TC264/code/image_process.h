@@ -31,8 +31,7 @@ typedef signed long long    int64;
 
 #endif
 #include "quaternion.h"
-#include "gyroscope_interface.h"
-#define image_w  (MT9V03X_W)
+#define image_w  (MT9V03X_W-1)
 #define image_h  (MT9V03X_H)
 
 
@@ -99,7 +98,7 @@ extern feature_result result_feature;
 #define black_point 0
 
 extern int error_image;
-extern uint8 T_index;
+extern int feature_T;
 extern uint8 condition_T;
 void image_process(uint8 (*source_image)[MT9V03X_W]);
 

@@ -29,6 +29,9 @@ int core0_main(void)
     battery_protection_init();      // 电池保护初始化
     motion_control_init();          // 运动控制初始化
     
+    battery_protection_init();      // 电池保护初始化
+    motion_control_init();          // 运动控制初始化
+
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
     
     motor_traveling_power_flag = 0;     // 全部电机PWM输出标志位，0:PWM输出为0  1:PWM输出正常
