@@ -63,6 +63,9 @@ extern uint8 left_lost_times;
 extern uint8 right_lost_times;
 extern uint8 feature_raw_l;
 extern uint8 feature_raw_r;
+extern uint8 detect_feature_row;
+extern uint8 condition_corner;
+extern int T_corner;
 extern FeatureDetectResult image_feature;
 // extern int condition;
 
@@ -87,11 +90,15 @@ extern uint8 speed_select_label;
 
 extern feature_result result_feature;
 
+// T控制相关
+// extern uint8 index_sum_num;
+// extern int * T_index_list;
+
 #define white_point 255
 #define black_point 0
 
 extern int error_image;
-extern uint8 T_index;
+extern int feature_T;
 extern uint8 condition_T;
 void image_process(uint8 (*source_image)[MT9V03X_W]);
 

@@ -713,6 +713,10 @@ void feature_square()
                 {
                     image_feature.right_feature_flag2=i;
                 }
+                if(image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0)
+                {
+                    break;
+                }
             }
             if(image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0 &&image_feature.right_feature_flag2-image_feature.right_feature_flag1>0)
             {
@@ -1037,6 +1041,13 @@ void turn(uint8 direction)
 // 校赛1 科目3 
 // #define index_num 16
 // int T_index_list[index_num]={1,-1,1,0,1,-1,1,-1,-1,-1,0,0,1,0,0,0};
+
+// 校赛2 科目3 
+//#define index_sum_num 6
+//int T_index_list[index_sum_num]={0,0,0,-1,-1,0};
+// #define index_sum_num 6
+// int T_index_list[index_sum_num]={0,1,1,0,0,0};
+// int * T_index_list = {0};
 
 
 uint8 speed_select_label = 0;

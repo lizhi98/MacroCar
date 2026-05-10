@@ -3,9 +3,6 @@
 
 #include "common_headfile.h"
 
-// #ifdef SMARTCAR_DEBUG_IPS
-
-#include "zf_device_ips200.h"
 #include "network_interface.h"
 #include "motor_control.h"
 #include "battery_protection.h"
@@ -17,6 +14,18 @@
 
 #define KEY_PIT_TIME           5 // 按键扫描时间，单位ms
 #define MENU_KEY_PIT_INDEX     CCU60_CH1
+
+// 按键命令
+typedef enum _KeyCmd{
+    KEY_NO_CMD = 0,
+    KEY_UP, KEY_DOWN, KEY_ENTER, KEY_BACK
+}KeyCmd;
+
+
+#ifdef SMARTCAR_DEBUG_IPS
+// =========================================SMARTCAR_DEBUG_IPS=========================================
+
+#include "zf_device_ips200.h"
 
 // // 菜单显示信息类型枚举，用于配置在屏幕上显示信息时选择显示的内容
 // typedef enum _MenuPrintInfoType{
@@ -89,38 +98,42 @@ typedef struct _MenuObject{
     MenuObjectData data;
 }MenuObject;
 
-// 按键命令
-typedef enum _KeyCmd{
-    KEY_NO_CMD = 0,
-    KEY_UP, KEY_DOWN, KEY_ENTER, KEY_BACK
-}KeyCmd;
-
 // ==============================菜单变量定义==============================
 
 extern MenuObjectIndex  current_menu_index; // 当前使用或显示的菜单项目索引
 extern MenuObject       menu_object_list[]; // 菜单项目列表
 
+void menu_refresh_screen(void);
 
+// =========================================SMARTCAR_DEBUG_IPS=========================================
+#elif defined(SMARTCAR_DEBUG_IPS_PRO)
+// =========================================SMARTCAR_DEBUG_IPS_PRO=========================================
+#include "zf_device_ips200pro.h"
+
+
+
+// =========================================SMARTCAR_DEBUG_IPS_PRO=========================================
+#endif
 
 void menu_interface_init(void);
 
 void menu_ips_print_info(void);
+void menu_show_main(void);
+void menu_get_key_event(void);
+void menu_event_handle(void);
+
+
+
+// 菜单功能实现
+void no_screen_key_event_handle(void);
+void menu_key_init(void);
+// 网络调试信息发送
 void network_print_info(void);
 
-void menu_key_init(void);
-void menu_key_event_handle(void);
-void no_screen_key_event_handle(void);
-
-void menu_show_main(void);
-
+// 分科目跑
 void menu_run_1(void);
-
 void menu_run_2(void);
-
 void menu_run_3(void);
 
-void menu_event_handle(void);
-void menu_refresh_screen(void);
 
-// #endif
 #endif

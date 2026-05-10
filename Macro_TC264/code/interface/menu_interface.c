@@ -1,13 +1,17 @@
 #include "menu_interface.h"
 
-// #ifdef SMARTCAR_DEBUG_IPS
+
 
 extern uint32 image_to_image_time;
 extern uint32 image_process_time;
+extern volatile uint8 image_process_flag; // 图像处理标志位，0表示CPU1正在处理图像，1表示CPU1处理完图像了，CPU0可以访问图像数据了
+
+KeyCmd current_key_cmd = KEY_NO_CMD; // 当前按键命令
+
+#ifdef SMARTCAR_DEBUG_IPS
 
 MenuObjectIndex current_menu_index = MAIN; // 当前使用或显示的菜单项目索引
 
-KeyCmd current_key_cmd = KEY_NO_CMD; // 当前按键命令
 
 // 菜单项目列表
 MenuObject menu_object_list[] = {
@@ -44,26 +48,22 @@ MenuObject menu_object_list[] = {
     {.parent_data = {.child_menu_max_index = 0, .selected_child_menu_index = 0, .child_menu_index_list = {MAIN} } }
 }
 };
+#elif defined(SMARTCAR_DEBUG_IPS_PRO)
 
-// 功能菜单功能实现函数
-void menu_run_1(void){
-    // ips200_show_string(0, 130, "RUN_1 function");
-}
+uint16 info_page_id; // 信息页面ID
+uint16 para_page_id; // 参数页面ID
+uint16 run_page_id;  // 启动页面ID
+uint16 image_id; // 图像显示对象ID
+uint16 info_table_id; // 信息显示表ID
+uint16 para_table_id; // 参数调节表ID
+uint16 run_table_id; // 启动功能表ID
 
-void menu_run_2(void){
-    motor_interface_power_flag = 1; // 使能电机PWM输出
-    motor_fun_soft_start(); // 负压风扇软启动
-    system_delay_ms(500);
-    motion_control_pit_run_flag = 1;
-}
+#endif
 
-void menu_run_3(void){
-    // ips200_show_string(0, 130, "RUN_3 function");
-}
 
-extern volatile uint8 image_process_flag; // 图像处理标志位，0表示CPU1正在处理图像，1表示CPU1处理完图像了，CPU0可以访问图像数据了
 
 void menu_ips_print_info(void){
+#ifdef SMARTCAR_DEBUG_IPS
     if(image_process_flag){ // 确保CPU1已经处理完图像了，CPU0可以访问图像数据了
         // ips200_show_binary_image_with_line(0, 0, mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像并带辅助线
         // ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H);
@@ -85,72 +85,18 @@ void menu_ips_print_info(void){
     ips200_show_string(0, 250, info_buffer);
     sprintf(info_buffer, "TH:%3u I_T:%2lu L:%3u R:%3u", img_threshold, image_process_time, left_lost_times, right_lost_times);
     ips200_show_string(0, 270, info_buffer);
+#endif
 }
-
-void menu_key_init(void){
-    key_init(KEY_PIT_TIME);   // 按键初始化 5ms扫描一次 // 改这个需要改所处中断时间
-    pit_ms_init(MENU_KEY_PIT_INDEX, KEY_PIT_TIME); // 按键扫描PIT初始化
-}
-
-void menu_key_event_handle(void){
-    if((key_get_state(KEY_1) == KEY_SHORT_PRESS) || (key_get_state(KEY_1) == KEY_LONG_PRESS)){
-        current_key_cmd = KEY_BACK;
-        key_clear_state(KEY_1);
-    }
-    if((key_get_state(KEY_2) == KEY_SHORT_PRESS) || (key_get_state(KEY_2) == KEY_LONG_PRESS)){
-        current_key_cmd = KEY_UP;
-        key_clear_state(KEY_2);
-    }
-    if((key_get_state(KEY_3) == KEY_SHORT_PRESS) || (key_get_state(KEY_3) == KEY_LONG_PRESS)){
-        current_key_cmd = KEY_DOWN;
-        key_clear_state(KEY_3);
-    }
-    if((key_get_state(KEY_4) == KEY_SHORT_PRESS) || (key_get_state(KEY_4) == KEY_LONG_PRESS)){
-        current_key_cmd = KEY_ENTER;
-        key_clear_state(KEY_4);
-    }
-}
-void no_screen_key_event_handle(void){
-    if((key_get_state(KEY_1) == KEY_SHORT_PRESS) || (key_get_state(KEY_1) == KEY_LONG_PRESS)){
-        menu_run_1(); // 直接运行科目1
-        key_clear_state(KEY_1);
-    }
-    if((key_get_state(KEY_2) == KEY_SHORT_PRESS) || (key_get_state(KEY_2) == KEY_LONG_PRESS)){
-        menu_run_2(); // 直接运行科目2
-        key_clear_state(KEY_2);
-    }
-    if((key_get_state(KEY_3) == KEY_SHORT_PRESS) || (key_get_state(KEY_3) == KEY_LONG_PRESS)){
-        menu_run_3(); // 直接运行科目3
-        key_clear_state(KEY_3);
-    }
-    if((key_get_state(KEY_4) == KEY_SHORT_PRESS) || (key_get_state(KEY_4) == KEY_LONG_PRESS)){
-        // 保留这个按键作为紧急停止按键，按下就停止电机运动
-        motor_interface_power_flag = 0; // 关闭所有电机PWM输出
-        key_clear_state(KEY_4);
-    }
-}
-
-
-void network_print_info(void){
-    static char info_buffer[120];
-    sprintf(info_buffer, "%d,%d,%d,%d,%f,%f,%u,%u,%d,%ld,%u,%u,%d,%d,%u,%u,%u,%u,%u \0",
-        motor_left_speed,motor_right_speed,
-        motor_left_pwm, motor_right_pwm,
-        attitude.yaw, gyro_current_data.gyro_z,
-        left_line_list[45],right_line_list[45],error_image,image_to_image_time,condition_T,T_index,
-        imu660rc_gyro_z,battery_protection_adc_value,img_threshold,image_feature.right_feature_flag2,image_feature.left_feature_flag2,
-        feature_raw_l,feature_raw_r
-    );
-    network_vofa_send_str(info_buffer);
-}
-
 
 void menu_show_main(void){
+#ifdef SMARTCAR_DEBUG_IPS
     current_menu_index = MAIN; // 切换到主菜单
     menu_refresh_screen(); // 刷新菜单显示
+#endif
 }
 
 void menu_event_handle(void){
+#ifdef SMARTCAR_DEBUG_IPS
     uint8 menu_need_refresh_flag = 0; // 菜单是否需要刷新显示的标志
     // 首先判断当前菜单项目类型，根据类型执行不同的操作
     switch (menu_object_list[current_menu_index].type)
@@ -287,9 +233,11 @@ void menu_event_handle(void){
         menu_refresh_screen(); // 刷新菜单显示
     }
     current_key_cmd = KEY_NO_CMD; // 处理完按键命令后，重置按键命令为无命令
+#endif
 }
 
 void menu_refresh_screen(void){
+#ifdef SMARTCAR_DEBUG_IPS
     // 刷新显示
     // 首先清屏
     ips200_clear();
@@ -359,11 +307,14 @@ void menu_refresh_screen(void){
         zf_assert(0); // 不应该出现其他菜单类型
         break;
     }
+#endif
 }
 
 
 
 void menu_interface_init(){
+#ifdef SMARTCAR_DEBUG_IPS
+    ips200_init(IPS200_TYPE_SPI);   // 初始化IPS200显示屏
     // 对菜单项目进行排序，按照菜单项目索引从小到大排序，确保菜单项目索引的顺序和菜单项目在列表中的顺序一致，这样方便通过菜单项目索引访问菜单项目数据
     for(int i=0; i < sizeof(menu_object_list) / sizeof(MenuObject); i++){
         for(int j=0; j < sizeof(menu_object_list) / sizeof(MenuObject)-1-i; j++){
@@ -375,6 +326,94 @@ void menu_interface_init(){
             }
         }
     }
+#elif defined(SMARTCAR_DEBUG_IPS_PRO)
+    // 初始化屏幕
+    info_page_id = ips200pro_init("信息", IPS200PRO_TITLE_BOTTOM, 30); // IPS200 Pro屏幕初始化
+    para_page_id = ips200pro_page_create("参数");
+    run_page_id = ips200pro_page_create("启动");
+    ips200pro_page_switch(info_page_id, PAGE_ANIM_ON); // 切换到信息页面
+    // 初始化信息页面
+    // 创建容器
+    uint16 info_container_id = ips200pro_container_create(0,0,240, 320); // 创建一个全屏的容器，后续信息显示对象都放在这个容器里
+    ips200pro_set_parent(info_container_id, info_page_id); // 把容器设置为信息页面的子对象
+    image_id = ips200pro_image_create(0, 0, MT9V03X_W, MT9V03X_H); // 创建图像显示对象，宽高和摄像头图像宽高一致
+    ips200pro_set_parent(image_id, info_container_id); // 把图像显示对象设置为信息页面的子对象
+    info_table_id = ips200pro_table_create(20, 20, 8, 2); 
+    ips200pro_set_parent(info_table_id, info_container_id); // 把信息显示表设置为信息页面的子对象
+#endif
 }
 
-// #endif
+// 功能菜单功能实现函数
+void menu_run_1(void){
+    // ips200_show_string(0, 130, "RUN_1 function");
+}
+
+void menu_run_2(void){
+    motor_interface_power_flag = 1; // 使能电机PWM输出
+    motor_fun_soft_start(); // 负压风扇软启动
+    system_delay_ms(500);
+    motion_control_pit_run_flag = 1;
+}
+
+void menu_run_3(void){
+    // ips200_show_string(0, 130, "RUN_3 function");
+}
+
+void menu_key_init(void){
+    key_init(KEY_PIT_TIME);   // 按键初始化 5ms扫描一次 // 改这个需要改所处中断时间
+    pit_ms_init(MENU_KEY_PIT_INDEX, KEY_PIT_TIME); // 按键扫描PIT初始化
+}
+
+
+void network_print_info(void){
+    static char info_buffer[120];
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%u,%u,%d,%ld,%u,%u,%d,%d,%u,%u,%u,%u,%u,%u,%d,%u,%u,%u,%u\0",
+        motor_forward_speed,
+        motor_left_speed,motor_right_speed,
+        motor_left_pwm, motor_right_pwm,
+        attitude.yaw, gyro_current_data.gyro_z,
+        left_line_list[45],right_line_list[45],error_image,image_to_image_time,condition_T,feature_T,
+        imu660rc_gyro_z,battery_protection_adc_value,img_threshold,image_feature.right_feature_flag2,image_feature.left_feature_flag2,
+        feature_raw_l,feature_raw_r,left_lost_times,right_lost_times,detect_feature_row,result_feature.left,result_feature.right,result_feature.height
+    );
+    network_vofa_send_str(info_buffer);
+}
+
+void no_screen_key_event_handle(void){
+    if((key_get_state(KEY_1) == KEY_SHORT_PRESS) || (key_get_state(KEY_1) == KEY_LONG_PRESS)){
+        menu_run_1(); // 直接运行科目1
+        key_clear_state(KEY_1);
+    }
+    if((key_get_state(KEY_2) == KEY_SHORT_PRESS) || (key_get_state(KEY_2) == KEY_LONG_PRESS)){
+        menu_run_2(); // 直接运行科目2
+        key_clear_state(KEY_2);
+    }
+    if((key_get_state(KEY_3) == KEY_SHORT_PRESS) || (key_get_state(KEY_3) == KEY_LONG_PRESS)){
+        menu_run_3(); // 直接运行科目3
+        key_clear_state(KEY_3);
+    }
+    if((key_get_state(KEY_4) == KEY_SHORT_PRESS) || (key_get_state(KEY_4) == KEY_LONG_PRESS)){
+        // 保留这个按键作为紧急停止按键，按下就停止电机运动
+        motor_interface_power_flag = 0; // 关闭所有电机PWM输出
+        key_clear_state(KEY_4);
+    }
+}
+
+void menu_get_key_event(void){
+    if((key_get_state(KEY_1) == KEY_SHORT_PRESS) || (key_get_state(KEY_1) == KEY_LONG_PRESS)){
+        current_key_cmd = KEY_BACK;
+        key_clear_state(KEY_1);
+    }
+    if((key_get_state(KEY_2) == KEY_SHORT_PRESS) || (key_get_state(KEY_2) == KEY_LONG_PRESS)){
+        current_key_cmd = KEY_UP;
+        key_clear_state(KEY_2);
+    }
+    if((key_get_state(KEY_3) == KEY_SHORT_PRESS) || (key_get_state(KEY_3) == KEY_LONG_PRESS)){
+        current_key_cmd = KEY_DOWN;
+        key_clear_state(KEY_3);
+    }
+    if((key_get_state(KEY_4) == KEY_SHORT_PRESS) || (key_get_state(KEY_4) == KEY_LONG_PRESS)){
+        current_key_cmd = KEY_ENTER;
+        key_clear_state(KEY_4);
+    }
+}

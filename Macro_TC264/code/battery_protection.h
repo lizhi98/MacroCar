@@ -6,7 +6,7 @@
 
 #define BATTERY_PROTECTION_ADC_CHANNEL      ADC0_CH11_A11
 #define BATTERY_PROTECTION_ADC_RESOLUTION   ADC_8BIT
-#define BATTERY_PROTECTION_ADC_LOW_VALUE    86     // 电池电压低于此值时报警
+#define BATTERY_PROTECTION_ADC_LOW_VALUE    84     // 电池电压低于此值时报警
 
 extern uint16  battery_protection_adc_value;    // 当前电池电压ADC值
 

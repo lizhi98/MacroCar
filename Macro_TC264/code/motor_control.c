@@ -63,7 +63,7 @@ PIDParam motor_right_speed_pid  = {
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 6.9f, .ki = 0.0f, .kd = 0.66f,
+    .kp = 7.5f, .ki = 0.0f, .kd = 1.2f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -71,7 +71,7 @@ PIDParam motion_image_steering_pid = {
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.4f, .ki = 0.0f, .kd = 0.16f,
+    .kp = 2.2f, .ki = 0.0f, .kd = 0.22f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -240,7 +240,7 @@ void motion_control_pit_callback(){
 
     // 负压风扇PWM设置
     if(!motion_control_run_flag){
-        motor_fun_pwm_duty = 0;
+        // motor_fun_pwm_duty = 2500;
         motor_soft_start_flag = 0; // 需要软启动
     }
     motor_fun_set_pwm(&motor_fun_pwm_duty);
@@ -280,9 +280,6 @@ void motion_control_pit_callback(){
     }
     motor_traveling_soft_start(); // 行进电机软启动
 
-    motor_left_current_pwm_duty = 0;
-    motor_right_current_pwm_duty = 0;
-
     // 应用PWM
     motor_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
 }
@@ -312,7 +309,7 @@ void motor_fun_soft_start(void){
     for(uint16 i = MOTOR_FUN_MIN_PWM_DUTY; i <= MOTOR_FUN_NORMAL_PWM_DUTY; i++){
         motor_fun_pwm_duty = i;
         motor_fun_set_pwm(&motor_fun_pwm_duty);
-        system_delay_ms(3); // 每3ms增加一次PWM占空比
+        system_delay_ms(1); // 每3ms增加一次PWM占空比
     }
 }
 
@@ -327,7 +324,7 @@ void motor_traveling_soft_start(void){
             motor_right_current_pwm_duty = (motor_right_current_pwm_duty > 0) ? MOTOR_SOFT_START_PWM : -MOTOR_SOFT_START_PWM;
         }
         // 当电机转速大于前进速度时，认为软启动完成
-        if(motor_left_speed > motor_forward_speed && motor_right_speed > motor_forward_speed){
+        if(motor_left_speed > (motor_forward_speed / 2) && motor_right_speed > (motor_forward_speed / 2)){
             motor_soft_start_flag = 1;
         }
     }
@@ -344,7 +341,7 @@ void forward_speed_decision(void){
         motor_forward_speed = MOTOR_FORWARD_NORMAL_SPEED;
         return;
     }else{
-        if(speed_select_label){ // 进行速度决策
+        if(speed_select_label && !curve_speed_lock){ // 进行速度决策
             curve_speed_lock_angle = attitude.yaw; // 记录当前转向角
             turn_time_start = system_getval_ms(); // 记录转弯开始时间
             curve_speed_lock = 1;
@@ -364,7 +361,7 @@ void forward_speed_decision(void){
             // 转弯超时停车
             if(system_getval_ms() > turn_time_start){ // 防止系统时钟溢出导致车辆误停车
                 if(system_getval_ms() - turn_time_start > 3000){ // 转弯超过3秒
-                    motion_control_run_flag = 0; // 停车
+                    motor_interface_power_flag = 0; // 停车
                 }
             }
         }
