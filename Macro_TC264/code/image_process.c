@@ -661,16 +661,39 @@ float angle_T=0.0f;
 void feature_square()
 {
     //路口判断
-    if(feature_label==1 && condition_T==0)
+    if((T_index_list[feature_T_index]==1 ||T_index_list[feature_T_index]==0) && feature_raw_r==1&& condition_T==0 &&feature_label==1)
     {
         feature_T++;
-        
+        feature_T_index++;
+        if(feature_T_index==index_num)
+        {
+            feature_T_index=0;
+        }
         if(feature_T>index_num)
         {
             feature_T=1;
         }
         condition_T=1;
         angle_T=attitude.yaw;
+    }
+    else if((T_index_list[feature_T_index]==-1 ||T_index_list[feature_T_index]==0) && feature_raw_l==1&& condition_T==0 &&feature_label==1)
+    {
+        feature_T++;
+        feature_T_index++;
+        if(feature_T_index==index_num)
+        {
+            feature_T_index=0;
+        }
+        if(feature_T>index_num)
+        {
+            feature_T=1;
+        }
+        condition_T=1;
+        angle_T=attitude.yaw;
+    }
+    if(feature_label==1 && condition_T==0)
+    {
+       
     }
     //减速标志位判断
     if(T_index_list[feature_T-1]!=0&&condition_T==1)
