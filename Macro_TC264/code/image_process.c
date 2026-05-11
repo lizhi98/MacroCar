@@ -645,23 +645,16 @@ void detect_feature()
 
 FeatureDetectResult image_feature;
 feature_result result_feature={0,0,0};
-#define height_start_raw 10          
-#define height_end_raw 90
-#define left_start_col 5
-#define right_start_col 170
 int feature_T=0;
-int feature_T_index=0;
 int feature_T_left=0;
 int feature_T_right=0;
-int feature_corner_left=0;
-int feature_corner_right=0;
+int feature_T_index=0;
 uint8 condition_T=0;
-uint8 condition_corner=0;
 float angle_T=0.0f;
 void feature_square()
 {
     //路口判断
-    if((T_index_list[feature_T_index]==1 ||T_index_list[feature_T_index]==0) && feature_raw_r==1&& condition_T==0 &&feature_label==1)
+    if(T_index_list[feature_T_index]==1 && feature_raw_r==1&& condition_T==0 &&feature_label==1)
     {
         feature_T++;
         feature_T_index++;
@@ -676,7 +669,7 @@ void feature_square()
         condition_T=1;
         angle_T=attitude.yaw;
     }
-    else if((T_index_list[feature_T_index]==-1 ||T_index_list[feature_T_index]==0) && feature_raw_l==1&& condition_T==0 &&feature_label==1)
+    else if(T_index_list[feature_T_index]==-1&& feature_raw_l==1&& condition_T==0 &&feature_label==1)
     {
         feature_T++;
         feature_T_index++;
@@ -691,9 +684,35 @@ void feature_square()
         condition_T=1;
         angle_T=attitude.yaw;
     }
-    if(feature_label==1 && condition_T==0)
+    else if(T_index_list[feature_T_index]==0&&feature_label==1 && condition_T==0 && feature_raw_l==1)
     {
-       
+        feature_T++;
+        feature_T_index++;
+        if(feature_T_index==index_num)
+        {
+            feature_T_index=0;
+        }
+        if(feature_T>index_num)
+        {
+            feature_T=1;
+        }
+        condition_T=1;
+        feature_T_left=1;
+    }
+    else if(T_index_list[feature_T_index]==0&&feature_label==1 && condition_T==0 && feature_raw_r==1)
+    {
+        feature_T++;
+        feature_T_index++;
+        if(feature_T_index==index_num)
+        {
+            feature_T_index=0;
+        }
+        if(feature_T>index_num)
+        {
+            feature_T=1;
+        }
+        condition_T=1;
+        feature_T_right=1;
     }
     //减速标志位判断
     if(T_index_list[feature_T-1]!=0&&condition_T==1)
@@ -727,18 +746,19 @@ void feature_square()
             if(get_angle_err(angle_T) > 60.0f)
             {
                 condition_T=0;
+                deceleration_label=0;
             }
         }
         else if(T_index_list[feature_T-1]==0)
         {
-            if(feature_T_left==1 &&feature_T_right==0)
+            if(feature_T_left==1 && feature_T_right==0)
             {
                 if(left_lost_times==0)
                 {
                     condition_T=0;
                 }
             }
-            else if(feature_T_left==0 &&feature_T_right==1)
+            else if(feature_T_left==0 && feature_T_right==1)
             {
                 if(right_lost_times==0)
                 {
