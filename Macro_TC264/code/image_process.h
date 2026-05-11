@@ -30,7 +30,7 @@ typedef signed long long    int64;
 #include "zf_device_mt9v03x_double.h"
 
 #endif
-// #include "quaternion.h"
+#include "quaternion.h"
 #define image_w  (MT9V03X_W-1)
 #define image_h  (MT9V03X_H)
 

@@ -661,7 +661,7 @@ float angle_T=0.0f;
 void feature_square()
 {
     //路口判断
-    if(feature_label==1)
+    if(feature_label==1 && condition_T==0)
     {
         feature_T++;
         
