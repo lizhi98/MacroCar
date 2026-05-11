@@ -1,8 +1,8 @@
 #include "image_process.h"
 
 #define ERROR_IMAGE_LINE 47
-#define index_num 15
-int T_index_list[index_num]={1,-1,1,1,0,1,-1,-1,-1,0,0,1,0,0,0};
+#define index_num 6
+int T_index_list[index_num]={1,-1,-1,1,0,0};
 
 #define GrayScale 256
 #define grayscale 256
@@ -460,14 +460,15 @@ uint8 feature_raw_l;
 uint8 feature_raw_r;
 #define feature_raw 10    
 uint8 detect_feature_row=0;
-int up_feature_row=0;
+int up_feature_row=MT9V03X_H-1;
 void detect_feature()
 {
     feature_label=0;
     feature_raw_l=0;
     feature_raw_r=0;
     detect_feature_row=0;
-    printf("left_lost_times=%d, right_lost_times=%d\n",left_lost_times,right_lost_times);
+    up_feature_row=MT9V03X_H-1;
+
     if(left_lost_times!=0 ||right_lost_times!=0)
     {
         for(int i=MT9V03X_H-21;i>=feature_raw;i--)
@@ -490,7 +491,7 @@ void detect_feature()
             {   
                 detect_feature_row=(uint8)i;
                 feature_raw_l=1;
-                printf("detect_feature_row_l=%d\n",detect_feature_row);
+               
                 break;
             }
             if((right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>15 || right_line_list[i-3]-right_line_list[i]>25 || right_line_list[i-4]-right_line_list[i]>15) &&
@@ -498,7 +499,7 @@ void detect_feature()
             {
                 detect_feature_row=(uint8)i;
                 feature_raw_r=1;
-                printf("detect_feature_row_r=%d\n",detect_feature_row);
+               
                 break;
             }
         }
@@ -542,7 +543,7 @@ void detect_feature()
                         up_row=j;
                     }
                 }
-                if(up_row>up_feature_row)
+                if(up_row<up_feature_row)
                 {
                     up_feature_row=up_row;
                 }
@@ -571,7 +572,7 @@ void detect_feature()
                         up_row=j;
                     }
                 }
-                if(up_row>up_feature_row)
+                if(up_row<up_feature_row)
                 {
                     up_feature_row=up_row;
                 }
@@ -587,8 +588,7 @@ void detect_feature()
             feature_label = 1;
         }
     }
-    printf("up_feature_row=%d\n",up_feature_row);
-    printf("feature_label=%d\n",feature_label);
+
 
     // feature_label=0;
     // feature_raw_r=0;
@@ -775,11 +775,14 @@ void feature_square()
 
         }
     }
-    printf("feature_left=%d, feature_right=%d, feature_height=%d\n",result_feature.left,result_feature.right,result_feature.height);
-    //路口判断
+       //路口判断
     if(result_feature.left==0 && result_feature.right==1 && result_feature.height==1)
     {
         feature_T++;
+        if(feature_T>index_num)
+        {
+            feature_T=1;
+        }
         feature_T_left=1;
         condition_T=1;
         angle_T=attitude.yaw;
@@ -787,6 +790,10 @@ void feature_square()
     else if(result_feature.left==1 && result_feature.right==0 && result_feature.height==1)
     {
         feature_T++;
+        if(feature_T>index_num)
+        {
+            feature_T=1;
+        }
         feature_T_right=1;
         condition_T=1;
         angle_T=attitude.yaw;
@@ -794,6 +801,10 @@ void feature_square()
     else if(result_feature.left==1 && result_feature.right==1 && result_feature.height==0)
     {
         feature_T++;
+        if(feature_T>index_num)
+        {
+            feature_T=1;
+        }
         feature_T_left=1;
         feature_T_right=1;
         condition_T=1;
@@ -802,6 +813,10 @@ void feature_square()
     else if(result_feature.left==1 && result_feature.right==1 && result_feature.height==1)
     {
         feature_T++;
+        if(feature_T>index_num)
+        {
+            feature_T=1;
+        }
         feature_T_left=1;
         feature_T_right=1;
         condition_T=1;

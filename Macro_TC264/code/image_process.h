@@ -63,9 +63,13 @@ extern uint8 left_lost_times;
 extern uint8 right_lost_times;
 extern uint8 feature_raw_l;
 extern uint8 feature_raw_r;
+extern uint8 feature_label;
 extern uint8 detect_feature_row;
 extern uint8 condition_corner;
+extern int feature_corner_left;
+extern int feature_corner_right;
 extern int T_corner;
+extern int up_feature_row;
 extern FeatureDetectResult image_feature;
 // extern int condition;
 
