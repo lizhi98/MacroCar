@@ -455,9 +455,10 @@ void detect_longest_col()
     }
 }
 
-uint8 feature_label;
-uint8 feature_raw_l;
-uint8 feature_raw_r;
+uint8 feature_label=0;
+uint8 deceleration_label=0;
+uint8 feature_raw_l=0;
+uint8 feature_raw_r=0;
 #define feature_raw 10    
 uint8 detect_feature_row=0;
 int up_feature_row=MT9V03X_H-1;
@@ -649,6 +650,7 @@ feature_result result_feature={0,0,0};
 #define left_start_col 5
 #define right_start_col 170
 int feature_T=0;
+int feature_T_index=0;
 int feature_T_left=0;
 int feature_T_right=0;
 int feature_corner_left=0;
@@ -658,234 +660,50 @@ uint8 condition_corner=0;
 float angle_T=0.0f;
 void feature_square()
 {
-    image_feature.left_feature_flag1=0;
-    image_feature.left_feature_flag2=0;
-    image_feature.right_feature_flag1=0;
-    image_feature.right_feature_flag2=0;
-    image_feature.height_feature_flag1=0;
-    image_feature.height_feature_flag2=0;
-    result_feature.left=0;
-    result_feature.right=0;
-    result_feature.height=0;
-    if(feature_label==1 &&up_feature_row>10 && condition_corner==0 && condition_T==0)
-    {
-        if(feature_raw_l)
-        {
-            result_feature.left=1;
-            int up_detect_row=up_feature_row-15;
-            if(up_detect_row<3)
-            {
-                up_detect_row=3;
-            }
-
-            //上行特征检测
-            for(int i=left_start_col+35;i<right_start_col-35;i++)
-            {
-                //上行特征：左白右黑（从左向右）
-                if(image[up_detect_row][i-1]==black_point && image[up_detect_row][i]==white_point && image[up_detect_row][i+1]==white_point)
-                {
-                    image_feature.height_feature_flag1=i;
-                    break;
-                }
-            }
-            for(int i=right_start_col-35;i>left_start_col+35;i--)
-            {
-                //上行特征：左白右黑（从右向左）
-                if(image[up_detect_row][i-1]==white_point && image[up_detect_row][i]==white_point && image[up_detect_row][i+1]==black_point)
-                {
-                    image_feature.height_feature_flag2=i;
-                    break;
-                }
-            }
-            if(image_feature.height_feature_flag2!=0&&image_feature.height_feature_flag1!=0)
-            {
-                result_feature.height=1;
-            }
-            //右侧特征检测
-            for(int i=up_detect_row;i<detect_feature_row+20;i++)
-            {
-                //右侧特征：上白下黑
-                if(image[i-1][right_start_col]==black_point && image[i][right_start_col]==white_point && image[i+1][right_start_col]==white_point)
-                {
-                    image_feature.right_feature_flag1=i;
-                }
-                else if(image[i-1][right_start_col]==white_point && image[i][right_start_col]==white_point && image[i+1][right_start_col]==black_point)
-                {
-                    image_feature.right_feature_flag2=i;
-                }
-                if(image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0)
-                {
-                    break;
-                }
-            }
-            if(image_feature.right_feature_flag1!=0 && image_feature.right_feature_flag2!=0 &&image_feature.right_feature_flag2-image_feature.right_feature_flag1>0)
-            {
-                result_feature.right=1;
-            }
-            
-        }
-        if(feature_raw_r)
-        {
-            result_feature.right=1;
-            int up_detect_row=up_feature_row-15;
-            if(up_detect_row<3)
-            {
-                up_detect_row=3;
-            }
-            //上行特征检测
-            for(int i=left_start_col+35;i<right_start_col-35;i++)
-            {
-                //上行特征：左白右黑（从左向右）
-                if(image[up_detect_row][i-1]==black_point && image[up_detect_row][i]==white_point && image[up_detect_row][i+1]==white_point)
-                {
-                    image_feature.height_feature_flag1=i;
-                    break;
-                }
-            }
-            for(int i=right_start_col-35;i>left_start_col+35;i--)
-            {
-                //上行特征：左白右黑（从右向左）
-                if(image[up_detect_row][i-1]==white_point && image[up_detect_row][i]==white_point && image[up_detect_row][i+1]==black_point)
-                {
-                    image_feature.height_feature_flag2=i;
-                    break;
-                }
-            }
-            if(image_feature.height_feature_flag2!=0&&image_feature.height_feature_flag1!=0)
-            {
-                result_feature.height=1;
-            }
-            //左侧特征检测
-            for(int i=up_detect_row;i<detect_feature_row+20;i++)
-            {
-                //左侧特征：上白下黑
-                if(image[i-1][left_start_col]==black_point && image[i][left_start_col]==white_point && image[i+1][left_start_col]==white_point )
-                {
-                    image_feature.left_feature_flag1=i;
-                }
-                else if(image[i-1][left_start_col]==white_point && image[i][left_start_col]==white_point && image[i+1][left_start_col]==black_point)
-                {
-                    image_feature.left_feature_flag2=i;
-                }
-            }
-            if(image_feature.left_feature_flag1!=0 && image_feature.left_feature_flag2!=0 && image_feature.left_feature_flag2-image_feature.left_feature_flag1>0)
-            {
-                result_feature.left=1;
-            }
-
-        }
-    }
-       //路口判断
-    if(result_feature.left==0 && result_feature.right==1 && result_feature.height==1)
+    //路口判断
+    if(feature_label==1)
     {
         feature_T++;
+        
         if(feature_T>index_num)
         {
             feature_T=1;
         }
-        feature_T_left=1;
         condition_T=1;
         angle_T=attitude.yaw;
     }
-    else if(result_feature.left==1 && result_feature.right==0 && result_feature.height==1)
+    //减速标志位判断
+    if(T_index_list[feature_T-1]!=0&&condition_T==1)
     {
-        feature_T++;
-        if(feature_T>index_num)
-        {
-            feature_T=1;
-        }
-        feature_T_right=1;
-        condition_T=1;
-        angle_T=attitude.yaw;
-    }
-    else if(result_feature.left==1 && result_feature.right==1 && result_feature.height==0)
-    {
-        feature_T++;
-        if(feature_T>index_num)
-        {
-            feature_T=1;
-        }
-        feature_T_left=1;
-        feature_T_right=1;
-        condition_T=1;
-        angle_T=attitude.yaw;
-    }
-    else if(result_feature.left==1 && result_feature.right==1 && result_feature.height==1)
-    {
-        feature_T++;
-        if(feature_T>index_num)
-        {
-            feature_T=1;
-        }
-        feature_T_left=1;
-        feature_T_right=1;
-        condition_T=1;
-        angle_T=attitude.yaw;
-    }
-    else if(result_feature.left==1 && result_feature.height==0 && result_feature.right==0)
-    {
-        feature_corner_left=1;
-        condition_corner=1;
-        angle_T=attitude.yaw;
-    }
-    else if(result_feature.right==1 && result_feature.height==0 && result_feature.left==0)
-    {
-        feature_corner_right=1;
-        condition_corner=1;
-        angle_T=attitude.yaw;
+        deceleration_label=1;
     }
     //路口处理
-    if(feature_corner_left==1)
+    if(T_index_list[feature_T-1]==-1)
     {
         if(detect_feature_row>ERROR_IMAGE_LINE)
         {
             mid_line_list[ERROR_IMAGE_LINE]=0;
         }
     }
-    else if(feature_corner_right==1)
+    else if(T_index_list[feature_T-1]==1)
     {
         if(detect_feature_row>ERROR_IMAGE_LINE)
         {
             mid_line_list[ERROR_IMAGE_LINE]=image_w-1;
         }
     }
-    else if(condition_T==1)
+    else if(T_index_list[feature_T-1]==0)
     {
-        if(detect_feature_row>ERROR_IMAGE_LINE)
-        {
-            if(T_index_list[feature_T-1]==-1)
-            {
-                mid_line_list[ERROR_IMAGE_LINE]=0;
-            }
-            else if(T_index_list[feature_T-1]==1)
-            {
-                mid_line_list[ERROR_IMAGE_LINE]=image_w-1;
-            }
-            else if(T_index_list[feature_T-1]==0)
-            {
-                Add_Line(94,119,mid_line_list[5],5);
-            }
-        }
+        Add_Line(94,119,mid_line_list[5],5);
     }
     //转向退出处理
-    if(condition_corner==1)
-    {
-        if(get_angle_err(angle_T) > 60.0f)
-        {
-            condition_corner=0;
-            feature_corner_left=0;
-            feature_corner_right=0;
-        }
-    }
-    else if(condition_T==1)
+    if(condition_T==1)
     {
         if(T_index_list[feature_T-1]!=0)
         {
             if(get_angle_err(angle_T) > 60.0f)
             {
                 condition_T=0;
-                feature_T_left=0;
-                feature_T_right=0;
             }
         }
         else if(T_index_list[feature_T-1]==0)
@@ -895,8 +713,6 @@ void feature_square()
                 if(left_lost_times==0)
                 {
                     condition_T=0;
-                    feature_T_left=0;
-                    feature_T_right=0;
                 }
             }
             else if(feature_T_left==0 &&feature_T_right==1)
@@ -904,8 +720,6 @@ void feature_square()
                 if(right_lost_times==0)
                 {
                     condition_T=0;
-                    feature_T_left=0;
-                    feature_T_right=0;
                 }
             }   
         }
@@ -1049,13 +863,10 @@ void turn(uint8 direction)
 // 科目三方案2
 // #define index_num 13
 // int T_index_list[index_num]={0,0,0,1,0,-1,-1,1,1,1,0,0,1};
-
 // 校赛1 科目3
-
 // 校赛1 科目3 
 // #define index_num 16
 // int T_index_list[index_num]={1,-1,1,0,1,-1,1,-1,-1,-1,0,0,1,0,0,0};
-
 // 校赛2 科目3 
 //#define index_sum_num 6
 //int T_index_list[index_sum_num]={0,0,0,-1,-1,0};
@@ -1225,7 +1036,7 @@ void image_process(uint8 (*source_image)[MT9V03X_W])
     detect_feature();
     feature_square();
     // feature_process();
-    //image_draw_pre();
+    // image_draw_pre();
     get_error_image();
 }
 

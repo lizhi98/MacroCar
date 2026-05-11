@@ -30,7 +30,7 @@ typedef signed long long    int64;
 #include "zf_device_mt9v03x_double.h"
 
 #endif
-#include "quaternion.h"
+// #include "quaternion.h"
 #define image_w  (MT9V03X_W-1)
 #define image_h  (MT9V03X_H)
 
@@ -94,6 +94,7 @@ extern uint8 speed_select_label;
 
 extern feature_result result_feature;
 
+extern uint8 deceleration_label;
 // T控制相关
 // extern uint8 index_sum_num;
 // extern int * T_index_list;
