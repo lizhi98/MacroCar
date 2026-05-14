@@ -84,6 +84,7 @@ extern FeatureDetectResult image_feature;
 extern uint8 img_threshold;
 // extern int points_count;
 // extern int error_image;
+extern int run_once_flag;
 extern int error_image_last;
 // extern uint8 (*image)[MT9V03X_W];
 extern uint8 left_line_list[MT9V03X_H];

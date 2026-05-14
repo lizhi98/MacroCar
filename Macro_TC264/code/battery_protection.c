@@ -1,6 +1,7 @@
 #include "battery_protection.h"
 
 uint16  battery_protection_adc_value = 0;    // 当前电池电压ADC值
+float battery_voltage = 0.0f;                        // 当前电池电压值
 
 void    battery_protection_init(void){
     adc_init(BATTERY_PROTECTION_ADC_CHANNEL, BATTERY_PROTECTION_ADC_RESOLUTION);
@@ -12,7 +13,7 @@ void    battery_protection_init(void){
         1：电池电压过低
 */
 uint8   battery_protection_check(void){
-    battery_protection_adc_value = adc_mean_filter_convert(BATTERY_PROTECTION_ADC_CHANNEL, 5);
-
-    return (battery_protection_adc_value < BATTERY_PROTECTION_ADC_LOW_VALUE);
+    battery_protection_adc_value = adc_mean_filter_convert(BATTERY_PROTECTION_ADC_CHANNEL, 3);
+    battery_voltage = battery_protection_adc_value * 3.3 * 10.8 / 4095; // 计算电池电压
+    return (battery_voltage < BATTERY_PROTECTION_ADC_LOW_VALUE);
 }

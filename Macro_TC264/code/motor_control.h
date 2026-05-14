@@ -69,7 +69,7 @@ extern int16 motor_steering_speed;
 #define MOTION_CONTROL_PIT_TIME         5  // 单位ms
 #define MOTION_CONTROL_PIT_INDEX        CCU61_CH0
 
-#define MOTOR_SOFT_START_PWM            2400// 电机软启动PWM占空比
+#define MOTOR_SOFT_START_PWM            2500// 电机软启动PWM占空比
 
 // 不进行速度决策
 #define MOTOR_FORWARD_NORMAL_SPEED      800  // 前进正常速度
@@ -77,10 +77,13 @@ extern int16 motor_steering_speed;
 // 进行速度决策
 #define MOTOR_FORWARD_LINEAR_SPEED      1600    // 前进直线速度
 #define MOTOR_FORWARD_CURVE_SPEED       1200    // 前进转角速度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   33      // 负压风扇直线行驶开度
-#define MOTOR_FUN_CURVE_OPEN_PERCENT    35      // 负压风扇转弯行驶开度
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   50      // 负压风扇直线行驶开度
+#define MOTOR_FUN_CURVE_OPEN_PERCENT    40      // 负压风扇转弯行驶开度
 
 #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
+
+#define RUN_PROTECT_IMG_TH_MAX      220 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
+#define RUN_PROTECT_IMG_TH_MIN      140  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
 
 extern uint8 motion_control_run_flag; // 作用于单电机速度环，让速度=0
 extern uint8 motor_traveling_pid_run_flag; // 作用于行进电机速度环，不让速度环运行
@@ -94,6 +97,9 @@ extern int32 motor_right_speed;
 
 extern int32 motor_forward_speed;
 
+extern int16 motor_traveling_left_target_speed;
+extern int16 motor_traveling_right_target_speed;
+
 extern uint8 forward_speed_decision_enable; // 0表示不执行速度决策，1表示执行速度决策
 
 void fuzzy_pid_update(PIDParam* pid_param);
@@ -106,5 +112,7 @@ void motor_fun_soft_start(void); // 负压风扇软启动
 void motor_traveling_soft_start(void); // 行进电机软启动
 
 void forward_speed_decision(void); // 前进速度决策，基于图像处理结果
+
+void run_control_protect(void); // 运行保护，基于图像处理结果
 
 #endif

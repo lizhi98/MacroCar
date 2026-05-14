@@ -36,7 +36,7 @@ int core0_main(void)
     
     motor_traveling_power_flag = 0;     // 全部电机PWM输出标志位，0:PWM输出为0  1:PWM输出正常
     motion_control_run_flag = 1;        // 行进电机运动标志位，0:电机速度环的目标速度为0，负压不变  1:电机速度盒负压电压受到算法控制
-    forward_speed_decision_enable = 0;  // 速度决策标志位，0:不执行速度决策  1:执行速度决策
+    forward_speed_decision_enable = 1;  // 速度决策标志位，0:不执行速度决策  1:执行速度决策
 #ifdef SMARTCAR_DEBUG_IPS
     menu_show_main();                   // 显示主菜单
 #endif
@@ -55,16 +55,15 @@ int core0_main(void)
 #else
         no_screen_key_event_handle(); // 没有屏幕时的按键事件处理
 #endif
-        // 电池保护，运行1s后检测，防止电机启动电流过大导致电池电压瞬间下降误触发保护
-        if(system_getval_ms() > 1000 && !battery_checked_flag){
-            // 电压检测
-            if(battery_protection_check()){
+        if(battery_protection_check()){
+            if(!battery_checked_flag)
+            {
                 motor_traveling_power_flag = 0; // 关闭电机PWM输出
-                zf_assert(!battery_protection_check()); // 电池电压过低
+                zf_assert(0); // 电池电压过低
                 while(1);
             }
-            battery_checked_flag = 1;
         }
+        battery_checked_flag = 1;
 #ifdef SMARTCAR_DEBUG_NET_INFO
         // 每隔4ms发送一次网络调试信息
         if(system_getval_ms() % 4 == 0){

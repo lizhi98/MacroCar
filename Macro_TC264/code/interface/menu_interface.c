@@ -366,14 +366,14 @@ void menu_key_init(void){
 
 void network_print_info(void){
     static char info_buffer[120];
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%d,%ld,%u,%d,%u,%u,%u,%u,%u,%u,%u,%d,%d,%u,%d\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%u,%lu\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
         attitude.yaw, gyro_current_data.gyro_z,
-        error_image,image_to_image_time,condition_T,feature_T,
-        battery_protection_adc_value,img_threshold,detect_feature_row,result_feature.left,result_feature.right,result_feature.height,
-        condition_corner,feature_corner_left,feature_corner_right,feature_label,up_feature_row
+        battery_voltage,
+        motor_traveling_left_target_speed,motor_traveling_right_target_speed,
+        error_image,image_to_image_time,condition_T,feature_T,detect_feature_row,img_threshold,image_to_image_time
     );
     network_vofa_send_str(info_buffer);
 }
