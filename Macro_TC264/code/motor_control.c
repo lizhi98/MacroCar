@@ -63,7 +63,7 @@ PIDParam motor_right_speed_pid  = {
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 7.2f, .ki = 0.0f, .kd = 1.5f,
+    .kp = 7.1f, .ki = 0.0f, .kd = 1.4f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -71,7 +71,7 @@ PIDParam motion_image_steering_pid = {
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.1f, .ki = 0.0f, .kd = 0.10f,
+    .kp = 1.25f, .ki = 0.0f, .kd = 0.15f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -250,10 +250,12 @@ void motion_control_pit_callback(){
     }
 
     motor_fun_set_open_percent(motor_fun_open_percent); // 开度
-    // 运行保护
-    run_control_protect();
+
     // 前进速度决策
     forward_speed_decision();
+
+    // 运行保护
+    run_control_protect();
 
     // 图像要求的转向环
     if(motor_pit_count % 2 == 0){ // 转向环10ms运行一次
@@ -316,7 +318,7 @@ void motor_fun_soft_start(void){
     motor_fun_open_percent = 25;
     system_delay_ms(1500);
     motor_fun_open_percent = MOTOR_FUN_LINEAR_OPEN_PERCENT;
-    system_delay_ms(1500);
+    system_delay_ms(2000);
 }
 
 void    motor_traveling_soft_start(void){
@@ -354,7 +356,18 @@ void forward_speed_decision(void){
             curve_speed_lock = 1;
         }
         if(!deceleration_label){
-            motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED; // 直线行驶时正常速度
+            if( feature_T_index == 1 || feature_T_index == 2 || feature_T_index == 4 ||
+                feature_T_index == 5   ||  feature_T_index == 6 || feature_T_index == 10 || feature_T_index == 11 || 
+                feature_T_index == 18 || feature_T_index == 19 || 
+                feature_T_index == 20)
+            {
+            // if( feature_T_index == 0    || feature_T_index == 2 || feature_T_index == 3 || feature_T_index == 5 ||
+            //     feature_T_index == 6   ||  feature_T_index >= 8)
+            // {
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 150;
+            }else{
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED; // 直线行驶时正常速度
+            }
             curve_speed_lock = 0; // 解除转弯速度锁定
         }else{
             motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED; // 转弯时降低速度

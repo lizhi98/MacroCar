@@ -99,6 +99,7 @@ extern uint8 deceleration_label;
 // T控制相关
 // extern uint8 index_sum_num;
 // extern int * T_index_list;
+extern int feature_T_index;
 
 #define white_point 255
 #define black_point 0

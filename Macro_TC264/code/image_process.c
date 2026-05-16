@@ -1,11 +1,17 @@
 #include "image_process.h"
 
-#define ERROR_IMAGE_LINE 43
+#define ERROR_IMAGE_LINE 40
 // #define index_num 6
 // int T_index_list[index_num]={-1,-1,-1,-1,-1,-1};
 // int T_index_list[index_num]={1,-1,-1,1,1,1};
-#define index_num 17
-int T_index_list[index_num]={-1,1,-1,-1,1,1,1,-1,-1,0,-1,-1,-1,0,1,0,1};
+// #define index_num 17
+// int T_index_list[index_num]={1,1,-1,-1,1,1,1,-1,-1,0,-1,-1,-1,0,1,0,1};
+
+// #define index_num 12
+// int T_index_list[index_num]={-1,-1,0,1,1,0,-1,-1,-1,0,0,-1};
+
+#define index_num 21
+int T_index_list[index_num]={1,0,1,1,0,0,-1,-1,-1,1,0,1,1,1,1,1,0,1,0,0,1};
 
 #define GrayScale 256
 #define grayscale 256
@@ -20,7 +26,7 @@ uint8 (*image)[MT9V03X_W];
 
 uint8 Ostu(uint8 index[MT9V03X_H][MT9V03X_W])
 {
-    uint8 threshold;
+    uint8 threshold=128;    //初始阈值
     imgsize = MT9V03X_H * MT9V03X_W;    //总像素个数
     uint8 images_value_temp;            //中间变量暂时存储
 
@@ -93,13 +99,13 @@ void Binarization()
     }
     else 
     {
-        if(img_threshold-threshold>8)
+        if(img_threshold-threshold>5)
         {
-            img_threshold=img_threshold-8;
+            img_threshold=img_threshold-5;
         }
-        else if(threshold-img_threshold>8)
+        else if(threshold-img_threshold>5)
         {
-            img_threshold=img_threshold+8;
+            img_threshold=img_threshold+5;
         }
         else
         {
@@ -287,7 +293,7 @@ void search_line()
                 }
             }
         }
-        if(i<100)
+        if(i<80)
         {
             //按实际情况来进行更改
             if(image[i][0]==white_point && left_line_list[i]==0)
@@ -495,14 +501,14 @@ void detect_feature()
                     right_line_lost_label++;
                 }
             }
-            if((left_line_list[i]-left_line_list[i-1]>10 || left_line_list[i]-left_line_list[i-2]>15 ||left_line_list[i]-left_line_list[i-3]>25 || left_line_list[i]-left_line_list[i-4]>15)
+            if((left_line_list[i]-left_line_list[i-1]>10 || left_line_list[i]-left_line_list[i-2]>18 ||left_line_list[i]-left_line_list[i-3]>22 || left_line_list[i]-left_line_list[i-4]>18)
                 && left_line_lost_label>=3 && (T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0))
             {   
                 detect_feature_row=(uint8)i;
                 feature_raw_l=1;
                 break;
             }
-            if((right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>15 || right_line_list[i-3]-right_line_list[i]>25 || right_line_list[i-4]-right_line_list[i]>15) &&
+            if((right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>18 || right_line_list[i-3]-right_line_list[i]>22 || right_line_list[i-4]-right_line_list[i]>18) &&
                 right_line_lost_label>=3&&(T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0))
             {
                 detect_feature_row=(uint8)i;
@@ -521,11 +527,11 @@ void detect_feature()
     int seek_col_start=0;
     if(feature_raw_r)
     {
-        seek_col_start=right_line_list[detect_feature_row];
+        seek_col_start=right_line_list[detect_feature_row]+10;
     }
     if(feature_raw_l)
     {
-        seek_col_start=left_line_list[detect_feature_row];
+        seek_col_start=left_line_list[detect_feature_row]-10;
     }
     if(seek_col_start>30 && seek_col_start<image_w-30)
     {
@@ -661,6 +667,8 @@ int zhuan_right_flag=0;
 int zhuan_row=0;
 int zhuan_condition_left=0;
 int zhuan_condition_right=0;
+int left_run_flag=0;
+int right_run_flag=0;
 int run_stop_flag=0;
 int run_once_flag=0;
 uint8 condition_T=0;
@@ -681,7 +689,7 @@ void feature_square()
         {
             feature_T=1;
         }
-        if(run_stop_flag &&feature_T_index==1)
+        if(run_stop_flag == 1 && feature_T_index==1)
         {
             run_once_flag=1;
         }
@@ -695,11 +703,16 @@ void feature_square()
         feature_T_index++;
         if(feature_T_index==index_num)
         {
+            run_stop_flag=1;
             feature_T_index=0;
         }
         if(feature_T>index_num)
         {
             feature_T=1;
+        }
+        if(run_stop_flag == 1 && feature_T_index==1)
+        {
+            run_once_flag=1;
         }
         zhuan_left_flag=1;
         condition_T=1;
@@ -711,11 +724,16 @@ void feature_square()
         feature_T_index++;
         if(feature_T_index==index_num)
         {
+            run_stop_flag=1;
             feature_T_index=0;
         }
         if(feature_T>index_num)
         {
             feature_T=1;
+        }
+        if(run_stop_flag == 1 && feature_T_index==1)
+        {
+            run_once_flag=1;
         }
         condition_T=1;
         feature_T_left=1;
@@ -726,11 +744,16 @@ void feature_square()
         feature_T_index++;
         if(feature_T_index==index_num)
         {
+            run_stop_flag=1;
             feature_T_index=0;
         }
         if(feature_T>index_num)
         {
             feature_T=1;
+        }
+        if(run_stop_flag == 1 && feature_T_index==1)
+        {
+            run_once_flag=1;
         }
         condition_T=1;
         feature_T_right=1;
@@ -739,7 +762,7 @@ void feature_square()
     zhuan_row=0;
     if(condition_T==1 &&zhuan_left_flag==1)
     {
-        for(int i=MT9V03X_H-21;i>5;i--)
+        for(int i=MT9V03X_H-31;i>5;i--)
         {
             if(image[i-1][20]==black_point && image[i][20]==white_point && image[i+1][20]==white_point)
             {
@@ -750,7 +773,7 @@ void feature_square()
     }
     else if(condition_T==1 && zhuan_right_flag==1)
     {
-        for(int i=MT9V03X_H-21;i>5;i--)
+        for(int i=MT9V03X_H-31;i>5;i--)
         {
             if(image[i-1][image_w-21]==black_point && image[i][image_w-21]==white_point && image[i+1][image_w-21]==white_point)
             {
@@ -781,7 +804,7 @@ void feature_square()
     }
     else if(T_index_list[feature_T-1]==0)
     {
-        Add_Line(94,119,mid_line_list[5],5);
+        Add_Line(mid_line_list[115],115,mid_line_list[5],5);
     }
     if(zhuan_condition_left==1)
     {
@@ -796,7 +819,7 @@ void feature_square()
     {
         if(T_index_list[feature_T-1]!=0)
         {
-            if(get_angle_err(angle_T) > 55.0f)
+            if(get_angle_err(angle_T) > 52.5f)
             {
                 condition_T=0;
                 deceleration_label=0;
@@ -812,7 +835,12 @@ void feature_square()
             {
                 if(left_lost_times==0)
                 {
+                    left_run_flag++;
+                }
+                if(left_run_flag>2)
+                {
                     condition_T=0;
+                    left_run_flag=0;
                     feature_T_left=0;
                 }
             }
@@ -820,7 +848,12 @@ void feature_square()
             {
                 if(right_lost_times==0)
                 {
+                    right_run_flag++;
+                }
+                if(right_run_flag>2)
+                {
                     condition_T=0;
+                    right_run_flag=0;
                     feature_T_right=0;
                 }
             }   
