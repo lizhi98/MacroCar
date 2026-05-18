@@ -63,7 +63,7 @@ PIDParam motor_right_speed_pid  = {
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 7.1f, .ki = 0.0f, .kd = 1.4f,
+    .kp = 7.10f, .ki = 0.0f, .kd = 1.6f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -71,7 +71,7 @@ PIDParam motion_image_steering_pid = {
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.25f, .ki = 0.0f, .kd = 0.15f,
+    .kp = 1.3f, .ki = 0.0f, .kd = 0.16f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -357,14 +357,14 @@ void forward_speed_decision(void){
         }
         if(!deceleration_label){
             if( feature_T_index == 1 || feature_T_index == 2 || feature_T_index == 4 ||
-                feature_T_index == 5   ||  feature_T_index == 6 || feature_T_index == 10 || feature_T_index == 11 || 
+                feature_T_index == 5   ||  feature_T_index == 6 || feature_T_index == 10 || 
                 feature_T_index == 18 || feature_T_index == 19 || 
                 feature_T_index == 20)
             {
             // if( feature_T_index == 0    || feature_T_index == 2 || feature_T_index == 3 || feature_T_index == 5 ||
             //     feature_T_index == 6   ||  feature_T_index >= 8)
             // {
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 150;
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 170;
             }else{
                 motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED; // 直线行驶时正常速度
             }

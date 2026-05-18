@@ -570,7 +570,7 @@ void detect_feature()
         if(feature_raw_r)
         {
             int k=0;
-            for(int i=seek_col_start+10;i<seek_col_start+25;i=i+3)
+            for(int i=seek_col_start;i<seek_col_start+15;i=i+3)
             {
                 up_row = 0;
                 down_row = 0;

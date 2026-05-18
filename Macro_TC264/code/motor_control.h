@@ -75,15 +75,15 @@ extern int16 motor_steering_speed;
 #define MOTOR_FORWARD_NORMAL_SPEED      800  // 前进正常速度
 
 // 进行速度决策
-#define MOTOR_FORWARD_LINEAR_SPEED      1400    // 前进直线速度 1500    1450
-#define MOTOR_FORWARD_CURVE_SPEED       1200    // 前进转角速度 1200    1250
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   50      // 负压风扇直线行驶开度
+#define MOTOR_FORWARD_LINEAR_SPEED      1500    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1250    // 前进转角速度 1200    1250
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   47      // 负压风扇直线行驶开度
 // #define MOTOR_FUN_CURVE_OPEN_PERCENT    40      // 负压风扇转弯行驶开度
 
 #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 
-#define RUN_PROTECT_IMG_TH_MAX      140 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
-#define RUN_PROTECT_IMG_TH_MIN      50  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
+#define RUN_PROTECT_IMG_TH_MAX      180 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
+#define RUN_PROTECT_IMG_TH_MIN      35  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
 
 extern uint8 motion_control_run_flag; // 作用于单电机速度环，让速度=0
 extern uint8 motor_traveling_pid_run_flag; // 作用于行进电机速度环，不让速度环运行
