@@ -152,7 +152,9 @@ uint8 right_line_list[MT9V03X_H]={image_w-1};
 uint8 mid_line_list[MT9V03X_H];
 uint8 left_lost_times = 0;
 uint8 right_lost_times = 0;
-
+int lost_row_down_l=0;
+int lost_row_down_r=0;
+int lost_condition=0;
 int detect_row_diff(const int row_diff[5], int limit)
 {
     int max_value = row_diff[0];
@@ -177,6 +179,7 @@ void search_line()
 {
     left_lost_times = 0;
     right_lost_times = 0;
+    lost_condition = 0;
     //第一行特殊处理
     for(uint8 i=right_last_point-1;i>left_last_point;i--)
     {
@@ -293,7 +296,7 @@ void search_line()
                 }
             }
         }
-        if(i<80)
+        if(i<90)
         {
             //按实际情况来进行更改
             if(image[i][0]==white_point && left_line_list[i]==0)
@@ -305,6 +308,24 @@ void search_line()
                 right_lost_times++;
             }
         }
+
+        if(image[i][0]==white_point && left_line_list[i]==0)
+        {
+            if(lost_condition==0)
+            {
+                lost_condition=1;
+                lost_row_down_l=i;
+            }
+        }
+        if(image[i][image_w-1]==white_point && right_line_list[i]==image_w-1)
+        {
+            if(lost_condition==0)
+            {
+                lost_condition=1;
+                lost_row_down_r=i;
+            }
+        }
+        
         mid_line_list[i]=(uint8)(((uint16)left_line_list[i]+(uint16)right_line_list[i])/2);
     }
 
@@ -486,7 +507,7 @@ void detect_feature()
 
     if(left_lost_times!=0 ||right_lost_times!=0)
     {
-        for(int i=MT9V03X_H-21;i>=feature_raw;i--)
+        for(int i=MT9V03X_H-31;i>=feature_raw;i--)
         {
             int left_line_lost_label=0;
             int right_line_lost_label=0;
@@ -833,29 +854,41 @@ void feature_square()
         {
             if(feature_T_left==1 && feature_T_right==0)
             {
-                if(left_lost_times==0)
+                if(lost_row_down_l>90)
                 {
-                    left_run_flag++;
-                }
-                if(left_run_flag>2)
-                {
-                    condition_T=0;
-                    left_run_flag=0;
                     feature_T_left=0;
+                    condition_T=0;
                 }
+                //原退出方案
+                // if(left_lost_times==0)
+                // {
+                //     left_run_flag++;
+                // }
+                // if(left_run_flag>2)
+                // {
+                //     condition_T=0;
+                //     left_run_flag=0;
+                //     feature_T_left=0;
+                // }
             }
             else if(feature_T_left==0 && feature_T_right==1)
             {
-                if(right_lost_times==0)
+                if(lost_row_down_r>90)
                 {
-                    right_run_flag++;
-                }
-                if(right_run_flag>2)
-                {
-                    condition_T=0;
-                    right_run_flag=0;
                     feature_T_right=0;
+                    condition_T=0;
                 }
+                //原退出方案
+                // if(right_lost_times==0)
+                // {
+                //     right_run_flag++;
+                // }
+                // if(right_run_flag>2)
+                // {
+                //     condition_T=0;
+                //     right_run_flag=0;
+                //     feature_T_right=0;
+                // }
             }   
         }
     }
