@@ -10,8 +10,11 @@
 // #define index_num 12
 // int T_index_list[index_num]={-1,-1,0,1,1,0,-1,-1,-1,0,0,-1};
 
-#define index_num 21
-int T_index_list[index_num]={1,0,1,1,0,0,-1,-1,-1,1,0,1,1,1,1,1,0,1,0,0,1};
+// #define index_num 21
+// int T_index_list[index_num]={1,0,1,1,0,0,-1,-1,-1,1,0,1,1,1,1,1,0,1,0,0,1};
+
+#define index_num 24
+int T_index_list[index_num]={-1,-1,1,1,0,-1,-1,0,1,1,1,-1,-1,1,1,0,0,1,1,-1,-1,1,-1,-1};
 
 #define GrayScale 256
 #define grayscale 256

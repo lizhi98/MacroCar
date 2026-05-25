@@ -28,9 +28,6 @@ int core0_main(void)
     
     battery_protection_init();      // 电池保护初始化
     motion_control_init();          // 运动控制初始化
-    
-    battery_protection_init();      // 电池保护初始化
-    motion_control_init();          // 运动控制初始化
 
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
     
@@ -41,7 +38,6 @@ int core0_main(void)
     menu_show_main();                   // 显示主菜单
 #endif
     uint8 battery_checked_flag = 0;
-
     // 延迟一段时间，等待负压自检
     system_delay_ms(500);
     while (TRUE)

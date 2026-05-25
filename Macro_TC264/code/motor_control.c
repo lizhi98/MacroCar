@@ -356,10 +356,7 @@ void forward_speed_decision(void){
             curve_speed_lock = 1;
         }
         if(!deceleration_label){
-            if( feature_T_index == 1 || feature_T_index == 2 || feature_T_index == 4 ||
-                feature_T_index == 5   ||  feature_T_index == 6 || feature_T_index == 10 || 
-                feature_T_index == 18 || feature_T_index == 19 || 
-                feature_T_index == 20)
+            if(0)
             {
             // if( feature_T_index == 0    || feature_T_index == 2 || feature_T_index == 3 || feature_T_index == 5 ||
             //     feature_T_index == 6   ||  feature_T_index >= 8)
@@ -385,6 +382,6 @@ void forward_speed_decision(void){
 void run_control_protect(){
     if(img_threshold > RUN_PROTECT_IMG_TH_MAX || img_threshold < RUN_PROTECT_IMG_TH_MIN || run_once_flag){
         motor_traveling_power_flag = 0; // 停车
-        motor_fun_open_percent = 0; // 负压风扇关闭
+        // motor_fun_open_percent = 0; // 负压风扇关闭
     }
 }
