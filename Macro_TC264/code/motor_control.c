@@ -45,13 +45,13 @@ static const float fuzzy_pid_rule_table_kd[7][7] = {
 
 PIDParam motor_left_speed_pid   = {
     .type = PID_INC,
-    .kp = 4.0f, .ki = 0.50f, .kd = 0.1f,
+    .kp = 4.5f, .ki = 0.50f, .kd = 0.1f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_INC,
-    .kp = 4.0f, .ki = 0.50f, .kd = 0.1f,
+    .kp = 4.5f, .ki = 0.50f, .kd = 0.1f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -63,7 +63,7 @@ PIDParam motor_right_speed_pid  = {
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 7.10f, .ki = 0.0f, .kd = 1.6f,
+    .kp = 7.0f, .ki = 0.0f, .kd = 1.6f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -71,7 +71,7 @@ PIDParam motion_image_steering_pid = {
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.3f, .ki = 0.0f, .kd = 0.16f,
+    .kp = 1.3f, .ki = 0.0f, .kd = 0.18f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -250,6 +250,7 @@ void motion_control_pit_callback(){
     }
 
     motor_fun_set_open_percent(motor_fun_open_percent); // 开度
+    // motor_fun_set_open_percent(0); // 开度
 
     // 前进速度决策
     forward_speed_decision();
@@ -286,7 +287,10 @@ void motion_control_pit_callback(){
             motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motor_traveling_right_target_speed), (float)motor_right_speed);
         }
         motor_traveling_soft_start(); // 行进电机软启动
-        
+
+        // motor_left_current_pwm_duty = 2000;
+        // motor_right_current_pwm_duty = 2000;
+
         // 应用PWM
         motor_traveling_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
     }
@@ -315,7 +319,7 @@ void motion_control_init(void){
 
 // 主循环中调用的函数，不要在中断中调用
 void motor_fun_soft_start(void){
-    motor_fun_open_percent = 25;
+    motor_fun_open_percent = 20;
     system_delay_ms(1500);
     motor_fun_open_percent = MOTOR_FUN_LINEAR_OPEN_PERCENT;
     system_delay_ms(2000);
@@ -356,12 +360,12 @@ void forward_speed_decision(void){
             curve_speed_lock = 1;
         }
         if(!deceleration_label){
-            if(0)
-            {
-            // if( feature_T_index == 0    || feature_T_index == 2 || feature_T_index == 3 || feature_T_index == 5 ||
-            //     feature_T_index == 6   ||  feature_T_index >= 8)
+            // if(0)
             // {
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 170;
+            if( feature_T_index == 3    || feature_T_index == 4 || feature_T_index == 5 ||
+                feature_T_index == 12  || feature_T_index == 14 || feature_T_index == 15 || feature_T_index == 16)
+            {
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 300;
             }else{
                 motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED; // 直线行驶时正常速度
             }
@@ -382,6 +386,6 @@ void forward_speed_decision(void){
 void run_control_protect(){
     if(img_threshold > RUN_PROTECT_IMG_TH_MAX || img_threshold < RUN_PROTECT_IMG_TH_MIN || run_once_flag){
         motor_traveling_power_flag = 0; // 停车
-        // motor_fun_open_percent = 0; // 负压风扇关闭
+        motor_fun_open_percent = 0; // 负压风扇关闭
     }
 }

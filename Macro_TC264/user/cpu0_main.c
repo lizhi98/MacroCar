@@ -31,7 +31,7 @@ int core0_main(void)
 
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
     
-    motor_traveling_power_flag = 0;     // 全部电机PWM输出标志位，0:PWM输出为0  1:PWM输出正常
+    motor_traveling_power_flag = 0;     // 行进电机PWM输出标志位，0:PWM输出为0  1:PWM输出正常
     motion_control_run_flag = 1;        // 行进电机运动标志位，0:电机速度环的目标速度为0，负压不变  1:电机速度盒负压电压受到算法控制
     forward_speed_decision_enable = 1;  // 速度决策标志位，0:不执行速度决策  1:执行速度决策
 #ifdef SMARTCAR_DEBUG_IPS
@@ -39,7 +39,7 @@ int core0_main(void)
 #endif
     uint8 battery_checked_flag = 0;
     // 延迟一段时间，等待负压自检
-    system_delay_ms(500);
+    system_delay_ms(200);
     while (TRUE)
     {
         // if(T_index == 7){

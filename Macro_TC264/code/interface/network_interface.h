@@ -6,11 +6,11 @@
 #include "seekfree_assistant_interface.h"
 #include "zf_device_mt9v03x_double.h"
 
-#define WIFI_SSID           "TianGang"
-#define WIFI_PASSWORD       "12341234"
+#define WIFI_SSID           "XIAOMI_GoGoGo"
+#define WIFI_PASSWORD       "9894653xxk"
 
-#define HOST_IP             "192.168.110.61"
-#define HOST_PORT           "9895"
+#define HOST_IP             "192.168.31.198"
+#define HOST_PORT           "9894"
 #define HOST_CONNECT_MODE   "TCP"
 
 typedef enum _NetworkPackType{

@@ -467,5 +467,4 @@ uint8 mt9v03x_double_init(m9v03x_double_init_type_enum init_type)
 
     interrupt_global_enable(interrupt_state);     // 打开全局中断
 
-    return return_state;
 }

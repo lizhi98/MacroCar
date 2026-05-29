@@ -1285,7 +1285,7 @@ void ips200_init (ips200_type_enum type_select)
     ips200_debug_init();
 }
 
-extern uint8 image_process_flag;
+extern uint8 image_process_finish_flag;
 
 void ips200_show_binary_image_with_line(uint16 x, uint16 y, const uint8 *image, uint16 width, uint16 height)
 {
@@ -1311,7 +1311,7 @@ void ips200_show_binary_image_with_line(uint16 x, uint16 y, const uint8 *image, 
         image_temp = image + j * width;                        // 直接对 image 操作会 Hardfault 暂时不知道为什么
         for(i = 0; i < width; i ++)
         {
-            while(image_process_flag == 0);
+            while(image_process_finish_flag == 0);
             temp = *(image_temp + i);                       // 读取像素点
             if(temp == 0)
             {

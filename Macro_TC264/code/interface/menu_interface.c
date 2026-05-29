@@ -4,7 +4,8 @@
 
 extern uint32 image_to_image_time;
 extern uint32 image_process_time;
-extern volatile uint8 image_process_flag; // 图像处理标志位，0表示CPU1正在处理图像，1表示CPU1处理完图像了，CPU0可以访问图像数据了
+extern volatile uint8 image_process_finish_flag; // 图像处理标志位，0表示CPU1正在处理图像，1表示CPU1处理完图像了，CPU0可以访问图像数据了
+extern uint8 image_process_flag; // 为1时图像开始处理
 
 KeyCmd current_key_cmd = KEY_NO_CMD; // 当前按键命令
 
@@ -64,7 +65,7 @@ uint16 run_table_id; // 启动功能表ID
 
 void menu_ips_print_info(void){
 #ifdef SMARTCAR_DEBUG_IPS
-    if(image_process_flag){ // 确保CPU1已经处理完图像了，CPU0可以访问图像数据了
+    if(image_process_finish_flag){ // 确保CPU1已经处理完图像了，CPU0可以访问图像数据了
         // ips200_show_binary_image_with_line(0, 0, mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H); // 显示图像并带辅助线
         // ips200_displayimage03x(mt9v03x_copy_image[0], MT9V03X_W, MT9V03X_H);
     }
@@ -79,7 +80,7 @@ void menu_ips_print_info(void){
     ips200_show_string(0, 190, info_buffer);
     sprintf(info_buffer, "GZ:%+6.2f YAW:%+6.2f", gyro_current_data.gyro_z, gyro_current_data.angle_z);
     ips200_show_string(0, 210, info_buffer);
-    sprintf(info_buffer, "Index:%2u Con:%1u", T_index, condition_T);
+    sprintf(info_buffer, "Index:%2u Con:%1u", feature_T, condition_T);
     ips200_show_string(0, 230, info_buffer);
     sprintf(info_buffer, "L:%2u R:%2u,H %2u",result_feature.left, result_feature.right, result_feature.height);
     ips200_show_string(0, 250, info_buffer);
@@ -349,6 +350,7 @@ void menu_run_1(void){
 }
 
 void menu_run_2(void){
+    gpio_init(P21_4,GPO,0,GPO_PUSH_PULL); // 初始化P21_4为推挽输出，用于显示电机启动
     motor_fun_soft_start();         // 负压风扇软启动
     motor_traveling_power_flag = 1; // 使能行进电机PWM输出
     motor_traveling_pid_run_flag = 1; // 使能行进电机速度环运行
@@ -366,14 +368,14 @@ void menu_key_init(void){
 
 void network_print_info(void){
     static char info_buffer[120];
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%u,%lu\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%u,%lu,%d\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
         attitude.yaw, gyro_current_data.gyro_z,
         battery_voltage,
         motor_traveling_left_target_speed,motor_traveling_right_target_speed,
-        error_image,image_to_image_time,condition_T,feature_T,detect_feature_row,img_threshold,image_to_image_time
+        error_image,image_to_image_time,condition_T,feature_T,detect_feature_row,img_threshold,image_to_image_time,zhuan_row
     );
     network_vofa_send_str(info_buffer);
 }
