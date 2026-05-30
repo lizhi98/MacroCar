@@ -535,7 +535,7 @@ void detect_feature()
                 feature_raw_l=1;
                 break;
             }
-            if((right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>10 || right_line_list[i-3]-right_line_list[i]>15 || right_line_list[i-4]-right_line_list[i]>10) 
+            if((right_line_list[i-1]-right_line_list[i]>7 || right_line_list[i-2]-right_line_list[i]>10 || right_line_list[i-3]-right_line_list[i]>15 || right_line_list[i-4]-right_line_list[i]>7) 
                 && right_line_lost_label>=1&&(T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0))
             {
                 detect_feature_row=(uint8)i;
