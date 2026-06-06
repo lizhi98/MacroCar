@@ -980,7 +980,7 @@ void feature_square()
         // }
         zhuan_right_flag=1;
         condition_T=1;
-        // angle_T=attitude.yaw;
+        angle_T=attitude.yaw;
     }
     else if(T_index_list[feature_T_index]==-1&& feature_raw_l==1&& condition_T==0 &&feature_label==1)
     {
@@ -1005,7 +1005,7 @@ void feature_square()
         // }
         zhuan_left_flag=1;
         condition_T=1;
-        // angle_T=attitude.yaw;
+        angle_T=attitude.yaw;
     }
     else if(T_index_list[feature_T_index]==0&&feature_label==1 && condition_T==0 && feature_raw_l==1)
     {
@@ -1121,16 +1121,16 @@ void feature_square()
     {
         if(T_index_list[feature_T-1]!=0)
         {
-            // if(get_angle_err(angle_T) > 52.5f)
-            // {
-            //     condition_T=0;
-            //     deceleration_label=0;
-            //     zhuan_left_flag=0;
-            //     zhuan_right_flag=0;
-            //     zhuan_condition_right=0;
-            //     zhuan_condition_left=0;
-            //     feature_label=0;    
-            // }
+            if(get_angle_err(angle_T) > 52.5f)
+            {
+                condition_T=0;
+                deceleration_label=0;
+                zhuan_left_flag=0;
+                zhuan_right_flag=0;
+                zhuan_condition_right=0;
+                zhuan_condition_left=0;
+                feature_label=0;    
+            }
         }
         else if(T_index_list[feature_T-1]==0)
         {
