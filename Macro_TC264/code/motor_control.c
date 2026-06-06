@@ -45,13 +45,13 @@ static const float fuzzy_pid_rule_table_kd[7][7] = {
 
 PIDParam motor_left_speed_pid   = {
     .type = PID_INC,
-    .kp = 4.4f, .ki = 0.48f, .kd = 0.1f,
+    .kp = 4.3f, .ki = 0.48f, .kd = 0.1f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_INC,
-    .kp = 4.4f, .ki = 0.48f, .kd = 0.1f,
+    .kp = 4.3f, .ki = 0.48f, .kd = 0.1f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -63,7 +63,7 @@ PIDParam motor_right_speed_pid  = {
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 7.1f, .ki = 0.0f, .kd = 1.6f,
+    .kp = 7.4f, .ki = 0.0f, .kd = 1.8f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -71,7 +71,7 @@ PIDParam motion_image_steering_pid = {
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.3f, .ki = 0.0f, .kd = 0.18f,
+    .kp = 1.25f, .ki = 0.0f, .kd = 0.18f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -363,11 +363,16 @@ void forward_speed_decision(void){
             // if(0)
             // {
             if( feature_T_index == 3    || feature_T_index == 4 || feature_T_index == 5 ||
-                feature_T_index == 12  || feature_T_index == 14 || feature_T_index == 15 || feature_T_index == 16)
+                feature_T_index == 14 || feature_T_index == 15 || feature_T_index == 16)
             {
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 300;
-            }else if(feature_T_index >= 20){
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED - 40;
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 450;
+            }
+            else if(feature_T_index == 12)
+            {
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 320;
+            }
+            else if(feature_T_index >= 20){
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED - 150;
             }else{
                 motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED; // 直线行驶时正常速度
             }
