@@ -516,7 +516,7 @@ int up_feature_row=MT9V03X_H-1;
 int feature_row_run=0;
 void detect_feature()
 {
-    printf("left_lost_times=%d, right_lost_times=%d\n", left_lost_times, right_lost_times);
+    // printf("left_lost_times=%d, right_lost_times=%d\n", left_lost_times, right_lost_times);
     feature_raw_l=0;
     feature_raw_r=0;
     detect_feature_row=0;
@@ -766,7 +766,7 @@ void detect_feature()
         }
     }
 
-    printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d,feature_label=%d,feature_row_run=%d\n",detect_feature_row, feature_raw_l, feature_raw_r, feature_label, feature_row_run);
+    // printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d,feature_label=%d,feature_row_run=%d\n",detect_feature_row, feature_raw_l, feature_raw_r, feature_label, feature_row_run);
     // if(left_lost_times!=0 ||right_lost_times!=0)
     // {
     //     for(int i=MT9V03X_H-31;i>=feature_raw;i--)
@@ -1115,7 +1115,7 @@ void feature_square()
     {
         mid_line_list[ERROR_IMAGE_LINE]=image_w-1;
     }
-    printf("condition_T=%d, feature_T=%d, zhuan_row=%d, zhuan_condition_left=%d, zhuan_condition_right=%d, deceleration_label=%d\n", condition_T, feature_T, zhuan_row, zhuan_condition_left, zhuan_condition_right, deceleration_label);
+    // printf("condition_T=%d, feature_T=%d, zhuan_row=%d, zhuan_condition_left=%d, zhuan_condition_right=%d, deceleration_label=%d\n", condition_T, feature_T, zhuan_row, zhuan_condition_left, zhuan_condition_right, deceleration_label);
     //转向退出处理
     if(condition_T==1)
     {
