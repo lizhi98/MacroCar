@@ -63,7 +63,7 @@ PIDParam motor_right_speed_pid  = {
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 7.1f, .ki = 0.0f, .kd = 1.6f,
+    .kp = 7.2f, .ki = 0.0f, .kd = 1.6f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -365,9 +365,9 @@ void forward_speed_decision(void){
             if( feature_T_index == 3    || feature_T_index == 4 || feature_T_index == 5 ||
                 feature_T_index == 12  || feature_T_index == 14 || feature_T_index == 15 || feature_T_index == 16)
             {
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 300;
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 250;
             }else if(feature_T_index >= 20){
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED - 40;
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED - 100;
             }else{
                 motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED; // 直线行驶时正常速度
             }
