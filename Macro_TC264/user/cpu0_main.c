@@ -23,10 +23,16 @@ int core0_main(void)
 #if defined(SMARTCAR_DEBUG_IPS) || defined(SMARTCAR_DEBUG_IPS_PRO)
     menu_interface_init();          // 菜单初始化
 #endif
+#if defined(SMARTCAR_DEBUG_NET_IMG) || defined(SMARTCAR_DEBUG_NET_INFO)
+    network_interface_init();
+    network_interface_seekfree_host_config(&mt9v03x_copy_image[0][0]); // 配置逐飞助手摄像头信息
+#endif
+
     menu_key_init();                // 按键初始化
     gyro_init();                    // 陀螺仪初始化
     
     battery_protection_init();      // 电池保护初始化
+
     motion_control_init();          // 运动控制初始化
 
     cpu_wait_event_ready();         // 等待所有核心初始化完毕

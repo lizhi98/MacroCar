@@ -63,7 +63,7 @@ PIDParam motor_right_speed_pid  = {
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 7.2f, .ki = 0.0f, .kd = 1.6f,
+    .kp = 8.0f, .ki = 0.0f, .kd = 2.1f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -71,7 +71,7 @@ PIDParam motion_image_steering_pid = {
 // 实际转向pid
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.25f, .ki = 0.0f, .kd = 0.18f,
+    .kp = 1.8f, .ki = 0.0f, .kd = 0.25f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
@@ -236,12 +236,19 @@ int16 motor_traveling_left_target_speed = 0;
 int16 motor_traveling_right_target_speed = 0;
 
 void motion_control_pit_callback(){
+    // motor_left_current_pwm_duty = 0;
+    // motor_right_current_pwm_duty = 0;
 
+    // // 应用PWM
+    // motor_traveling_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
+    // motor_fun_set_open_percent(0); // 开度
+    
     motor_pit_count++;
-
+    
     // 电机接口PIT，获取速度
     motor_interface_pit_callback();
     motor_get_speed(&motor_left_speed, &motor_right_speed);
+    // return;
 
     // 如果车不运动
     if(!motion_control_run_flag){
@@ -287,9 +294,6 @@ void motion_control_pit_callback(){
             motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motor_traveling_right_target_speed), (float)motor_right_speed);
         }
         motor_traveling_soft_start(); // 行进电机软启动
-
-        // motor_left_current_pwm_duty = 2000;
-        // motor_right_current_pwm_duty = 2000;
 
         // 应用PWM
         motor_traveling_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
@@ -365,9 +369,9 @@ void forward_speed_decision(void){
             if( feature_T_index == 3    || feature_T_index == 4 || feature_T_index == 5 ||
                 feature_T_index == 14 || feature_T_index == 15 || feature_T_index == 16)
             {
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 250;
-            }else if(feature_T_index >= 20){
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED - 100;
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 450;
+            }else if(feature_T_index >= 18){
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;
             }else{
                 motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED; // 直线行驶时正常速度
             }
@@ -384,9 +388,17 @@ void forward_speed_decision(void){
     }
 }
 
+volatile uint32 run_protect_trigger_time = 0; // 保护触发时间
+volatile uint8 run_control_protect_trigger_flag = 0; // 运行保护触发标志位
+
 void run_control_protect(){
-    if(img_threshold > RUN_PROTECT_IMG_TH_MAX || img_threshold < RUN_PROTECT_IMG_TH_MIN || run_once_flag){
+    if(!run_control_protect_trigger_flag && (img_threshold > RUN_PROTECT_IMG_TH_MAX || img_threshold < RUN_PROTECT_IMG_TH_MIN || run_once_flag)){
         motor_traveling_power_flag = 0; // 停车
+        run_control_protect_trigger_flag = 1; // 设置运行保护触发标志位
+        // 记录保护触发时间
+        run_protect_trigger_time = system_getval_ms();
+    }
+    if(run_control_protect_trigger_flag && system_getval_ms() - run_protect_trigger_time > 1000){ // 保护触发超过1秒，停止负压风扇
         motor_fun_open_percent = 0; // 负压风扇关闭
     }
 }

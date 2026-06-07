@@ -350,7 +350,6 @@ void menu_run_1(void){
 }
 
 void menu_run_2(void){
-    gpio_init(P21_4,GPO,0,GPO_PUSH_PULL); // 初始化P21_4为推挽输出，用于显示电机启动
     motor_fun_soft_start();         // 负压风扇软启动
     motor_traveling_power_flag = 1; // 使能行进电机PWM输出
     motor_traveling_pid_run_flag = 1; // 使能行进电机速度环运行
@@ -368,14 +367,14 @@ void menu_key_init(void){
 
 void network_print_info(void){
     static char info_buffer[120];
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%u,%lu,%d\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%u,%lu,%d,%d,%d,%d,%d\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
         attitude.yaw, gyro_current_data.gyro_z,
         battery_voltage,
         motor_traveling_left_target_speed,motor_traveling_right_target_speed,
-        error_image,image_to_image_time,condition_T,feature_T,detect_feature_row,img_threshold,image_to_image_time,zhuan_row
+        error_image,image_to_image_time,condition_T,feature_T,detect_feature_row,img_threshold,image_to_image_time,zhuan_row,right_lost_times,right_run_flag,feature_T_left,feature_T_right
     );
     network_vofa_send_str(info_buffer);
 }

@@ -58,8 +58,10 @@ typedef struct
     uint8 right;
     uint8 T;
 }corner_result;
-
+extern int right_run_flag;
 extern uint8 left_lost_times;
+extern int feature_T_left;
+extern int feature_T_right;
 extern uint8 right_lost_times;
 extern uint8 feature_raw_l;
 extern uint8 feature_raw_r;

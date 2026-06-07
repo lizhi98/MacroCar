@@ -24,10 +24,7 @@ void core1_main(void)
 
     // 外设初始化
     mt9v03x_init();                         // 初始化总钻风摄像头
-#if defined(SMARTCAR_DEBUG_NET_IMG) || defined(SMARTCAR_DEBUG_NET_INFO)
-    network_interface_init();
-    network_interface_seekfree_host_config(&mt9v03x_copy_image[0][0]); // 配置逐飞助手摄像头信息
-#endif
+
     // 初始化蜂鸣器
     // gpio_init(P33_10, GPO, 1, GPO_PUSH_PULL);
     cpu_wait_event_ready();                 // 等待所有核心初始化完毕
