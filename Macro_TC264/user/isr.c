@@ -54,12 +54,20 @@ IFX_INTERRUPT(cc60_pit_ch1_isr, 0, CCU6_0_CH1_ISR_PRIORITY)
     key_scanner();
 }
 
+uint32 cc61_ch0_pit_count = 0; // 计数变量
+
 IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
 {
     interrupt_global_enable(0);                     // 开启中断嵌套
     pit_clear_flag(CCU61_CH0);
+
+    cc61_ch0_pit_count++; // 每次进入中断，计数变量加1
     
-    motion_control_pit_callback();
+    gyro_pit_callback(); // 陀螺仪
+    
+    if(cc61_ch0_pit_count % MOTION_CONTROL_PIT_TIME == 0){
+        motion_control_pit_callback(); // 运动控制
+    }
 
 }
 
@@ -68,7 +76,7 @@ IFX_INTERRUPT(cc61_pit_ch1_isr, 0, CCU6_1_CH1_ISR_PRIORITY)
     interrupt_global_enable(0);                     // 开启中断嵌套
     pit_clear_flag(CCU61_CH1);
 
-    gyro_pit_callback(); // 陀螺仪
+    
 
 }
 // **************************** PIT中断函数 ****************************

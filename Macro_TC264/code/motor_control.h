@@ -69,7 +69,7 @@ extern int16 motor_steering_speed;
 #define MOTION_CONTROL_PIT_TIME         5  // 单位ms
 #define MOTION_CONTROL_PIT_INDEX        CCU61_CH0
 
-#define MOTOR_SOFT_START_PWM            2500// 电机软启动PWM占空比
+#define MOTOR_SOFT_START_PWM            3500// 电机软启动PWM占空比
 
 // 不进行速度决策
 #define MOTOR_FORWARD_NORMAL_SPEED      1100  // 前进正常速度

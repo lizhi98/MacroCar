@@ -42,7 +42,8 @@ void network_interface_seekfree_host_config(uint8 *image_addr){
 
 // VOFA+
 void network_vofa_send_str(char * str){
-    sprintf(network_vofa_send_buffer, "%lu,%s\n" , vofa_pack_id++, str);
+    // sprintf(network_vofa_send_buffer, "%lu,%s\n" , vofa_pack_id++, str);
+    sprintf(network_vofa_send_buffer, "%lu,%s\n" , system_getval_ms(), str);
     wifi_spi_send_buffer((const uint8 *)network_vofa_send_buffer, strlen(network_vofa_send_buffer));
 }
 

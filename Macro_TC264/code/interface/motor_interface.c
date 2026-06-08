@@ -64,10 +64,10 @@ void motor_fun_set_open_percent(uint16 percent){
 // 主要是用于获取速度
 void motor_interface_pit_callback(void){
     // 获取速度
-    motor_right_speed  = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX)  * 10 / motor_get_speed_pit_time;
-    motor_left_speed = encoder_get_count(MOTOR_RIGHT_ENCODER_INDEX) * -10  / motor_get_speed_pit_time;  // 转换速度不受PIT时间影响
     // 清零计数
+    motor_right_speed  = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX)  * 10 / motor_get_speed_pit_time;
     encoder_clear_count(MOTOR_LEFT_ENCODER_INDEX);
+    motor_left_speed = encoder_get_count(MOTOR_RIGHT_ENCODER_INDEX) * -10  / motor_get_speed_pit_time;  // 转换速度不受PIT时间影响
     encoder_clear_count(MOTOR_RIGHT_ENCODER_INDEX);
 }
 
