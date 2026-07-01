@@ -3,13 +3,13 @@
 // 规则表
 static const float fuzzy_pid_rule_table_kp[7][7] = {
 // EC→  NB     NM     NS     ZO     PS     PM     PB      E ↓
-    { 1.3f,  1.3f,  1.2f,  1.2f,  1.1f,  1.1f,  1.0f}, // E=-3 负大
-    { 1.2f,  1.2f,  1.1f,  1.1f,  1.0f,  1.0f,  0.9f}, // E=-2 负中
-    { 0.9f,  0.9f,  0.8f,  0.8f,  0.7f,  0.7f,  0.6f}, // E=-1 负小
-    { 0.2f,  0.1f,  0.0f,  0.0f,  0.0f,  0.1f,  0.2f}, // E=0  零
-    { 0.6f,  0.7f,  0.7f,  0.8f,  0.8f,  0.9f,  0.9f}, // E=1  正小
-    { 0.9f,  1.0f,  1.0f,  1.1f,  1.1f,  1.2f,  1.2f}, // E=2  正中
-    { 1.0f,  1.1f,  1.1f,  1.2f,  1.2f,  1.3f,  1.3f}  // E=3  正大
+    {1.00f, 1.00f, 0.93f, 0.93f, 0.87f, 0.87f, 0.80f}, // E=-3 负大
+    {0.93f, 0.93f, 0.87f, 0.87f, 0.80f, 0.80f, 0.73f}, // E=-2 负中
+    {0.73f, 0.73f, 0.67f, 0.67f, 0.60f, 0.60f, 0.53f}, // E=-1 负小
+    {0.33f, 0.27f, 0.20f, 0.20f, 0.20f, 0.27f, 0.33f}, // E=0  零
+    {0.53f, 0.60f, 0.60f, 0.67f, 0.67f, 0.73f, 0.73f}, // E=1  正小
+    {0.73f, 0.80f, 0.80f, 0.87f, 0.87f, 0.93f, 0.93f}, // E=2  正中
+    {0.80f, 0.87f, 0.87f, 0.93f, 0.93f, 1.00f, 1.00f}  // E=3  正大
 };
 
 static const float fuzzy_pid_rule_table_ki[7][7] = {
@@ -78,7 +78,7 @@ PIDParam motion_image_steering_pid = {
 
 PIDParam motor_steering_pid = {
     .type = FUZZY_PID_POS,
-    .kp = 0.6f, .ki = 0.0f, .kd = 0.1f,
+    .kp = 1.0f, .ki = 0.0f, .kd = 0.1f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
@@ -243,6 +243,8 @@ void PID_clear(PIDParam* pid_param){
 int16 motor_traveling_left_target_speed = 0;
 int16 motor_traveling_right_target_speed = 0;
 
+float motor_steering_speed_up_k = 0.5f;
+
 void motion_control_pit_callback(){
     // motor_left_current_pwm_duty = 0;
     // motor_right_current_pwm_duty = 0;
@@ -291,9 +293,14 @@ void motion_control_pit_callback(){
         //     motor_left_current_pwm_duty  = (int16)PID_calculate(&motor_left_speed_pid,  (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_left_speed);
         //     motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
         // }
-        
-        motor_traveling_left_target_speed  =    motion_control_run_flag ? motor_steering_speed +   motor_forward_speed : 0;
-        motor_traveling_right_target_speed =    motion_control_run_flag ? -motor_steering_speed  + motor_forward_speed : 0;
+        // 加速轮加速少，减速轮减速多
+        if(motor_steering_speed >= 0){
+            motor_traveling_left_target_speed  =    motion_control_run_flag ?   motor_forward_speed     +   motor_steering_speed  *  motor_steering_speed_up_k  : 0;
+            motor_traveling_right_target_speed =    motion_control_run_flag ?   motor_forward_speed     -   motor_steering_speed  : 0;
+        }else{
+            motor_traveling_left_target_speed  =    motion_control_run_flag ?   motor_forward_speed     +   motor_steering_speed  : 0;
+            motor_traveling_right_target_speed =    motion_control_run_flag ?   motor_forward_speed     -   motor_steering_speed  *  motor_steering_speed_up_k  : 0;
+        }
         if(motor_left_speed_pid.type == PID_INC){
             motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motor_traveling_left_target_speed), (float)motor_left_speed);
             motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motor_traveling_right_target_speed), (float)motor_right_speed);

@@ -376,15 +376,15 @@ void network_print_info(void){
     //     motor_traveling_left_target_speed,motor_traveling_right_target_speed,
     //     error_image,image_to_image_time,condition_T,feature_T,detect_feature_row,img_threshold,image_to_image_time,zhuan_row,right_lost_times,right_run_flag,feature_T_left,feature_T_right
     // );
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%f,%f,%f,%f\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%f,%f,%f\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
         attitude.yaw, gyro_current_data.gyro_z,
         battery_voltage,
         motor_traveling_left_target_speed,motor_traveling_right_target_speed,
-        error_image,image_to_image_time,condition_T,feature_T,
-        motor_steering_pid.error, motor_steering_pid.error_delta, motor_steering_pid.fuzzy_kp, motor_steering_pid.fuzzy_kd
+        error_image,image_to_image_time,condition_T,feature_T,img_threshold,
+        motor_steering_pid.error, motor_steering_pid.error_delta, motor_steering_pid.fuzzy_kp
     );
     network_vofa_send_str(info_buffer);
 }

@@ -643,8 +643,7 @@ void detect_feature()
     // else if(feature_label==0)
     // {
     //     if((T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0)&&left_lost_times>=3)
-    //     {
-            
+    //     { 
     //         for(int i=MT9V03X_H-41;i>=feature_raw;i--)
     //         {
     //             detect_feature_row=0;
@@ -756,9 +755,7 @@ void detect_feature()
     //                             feature_row_run=detect_feature_row;
     //                             feature_label = 1;
     //                             break;
-    //                         }
-                                
-                            
+    //                         }                         
     //                     }
     //                 }
     //             }
