@@ -18,7 +18,7 @@
 // int T_index_list[index_num]={-1,-1,1,1,0,-1,-1,0,-1,-1,-1,1,0,1,0,0,1,1,-1,-1,1,-1,-1};
 
 #define index_num 23
-int T_index_list[index_num]={-1,-1,1,0,0,1,1,1,-1,-1,0,-1,1,1,0,0,1,1,-1,-1,1,-1,-1};
+int T_index_list[index_num]={1,-1,1,0,0,1,1,1,-1,-1,0,-1,1,1,0,0,1,1,-1,-1,1,-1,-1};
 
 #define GrayScale 256
 #define grayscale 256
@@ -159,9 +159,6 @@ uint8 right_line_list[MT9V03X_H]={image_w-1};
 uint8 mid_line_list[MT9V03X_H];
 uint8 left_lost_times = 0;
 uint8 right_lost_times = 0;
-int lost_row_down_l=0;
-int lost_row_down_r=0;
-int lost_condition=0;
 int detect_row_diff(const int row_diff[5], int limit)
 {
     int max_value = row_diff[0];
@@ -184,9 +181,6 @@ int detect_row_diff(const int row_diff[5], int limit)
 
 void search_line()
 {
-    left_lost_times = 0;
-    right_lost_times = 0;
-    lost_condition = 0;
     //第一行特殊处理
     for(uint8 i=right_last_point-1;i>left_last_point;i--)
     {
@@ -301,43 +295,6 @@ void search_line()
                 else{
                     right_line_list[i]=image_w-1;
                 }
-            }
-        }
-        if(i<90)
-        {
-            //按实际情况来进行更改
-            // if(image[i][0]==white_point && left_line_list[i]==0)
-            // {
-            //     left_lost_times++;
-            // }
-            // if(image[i][image_w-1]==white_point&& right_line_list[i]==image_w-1)
-            // {
-            //     right_lost_times++;
-            // }
-            if(image[i][0]==white_point)
-            {
-                left_lost_times++;
-            }
-            if(image[i][image_w-1]==white_point)
-            {
-                right_lost_times++;
-            }
-        }
-
-        if(image[i][0]==white_point && left_line_list[i]==0)
-        {
-            if(lost_condition==0)
-            {
-                lost_condition=1;
-                lost_row_down_l=i;
-            }
-        }
-        if(image[i][image_w-1]==white_point && right_line_list[i]==image_w-1)
-        {
-            if(lost_condition==0)
-            {
-                lost_condition=1;
-                lost_row_down_r=i;
             }
         }
         
@@ -512,322 +469,120 @@ int feature_T_index=0;
 
 #define feature_raw 10    
 uint8 detect_feature_row=0;
-int up_feature_row=MT9V03X_H-1;
 int feature_row_run=0;
+
+#define left_suspect_col_start  30
+#define right_suspect_col_start  image_w-31
+
 void detect_feature()
 {
-    // printf("left_lost_times=%d, right_lost_times=%d\n", left_lost_times, right_lost_times);
     feature_raw_l=0;
     feature_raw_r=0;
     detect_feature_row=0;
     feature_label=0;
-    up_feature_row=MT9V03X_H-1;
-    // if(feature_label==1)
-    // {
-    //     if(T_index_list[feature_T_index-1]==0 &&feature_T_left==1)
-    //     {
-    //         for(int i=MT9V03X_H-11;i>=feature_raw;i--)
-    //         {
-    //             detect_feature_row=0;
-    //             if(left_line_list[i]-left_line_list[i-1]>10 || left_line_list[i]-left_line_list[i-2]>10 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>10)
-    //             {
-    //                 detect_feature_row=(uint8)i;
-    //             }
-    //             if(detect_feature_row >20)
-    //             {
-    //                 int seek_row_start=detect_feature_row-20;
-    //                 int seek_row_end=detect_feature_row+10;
-    //                 int seek_col_start=left_line_list[detect_feature_row]-10;;
-    //                 if(seek_col_start>30 && seek_col_start<image_w-30)
-    //                 {
-    //                     int up_row=0;
-    //                     int down_row=0;
-    //                     int row_diff[5]={0};
-    //                     if(feature_raw_l)
-    //                     {
-    //                         int k=0;
-    //                         for(int i=seek_col_start-10;i>seek_col_start-25;i=i-3)
-    //                         {
-    //                             up_row = 0;
-    //                             down_row = 0;
-    //                             for(int j=seek_row_start;j<seek_row_end;j++)
-    //                             {
-    //                                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
-    //                                 {
-    //                                     down_row=j;
-    //                                 }
-    //                                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
-    //                                 {
-    //                                     up_row=j;
-    //                                 }
-    //                             }
-    //                             if(up_row<up_feature_row && up_row!=0)
-    //                             {
-    //                                 up_feature_row=up_row;
-    //                             }
-    //                             if(up_row!=0 && down_row!=0)
-    //                             {
-    //                                 row_diff[k]=down_row-up_row;
-    //                             }
-    //                             k++;
-    //                         }
-    //                         if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
-    //                         {
-    //                             feature_row_run=detect_feature_row;
-    //                             break;
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     up_feature_row=MT9V03X_H-1;
-    //     if(T_index_list[feature_T_index]==0&&feature_T_right==1)
-    //     {
-    //         for(int i=MT9V03X_H-11;i>=feature_raw;i--)
-    //         {
-    //             detect_feature_row=0;
-    //             if(right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>10 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>10)
-    //             {
-    //                 detect_feature_row=(uint8)i;
-    //                 feature_raw_r=1;
-    //             }
-    //             if(detect_feature_row >20)
-    //             {
-    //                 int seek_row_start=detect_feature_row-20;
-    //                 int seek_row_end=detect_feature_row+10;
-    //                 int seek_col_start=right_line_list[detect_feature_row]+10;;
-    //                 if(seek_col_start>30 && seek_col_start<image_w-30)
-    //                 {
-    //                     int up_row=0;
-    //                     int down_row=0;
-    //                     int row_diff[5]={0};
-    //                     if(feature_raw_r)
-    //                     {
-    //                         int k=0;
-    //                         for(int i=seek_col_start;i<seek_col_start+15;i=i+3)
-    //                         {
-    //                             up_row = 0;
-    //                             down_row = 0;
-    //                             for(int j=seek_row_start;j<seek_row_end;j++)
-    //                             {
-    //                                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
-    //                                 {
-    //                                     down_row=j;
-    //                                 }
-    //                                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
-    //                                 {
-    //                                     up_row=j;
-    //                                 }
-    //                             }
-    //                             if(up_row<up_feature_row && up_row!=0)
-    //                             {
-    //                                 up_feature_row=up_row;
-    //                             }
-    //                             if(up_row!=0 && down_row!=0)
-    //                             {
-    //                                 row_diff[k]=down_row-up_row;
-    //                             }
-    //                             k++;
-    //                         }
-    //                         if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
-    //                         {
-    //                             feature_row_run=detect_feature_row;
-    //                             break;
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-    // else if(feature_label==0)
-    // {
-    //     if((T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0)&&left_lost_times>=3)
-    //     { 
-    //         for(int i=MT9V03X_H-41;i>=feature_raw;i--)
-    //         {
-    //             detect_feature_row=0;
-    //             if(left_line_list[i]-left_line_list[i-1]>10 || left_line_list[i]-left_line_list[i-2]>10 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>10)
-    //             {
-    //                 detect_feature_row=(uint8)i;
-    //                 feature_raw_l=1;
-    //             }
-    //             if(detect_feature_row >20)
-    //             {
-    //                 int seek_row_start=detect_feature_row-20;
-    //                 int seek_row_end=detect_feature_row+15;
-    //                 int seek_col_start=left_line_list[detect_feature_row]-10;;
-    //                 if(seek_col_start>30 && seek_col_start<image_w-30)
-    //                 {
-    //                     int up_row=0;
-    //                     int down_row=0;
-    //                     int row_diff[5]={0};
-    //                     if(feature_raw_l)
-    //                     {
-    //                         int k=0;
-    //                         for(int i=seek_col_start-10;i>seek_col_start-25;i=i-3)
-    //                         {
-    //                             up_row = 0;
-    //                             down_row = 0;
-    //                             for(int j=seek_row_start;j<seek_row_end;j++)
-    //                             {
-    //                                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
-    //                                 {
-    //                                     down_row=j;
-    //                                 }
-    //                                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
-    //                                 {
-    //                                     up_row=j;
-    //                                 }
-    //                             }
-    //                             if(up_row<up_feature_row && up_row!=0)
-    //                             {
-    //                                 up_feature_row=up_row;
-    //                             }
-    //                             if(up_row!=0 && down_row!=0)
-    //                             {
-    //                                 row_diff[k]=down_row-up_row;
-    //                             }
-    //                             k++;
-    //                         }
-    //                         if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
-    //                         {
-    //                             feature_row_run=detect_feature_row;
-    //                             feature_label = 1;
-    //                             break;
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     up_feature_row=MT9V03X_H-1;
-    //     if((T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0)&&right_lost_times>=3)
-    //     {
-    //         for(int i=MT9V03X_H-41;i>=feature_raw;i--)
-    //         {
-    //             detect_feature_row=0;
-    //             if(right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>10 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>10)
-    //             {
-    //                 detect_feature_row=(uint8)i;
-    //                 feature_raw_r=1;
-    //             }
-    //             if(detect_feature_row >20)
-    //             {
-    //                 int seek_row_start=detect_feature_row-20;
-    //                 int seek_row_end=detect_feature_row+15;
-    //                 int seek_col_start=right_line_list[detect_feature_row]+10;;
-    //                 if(seek_col_start>30 && seek_col_start<image_w-30)
-    //                 {
-    //                     int up_row=0;
-    //                     int down_row=0;
-    //                     int row_diff[5]={0};
-    //                     if(feature_raw_r)
-    //                     {
-    //                         int k=0;
-    //                         for(int i=seek_col_start;i<seek_col_start+15;i=i+3)
-    //                         {
-    //                             up_row = 0;
-    //                             down_row = 0;
-    //                             for(int j=seek_row_start;j<seek_row_end;j++)
-    //                             {
-    //                                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
-    //                                 {
-    //                                     down_row=j;
-    //                                 }
-    //                                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
-    //                                 {
-    //                                     up_row=j;
-    //                                 }
-    //                             }
-    //                             if(up_row<up_feature_row && up_row!=0)
-    //                             {
-    //                                 up_feature_row=up_row;
-    //                             }
-    //                             if(up_row!=0 && down_row!=0)
-    //                             {
-    //                                 row_diff[k]=down_row-up_row;
-    //                             }
-    //                             k++;
-    //                         }
-    //                         if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
-    //                         {
-    //                             feature_row_run=detect_feature_row;
-    //                             feature_label = 1;
-    //                             break;
-    //                         }                         
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }
-
-    // printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d,feature_label=%d,feature_row_run=%d\n",detect_feature_row, feature_raw_l, feature_raw_r, feature_label, feature_row_run);
-    if(left_lost_times!=0 ||right_lost_times!=0)
+    if(T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0)
     {
-        for(int i=MT9V03X_H-31;i>=feature_raw;i--)
+        for(int i = MT9V03X_H-31;i>=5;i--)
         {
-            int left_line_lost_label=0;
-            int right_line_lost_label=0;
-            // for(int j=-8;j<=8;j++)
-            // {
-            //     if(image[i+j][0]==white_point)
-            //     {
-            //         left_line_lost_label++;
-            //     }
-            //     if(image[i+j][image_w-1]==white_point)
-            //     {
-            //         right_line_lost_label++;
-            //     }
-            // }
-            if((left_line_list[i]-left_line_list[i-1]>5 || left_line_list[i]-left_line_list[i-2]>8 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>10)
-                && left_lost_times!=0 && (T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0))
-            {   
-                detect_feature_row=(uint8)i;
+            int suspect_row=0;
+            int white_line_position=0;
+            // 先找跳变
+            if(left_line_list[i]-left_line_list[i-1]>8 && left_line_list[i]-left_line_list[i-2]>8 )
+            {
+                suspect_row=i;
+            }
+            // 再找横向白线
+            if(suspect_row!=0)
+            {
+                if(suspect_row>20)
+                {
+                    for(int j=suspect_row+20;j>suspect_row-20;j--)
+                    {
+                        if(image[j][left_suspect_col_start]==white_point && image[j][left_suspect_col_start+1]==white_point && image[j][left_suspect_col_start+2]==white_point && image[j][left_suspect_col_start+3]==white_point && image[j][left_suspect_col_start+4]==white_point)
+                        {
+                            white_line_position=j;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    for(int j=suspect_row+20;j>0;j--)
+                    {
+                        if(image[j][right_suspect_col_start]==white_point && image[j][right_suspect_col_start-1]==white_point && image[j][right_suspect_col_start-2]==white_point && image[j][right_suspect_col_start-3]==white_point && image[j][right_suspect_col_start-4]==white_point)
+                        {
+                            white_line_position=j;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(white_line_position!=0)
+            {
                 feature_raw_l=1;
+                detect_feature_row=(uint8)suspect_row;
                 break;
             }
-            if((right_line_list[i-1]-right_line_list[i]>5 || right_line_list[i-2]-right_line_list[i]>8 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>7) 
-                && right_lost_times!=0&&(T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0))
+        }
+    }
+    if((T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0 )&&feature_raw_l==0)
+    {
+        for(int i = MT9V03X_H-31;i>=5;i--)
+        {
+            int suspect_row=0;
+            int white_line_position=0;
+            // 先找跳变
+            if(right_line_list[i-1]-right_line_list[i]>8 && right_line_list[i-2]-right_line_list[i]>8 )
             {
-                detect_feature_row=(uint8)i;
+                suspect_row=i;
+            }
+            // 再找横向白线
+            if(suspect_row!=0)
+            {
+                if(suspect_row>20)
+                {
+                    for(int j=suspect_row+20;j>suspect_row-20;j--)
+                    {
+                        if(image[j][right_suspect_col_start]==white_point && image[j][right_suspect_col_start-1]==white_point && image[j][right_suspect_col_start-2]==white_point && image[j][right_suspect_col_start-3]==white_point && image[j][right_suspect_col_start-4]==white_point)
+                        {
+                            white_line_position=j;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    for(int j=suspect_row+20;j>0;j--)
+                    {
+                        if(image[j][left_suspect_col_start]==white_point && image[j][left_suspect_col_start-1]==white_point && image[j][left_suspect_col_start-2]==white_point && image[j][left_suspect_col_start-3]==white_point && image[j][left_suspect_col_start-4]==white_point)
+                        {
+                            white_line_position=j;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(white_line_position!=0)
+            {
                 feature_raw_r=1;
+                detect_feature_row=(uint8)white_line_position;
                 break;
             }
         }
     }
-    // printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d\n",detect_feature_row, feature_raw_l, feature_raw_r);
-    int seek_row_start=0;
-    int seek_row_end=0;
-    if(detect_feature_row>20)
+    int up_row=0;
+    int down_row=0;
+    int row_diff[5]={0};
+    if(feature_raw_l==1)
     {
-        seek_row_start=detect_feature_row-20;
-        seek_row_end=detect_feature_row+15;
-    }
-    int seek_col_start=0;
-    if(feature_raw_r)
-    {
-        seek_col_start=right_line_list[detect_feature_row]+10;
-    }
-    if(feature_raw_l)
-    {
-        seek_col_start=left_line_list[detect_feature_row]-10;
-    }
-    if(seek_col_start>30 && seek_col_start<image_w-30)
-    {
-        int up_row=0;
-        int down_row=0;
-        int row_diff[5]={0};
-        if(feature_raw_l)
+        int k=0;
+        if(detect_feature_row>10)
         {
-            int k=0;
-            for(int i=seek_col_start-10;i>seek_col_start-25;i=i-3)
+            for(int i=left_suspect_col_start+25;i>left_suspect_col_start+10;i-=3)
             {
                 up_row = 0;
                 down_row = 0;
-                for(int j=seek_row_start;j<seek_row_end;j++)
+                for(int j= detect_feature_row-10;j<detect_feature_row+10;j++)
                 {
                     if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
                     {
@@ -838,10 +593,6 @@ void detect_feature()
                         up_row=j;
                     }
                 }
-                if(up_row<up_feature_row)
-                {
-                    up_feature_row=up_row;
-                }
                 if(up_row!=0 && down_row!=0)
                 {
                     row_diff[k]=down_row-up_row;
@@ -849,14 +600,17 @@ void detect_feature()
                 k++;
             }
         }
-        if(feature_raw_r)
+    }
+    else if(feature_raw_r==1)
+    {
+        int k=0;
+        if(detect_feature_row>10)
         {
-            int k=0;
-            for(int i=seek_col_start;i<seek_col_start+15;i=i+3)
+            for(int i=right_suspect_col_start-25;i<right_suspect_col_start-10;i+=3)
             {
                 up_row = 0;
                 down_row = 0;
-                for(int j=seek_row_start;j<seek_row_end;j++)
+                for(int j= detect_feature_row-10;j<detect_feature_row+10;j++)
                 {
                     if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
                     {
@@ -867,10 +621,6 @@ void detect_feature()
                         up_row=j;
                     }
                 }
-                if(up_row<up_feature_row)
-                {
-                    up_feature_row=up_row;
-                }
                 if(up_row!=0 && down_row!=0)
                 {
                     row_diff[k]=down_row-up_row;
@@ -878,11 +628,378 @@ void detect_feature()
                 k++;
             }
         }
-        if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
-        {
-            feature_label = 1;
-        }
     }
+    if(detect_row_diff(row_diff, 10) &&row_diff[0]>0 && row_diff[1]>0 && row_diff[2]>0 && row_diff[3]>0 && row_diff[4]>0)
+    {
+        feature_label = 1;
+    }
+    // printf("feature_raw_l=%d, feature_raw_r=%d, detect_feature_row=%d, feature_label=%d\n", feature_raw_l, feature_raw_r, detect_feature_row, feature_label);
+    // printf("left_lost_times=%d, right_lost_times=%d\n", left_lost_times, right_lost_times);
+    
+    // detect_feature_row=0;
+    // feature_label=0;
+    // up_feature_row=MT9V03X_H-1;
+    // // if(feature_label==1)
+    // // {
+    // //     if(T_index_list[feature_T_index-1]==0 &&feature_T_left==1)
+    // //     {
+    // //         for(int i=MT9V03X_H-11;i>=feature_raw;i--)
+    // //         {
+    // //             detect_feature_row=0;
+    // //             if(left_line_list[i]-left_line_list[i-1]>10 || left_line_list[i]-left_line_list[i-2]>10 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>10)
+    // //             {
+    // //                 detect_feature_row=(uint8)i;
+    // //             }
+    // //             if(detect_feature_row >20)
+    // //             {
+    // //                 int seek_row_start=detect_feature_row-20;
+    // //                 int seek_row_end=detect_feature_row+10;
+    // //                 int seek_col_start=left_line_list[detect_feature_row]-10;;
+    // //                 if(seek_col_start>30 && seek_col_start<image_w-30)
+    // //                 {
+    // //                     int up_row=0;
+    // //                     int down_row=0;
+    // //                     int row_diff[5]={0};
+    // //                     if(feature_raw_l)
+    // //                     {
+    // //                         int k=0;
+    // //                         for(int i=seek_col_start-10;i>seek_col_start-25;i=i-3)
+    // //                         {
+    // //                             up_row = 0;
+    // //                             down_row = 0;
+    // //                             for(int j=seek_row_start;j<seek_row_end;j++)
+    // //                             {
+    // //                                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+    // //                                 {
+    // //                                     down_row=j;
+    // //                                 }
+    // //                                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
+    // //                                 {
+    // //                                     up_row=j;
+    // //                                 }
+    // //                             }
+    // //                             if(up_row<up_feature_row && up_row!=0)
+    // //                             {
+    // //                                 up_feature_row=up_row;
+    // //                             }
+    // //                             if(up_row!=0 && down_row!=0)
+    // //                             {
+    // //                                 row_diff[k]=down_row-up_row;
+    // //                             }
+    // //                             k++;
+    // //                         }
+    // //                         if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
+    // //                         {
+    // //                             feature_row_run=detect_feature_row;
+    // //                             break;
+    // //                         }
+    // //                     }
+    // //                 }
+    // //             }
+    // //         }
+    // //     }
+    // //     up_feature_row=MT9V03X_H-1;
+    // //     if(T_index_list[feature_T_index]==0&&feature_T_right==1)
+    // //     {
+    // //         for(int i=MT9V03X_H-11;i>=feature_raw;i--)
+    // //         {
+    // //             detect_feature_row=0;
+    // //             if(right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>10 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>10)
+    // //             {
+    // //                 detect_feature_row=(uint8)i;
+    // //                 feature_raw_r=1;
+    // //             }
+    // //             if(detect_feature_row >20)
+    // //             {
+    // //                 int seek_row_start=detect_feature_row-20;
+    // //                 int seek_row_end=detect_feature_row+10;
+    // //                 int seek_col_start=right_line_list[detect_feature_row]+10;;
+    // //                 if(seek_col_start>30 && seek_col_start<image_w-30)
+    // //                 {
+    // //                     int up_row=0;
+    // //                     int down_row=0;
+    // //                     int row_diff[5]={0};
+    // //                     if(feature_raw_r)
+    // //                     {
+    // //                         int k=0;
+    // //                         for(int i=seek_col_start;i<seek_col_start+15;i=i+3)
+    // //                         {
+    // //                             up_row = 0;
+    // //                             down_row = 0;
+    // //                             for(int j=seek_row_start;j<seek_row_end;j++)
+    // //                             {
+    // //                                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+    // //                                 {
+    // //                                     down_row=j;
+    // //                                 }
+    // //                                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
+    // //                                 {
+    // //                                     up_row=j;
+    // //                                 }
+    // //                             }
+    // //                             if(up_row<up_feature_row && up_row!=0)
+    // //                             {
+    // //                                 up_feature_row=up_row;
+    // //                             }
+    // //                             if(up_row!=0 && down_row!=0)
+    // //                             {
+    // //                                 row_diff[k]=down_row-up_row;
+    // //                             }
+    // //                             k++;
+    // //                         }
+    // //                         if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
+    // //                         {
+    // //                             feature_row_run=detect_feature_row;
+    // //                             break;
+    // //                         }
+    // //                     }
+    // //                 }
+    // //             }
+    // //         }
+    // //     }
+    // // }
+    // // else if(feature_label==0)
+    // // {
+    // //     if((T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0)&&left_lost_times>=3)
+    // //     { 
+    // //         for(int i=MT9V03X_H-41;i>=feature_raw;i--)
+    // //         {
+    // //             detect_feature_row=0;
+    // //             if(left_line_list[i]-left_line_list[i-1]>10 || left_line_list[i]-left_line_list[i-2]>10 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>10)
+    // //             {
+    // //                 detect_feature_row=(uint8)i;
+    // //                 feature_raw_l=1;
+    // //             }
+    // //             if(detect_feature_row >20)
+    // //             {
+    // //                 int seek_row_start=detect_feature_row-20;
+    // //                 int seek_row_end=detect_feature_row+15;
+    // //                 int seek_col_start=left_line_list[detect_feature_row]-10;;
+    // //                 if(seek_col_start>30 && seek_col_start<image_w-30)
+    // //                 {
+    // //                     int up_row=0;
+    // //                     int down_row=0;
+    // //                     int row_diff[5]={0};
+    // //                     if(feature_raw_l)
+    // //                     {
+    // //                         int k=0;
+    // //                         for(int i=seek_col_start-10;i>seek_col_start-25;i=i-3)
+    // //                         {
+    // //                             up_row = 0;
+    // //                             down_row = 0;
+    // //                             for(int j=seek_row_start;j<seek_row_end;j++)
+    // //                             {
+    // //                                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+    // //                                 {
+    // //                                     down_row=j;
+    // //                                 }
+    // //                                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
+    // //                                 {
+    // //                                     up_row=j;
+    // //                                 }
+    // //                             }
+    // //                             if(up_row<up_feature_row && up_row!=0)
+    // //                             {
+    // //                                 up_feature_row=up_row;
+    // //                             }
+    // //                             if(up_row!=0 && down_row!=0)
+    // //                             {
+    // //                                 row_diff[k]=down_row-up_row;
+    // //                             }
+    // //                             k++;
+    // //                         }
+    // //                         if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
+    // //                         {
+    // //                             feature_row_run=detect_feature_row;
+    // //                             feature_label = 1;
+    // //                             break;
+    // //                         }
+    // //                     }
+    // //                 }
+    // //             }
+    // //         }
+    // //     }
+    // //     up_feature_row=MT9V03X_H-1;
+    // //     if((T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0)&&right_lost_times>=3)
+    // //     {
+    // //         for(int i=MT9V03X_H-41;i>=feature_raw;i--)
+    // //         {
+    // //             detect_feature_row=0;
+    // //             if(right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>10 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>10)
+    // //             {
+    // //                 detect_feature_row=(uint8)i;
+    // //                 feature_raw_r=1;
+    // //             }
+    // //             if(detect_feature_row >20)
+    // //             {
+    // //                 int seek_row_start=detect_feature_row-20;
+    // //                 int seek_row_end=detect_feature_row+15;
+    // //                 int seek_col_start=right_line_list[detect_feature_row]+10;;
+    // //                 if(seek_col_start>30 && seek_col_start<image_w-30)
+    // //                 {
+    // //                     int up_row=0;
+    // //                     int down_row=0;
+    // //                     int row_diff[5]={0};
+    // //                     if(feature_raw_r)
+    // //                     {
+    // //                         int k=0;
+    // //                         for(int i=seek_col_start;i<seek_col_start+15;i=i+3)
+    // //                         {
+    // //                             up_row = 0;
+    // //                             down_row = 0;
+    // //                             for(int j=seek_row_start;j<seek_row_end;j++)
+    // //                             {
+    // //                                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+    // //                                 {
+    // //                                     down_row=j;
+    // //                                 }
+    // //                                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
+    // //                                 {
+    // //                                     up_row=j;
+    // //                                 }
+    // //                             }
+    // //                             if(up_row<up_feature_row && up_row!=0)
+    // //                             {
+    // //                                 up_feature_row=up_row;
+    // //                             }
+    // //                             if(up_row!=0 && down_row!=0)
+    // //                             {
+    // //                                 row_diff[k]=down_row-up_row;
+    // //                             }
+    // //                             k++;
+    // //                         }
+    // //                         if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
+    // //                         {
+    // //                             feature_row_run=detect_feature_row;
+    // //                             feature_label = 1;
+    // //                             break;
+    // //                         }                         
+    // //                     }
+    // //                 }
+    // //             }
+    // //         }
+    // //     }
+    // // }
+
+    // // printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d,feature_label=%d,feature_row_run=%d\n",detect_feature_row, feature_raw_l, feature_raw_r, feature_label, feature_row_run);
+    // if(left_lost_times!=0 ||right_lost_times!=0)
+    // {
+    //     for(int i=MT9V03X_H-31;i>=feature_raw;i--)
+    //     {
+    //         int left_line_lost_label=0;
+    //         int right_line_lost_label=0;
+    //         // for(int j=-8;j<=8;j++)
+    //         // {
+    //         //     if(image[i+j][0]==white_point)
+    //         //     {
+    //         //         left_line_lost_label++;
+    //         //     }
+    //         //     if(image[i+j][image_w-1]==white_point)
+    //         //     {
+    //         //         right_line_lost_label++;
+    //         //     }
+    //         // }
+    //         if((left_line_list[i]-left_line_list[i-1]>5 || left_line_list[i]-left_line_list[i-2]>8 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>10)
+    //             && left_lost_times!=0 && (T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0))
+    //         {   
+    //             detect_feature_row=(uint8)i;
+    //             feature_raw_l=1;
+    //             break;
+    //         }
+    //         if((right_line_list[i-1]-right_line_list[i]>5 || right_line_list[i-2]-right_line_list[i]>8 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>7) 
+    //             && right_lost_times!=0&&(T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0))
+    //         {
+    //             detect_feature_row=(uint8)i;
+    //             feature_raw_r=1;
+    //             break;
+    //         }
+    //     }
+    // }
+    // // printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d\n",detect_feature_row, feature_raw_l, feature_raw_r);
+    // int seek_row_start=0;
+    // int seek_row_end=0;
+    // if(detect_feature_row>20)
+    // {
+    //     seek_row_start=detect_feature_row-20;
+    //     seek_row_end=detect_feature_row+15;
+    // }
+    // int seek_col_start=0;
+    // if(feature_raw_r)
+    // {
+    //     seek_col_start=right_line_list[detect_feature_row]+10;
+    // }
+    // if(feature_raw_l)
+    // {
+    //     seek_col_start=left_line_list[detect_feature_row]-10;
+    // }
+    // if(seek_col_start>30 && seek_col_start<image_w-30)
+    // {
+    //     int up_row=0;
+    //     int down_row=0;
+    //     int row_diff[5]={0};
+    //     if(feature_raw_l)
+    //     {
+    //         int k=0;
+    //         for(int i=seek_col_start-10;i>seek_col_start-25;i=i-3)
+    //         {
+    //             up_row = 0;
+    //             down_row = 0;
+    //             for(int j=seek_row_start;j<seek_row_end;j++)
+    //             {
+    //                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+    //                 {
+    //                     down_row=j;
+    //                 }
+    //                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
+    //                 {
+    //                     up_row=j;
+    //                 }
+    //             }
+    //             if(up_row<up_feature_row)
+    //             {
+    //                 up_feature_row=up_row;
+    //             }
+    //             if(up_row!=0 && down_row!=0)
+    //             {
+    //                 row_diff[k]=down_row-up_row;
+    //             }
+    //             k++;
+    //         }
+    //     }
+    //     if(feature_raw_r)
+    //     {
+    //         int k=0;
+    //         for(int i=seek_col_start;i<seek_col_start+15;i=i+3)
+    //         {
+    //             up_row = 0;
+    //             down_row = 0;
+    //             for(int j=seek_row_start;j<seek_row_end;j++)
+    //             {
+    //                 if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+    //                 {
+    //                     down_row=j;
+    //                 }
+    //                 else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
+    //                 {
+    //                     up_row=j;
+    //                 }
+    //             }
+    //             if(up_row<up_feature_row)
+    //             {
+    //                 up_feature_row=up_row;
+    //             }
+    //             if(up_row!=0 && down_row!=0)
+    //             {
+    //                 row_diff[k]=down_row-up_row;
+    //             }
+    //             k++;
+    //         }
+    //     }
+    //     if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
+    //     {
+    //         feature_label = 1;
+    //     }
+    // }
     // printf("feature_label=%d, up_feature_row=%d\n", feature_label, up_feature_row);
 
     // feature_label=0;
@@ -1212,95 +1329,6 @@ void feature_square()
         }
     }
 
-    // image_feature.left_feature_flag1=0;
-    // image_feature.left_feature_flag2=0;
-    // image_feature.right_feature_flag1=0;
-    // image_feature.right_feature_flag2=0;
-    // image_feature.height_feature_flag1=0;
-    // image_feature.height_feature_flag2=0;
-    // result_feature.left=0;
-    // result_feature.right=0;
-    // result_feature.height=0;
-    // // printf("feature_label=%d, detect_feature_row=%d\n",feature_label,detect_feature_row);
-    // if((feature_label==1 && detect_feature_row!=0)||condition_T!=0)
-    // {
-    //     int detect_row=0;
-    //     if(detect_feature_row>15)
-    //     {
-    //         detect_row=height_start_raw-3;
-    //     }
-    //     else if(detect_feature_row!=0)
-    //     {
-    //         detect_row=detect_feature_row-3;
-    //     }
-    //     else{
-    //         detect_row=height_start_raw+10;
-    //     }
-    //     int left_feature_col_count[3]={0};
-    //     for(int j=left_start_col;j<left_start_col+5;j+=2)
-    //     {
-    //         for(int i=detect_row;i<height_end_raw;i++)
-    //         {
-    //             //左侧特征：上白下黑
-    //             if(image[i-1][j]==black_point && image[i][j]==white_point && image[i+1][j]==white_point )
-    //             {
-    //                 image_feature.left_feature_flag1=i;
-    //             }
-    //             else if(image[i-1][j]==white_point && image[i][j]==white_point && image[i+1][j]==black_point)
-    //             {
-    //                 image_feature.left_feature_flag2=i;
-    //             }
-    //         }
-    //         left_feature_col_count[(j-left_start_col)/2]=image_feature.left_feature_flag2-image_feature.left_feature_flag1;
-    //     }
-    //     int right_feature_col_count[3]={0};
-    //     for(int j=right_start_col-5;j<right_start_col;j+=2)
-    //     {
-    //         for(int i=detect_row;i<height_end_raw;i++)
-    //         {
-    //             //右侧特征：上白下黑
-    //             if(image[i-1][j]==black_point && image[i][j]==white_point && image[i+1][j]==white_point)
-    //             {
-    //                 image_feature.right_feature_flag1=i;
-    //             }
-    //             else if(image[i-1][j]==white_point && image[i][j]==white_point && image[i+1][j]==black_point)
-    //             {
-    //                 image_feature.right_feature_flag2=i;
-    //             }
-    //         }
-    //         right_feature_col_count[(j-(right_start_col-5))/2]=image_feature.right_feature_flag2-image_feature.right_feature_flag1;
-    //     }
-    //     if(abs(left_feature_col_count[0]-left_feature_col_count[1])<3 && abs(left_feature_col_count[0]-left_feature_col_count[2])<3 && abs(left_feature_col_count[1]-left_feature_col_count[2])<3 &&left_feature_col_count[0]>2 && left_feature_col_count[1]>2 && left_feature_col_count[2]>2)
-    //     {
-    //         result_feature.left=1;
-    //     }
-    //     if(abs(right_feature_col_count[0]-right_feature_col_count[1])<3 && abs(right_feature_col_count[0]-right_feature_col_count[2])<3 && abs(right_feature_col_count[1]-right_feature_col_count[2])<3 && right_feature_col_count[0]>2 && right_feature_col_count[1]>2 && right_feature_col_count[2]>2)
-    //     {
-    //         result_feature.right=1;
-    //     }
-    //     for(int i=left_start_col+20;i<right_start_col-20;i++)
-    //     {
-    //         //上行特征：左白右黑（从左向右）
-    //         if(image[detect_row][i-1]==black_point && image[detect_row][i]==white_point && image[detect_row][i+1]==white_point)
-    //         {
-    //             image_feature.height_feature_flag1=i;
-    //             break;
-    //         }
-    //     }
-    //     for(int i=right_start_col-35;i>left_start_col+35;i--)
-    //     {
-    //         //上行特征：左白右黑（从右向左）
-    //         if(image[detect_row][i-1]==white_point && image[detect_row][i]==white_point && image[detect_row][i+1]==black_point)
-    //         {
-    //             image_feature.height_feature_flag2=i;
-    //             break;
-    //         }
-    //     }
-    //     if(image_feature.height_feature_flag2!=0&&image_feature.height_feature_flag1!=0)
-    //     {
-    //         result_feature.height=1;
-    //     }
-    // }
 }
 
 void turn(uint8 direction)
@@ -1341,160 +1369,11 @@ void turn(uint8 direction)
 
 
 
-// #define index_num 6
-// int T_index_list[index_num]={1,-1,-1,1,0,0};
-// int T_index_list[index_num]={-1,1,1,-1};
-// 科目三方案1
-// #define index_num 12
-// int T_index_list[index_num]={1,-1,1,1,1,-1,-1,0,-1,0,1,0};
-// 科目三方案2
-// #define index_num 13
-// int T_index_list[index_num]={0,0,0,1,0,-1,-1,1,1,1,0,0,1};
-// 校赛1 科目3
-// 校赛1 科目3 
-// #define index_num 16
-// int T_index_list[index_num]={1,-1,1,0,1,-1,1,-1,-1,-1,0,0,1,0,0,0};
-// 校赛2 科目3 
-//#define index_sum_num 6
-//int T_index_list[index_sum_num]={0,0,0,-1,-1,0};
-// #define index_sum_num 6
-// int T_index_list[index_sum_num]={0,1,1,0,0,0};
-// int * T_index_list = {0};
-
-
 uint8 speed_select_label = 0;
 float speed_select_angle = 0.0f;
 int T_corner=0;
 int times_T=0;
 uint8 condition_T_angle=0;
-// void feature_process()
-// {
-//     detect_feature();
-//     feature_square();
-//     // printf("feature: left=%d, right=%d, height=%d\n",result_feature.left,result_feature.right,result_feature.height);
-//     //纯左转
-//     if(result_feature.left==1  && result_feature.right==0 && result_feature.height==0  &&condition_T==0)
-//     {
-//         turn(1);
-//         speed_select_label=1;
-//         // condition_corner=1;
-//         // angle_corner=attitude.yaw;
-//     }
-//     //纯右转
-//     else if (result_feature.right==1 &&  result_feature.left==0 && result_feature.height==0 && condition_T==0 )
-//     {
-//         turn(2);
-//         speed_select_label=1;
-//         // condition_corner=2;
-//         // angle_corner=attitude.yaw;
-//     }
-//     // T
-//     else if(result_feature.height==0&& result_feature.left==1 && result_feature.right==1 && condition_T==0  )
-//     {       
-//         T_index++;
-//         if(T_index>index_num)
-//         {
-//             T_index=1;
-//         }
-//         condition_T=1;
-//     }
-//     else if(result_feature.height==1 && result_feature.left==0 && result_feature.right==1 && condition_T==0)
-//     {     
-//         T_corner=2;
-//         T_index++;
-//         if(T_index>index_num)
-//         {
-//             T_index=1;
-//         }
-//         condition_T=1;
-//     }
-//     else if(result_feature.height==1 && result_feature.left==1 && result_feature.right==0 && condition_T==0)
-//     { 
-//         T_corner=1;
-//         T_index++;
-//         if(T_index>index_num)
-//         {
-//             T_index=1;
-//         }
-//         condition_T=1;
-//     }
-//     // if(condition_corner==1)
-//     // {
-//     //     turn(1);
-//     //     if(get_angle_err(angle_corner) > 40.0f)
-//     //     {
-//     //         condition_corner=0;
-//     //     }
-//     // }
-//     // else if(condition_corner==2)
-//     // {
-//     //     turn(2);
-//     //     if(get_angle_err(angle_corner) > 40.0f)
-//     //     {
-//     //         condition_corner=0;
-//     //     }
-//     // }
-//     if( condition_T==1)
-//     {
-//         if(T_index_list[T_index-1]==0)
-//         {
-//             //直行
-//             turn(0);    
-//         }
-//         else if(T_index_list[T_index-1]==-1)
-//         {
-//             speed_select_label=1;
-//             if(condition_T_angle==0 && (image_feature.left_feature_flag2>ERROR_IMAGE_LINE-15||feature_raw_l>ERROR_IMAGE_LINE-15))
-//             {
-//                 condition_T_angle=1;
-//                 angle_T=attitude.yaw;
-//             }
-//             //左转
-//             turn(1);
-//         }
-//         else if(T_index_list[T_index-1]==1)
-//         {
-//             speed_select_label=1;
-//             if(condition_T_angle==0 && (image_feature.right_feature_flag2>ERROR_IMAGE_LINE-15||feature_raw_r>ERROR_IMAGE_LINE-15))
-//             {
-//                 condition_T_angle=1;
-//                 angle_T=attitude.yaw;
-//             }
-//             //右转
-//             turn(2);
-//         }
-//         //左右转向退出
-//         if(T_index_list[T_index-1]!=0 && condition_T_angle==1)
-//         {
-//             if(get_angle_err(angle_T) > 60.0f)
-//             {
-//                 condition_T=0;
-//                 condition_T_angle=0;
-//             }
-//         }
-//         //直行退出
-//         else
-//         {
-//             times_T++;
-//             if(T_corner==1&&left_lost_times==0 &&times_T>3)
-//             {
-//                 T_corner=0;
-//                 condition_T=0;
-//                 times_T=0;
-//             }
-//             else if(T_corner==2&&right_lost_times==0 &&times_T>3)
-//             {
-//                 T_corner=0;
-//                 condition_T=0;
-//                 times_T=0;
-//             }
-//         }
-//     }
-// }
-
-
-
-
 
 int error_image;
 int error_image_last;
@@ -1530,22 +1409,6 @@ void image_process(uint8 (*source_image)[MT9V03X_W])
 
 
 
-
-
-// void draw_tangle()
-// {
-//     remove_white_noise_filter() ;
-//     for (int i = 0; i < MT9V03X_H; i++)
-//     {
-//         image[i][0] = 0;
-//         image[i][MT9V03X_W - 1] = 0;
-//     }
-//     for (int j = 0; j < MT9V03X_W; j++)
-//     {
-//         image[0][j] = 0;
-//         image[MT9V03X_H - 1][j] = 0;
-//     }
-// }
 
 
 // uint8 left_start_point = 0;
