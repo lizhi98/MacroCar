@@ -2,14 +2,14 @@
 
 // 规则表
 static const float fuzzy_pid_rule_table_kp[7][7] = {
-// EC→  NB     NM     NS     ZO     PS     PM     PB      E ↓
-    {1.00f, 1.00f, 0.93f, 0.93f, 0.87f, 0.87f, 0.80f}, // E=-3 负大
-    {0.93f, 0.93f, 0.87f, 0.87f, 0.80f, 0.80f, 0.73f}, // E=-2 负中
-    {0.73f, 0.73f, 0.67f, 0.67f, 0.60f, 0.60f, 0.53f}, // E=-1 负小
-    {0.33f, 0.27f, 0.20f, 0.20f, 0.20f, 0.27f, 0.33f}, // E=0  零
-    {0.53f, 0.60f, 0.60f, 0.67f, 0.67f, 0.73f, 0.73f}, // E=1  正小
-    {0.73f, 0.80f, 0.80f, 0.87f, 0.87f, 0.93f, 0.93f}, // E=2  正中
-    {0.80f, 0.87f, 0.87f, 0.93f, 0.93f, 1.00f, 1.00f}  // E=3  正大
+// EC→  NB      NM      NS      ZO      PS      PM      PB      E ↓
+    {0.40f, 0.40f, 0.37f, 0.37f, 0.34f, 0.34f, 0.31f}, // E=-3 负大
+    {0.37f, 0.37f, 0.34f, 0.34f, 0.31f, 0.31f, 0.28f}, // E=-2 负中
+    {0.28f, 0.28f, 0.25f, 0.25f, 0.22f, 0.22f, 0.18f}, // E=-1 负小
+    {0.06f, 0.03f, 0.00f, 0.00f, 0.00f, 0.03f, 0.06f}, // E=0  零
+    {0.18f, 0.22f, 0.22f, 0.25f, 0.25f, 0.28f, 0.28f}, // E=1  正小
+    {0.28f, 0.31f, 0.31f, 0.34f, 0.34f, 0.37f, 0.37f}, // E=2  正中
+    {0.31f, 0.34f, 0.34f, 0.37f, 0.37f, 0.40f, 0.40f}  // E=3  正大
 };
 
 static const float fuzzy_pid_rule_table_ki[7][7] = {
@@ -64,7 +64,7 @@ PIDParam motor_right_speed_pid  = {
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 8.0f, .ki = 0.0f, .kd = 2.1f,
+    .kp = 7.8f, .ki = 0.0f, .kd = 2.7f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -78,9 +78,9 @@ PIDParam motion_image_steering_pid = {
 
 PIDParam motor_steering_pid = {
     .type = FUZZY_PID_POS,
-    .kp = 1.0f, .ki = 0.0f, .kd = 0.1f,
+    .kp = 1.2f, .ki = 0.0f, .kd = 0.1f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
-    .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
+    .error_max = 800.0f,     .error_min = -800.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
 
 uint8 motion_control_run_flag = 0;      // 作用于单电机速度环，让速度=0
@@ -243,7 +243,7 @@ void PID_clear(PIDParam* pid_param){
 int16 motor_traveling_left_target_speed = 0;
 int16 motor_traveling_right_target_speed = 0;
 
-float motor_steering_speed_up_k = 0.5f;
+float motor_steering_speed_up_k = 1.0f;
 
 void motion_control_pit_callback(){
     // motor_left_current_pwm_duty = 0;
@@ -357,7 +357,7 @@ void    motor_traveling_soft_start(void){
             motor_right_current_pwm_duty = (motor_right_current_pwm_duty > 0) ? MOTOR_SOFT_START_PWM : -MOTOR_SOFT_START_PWM;
         }
         // 当电机转速大于前进速度时，认为软启动完成
-        if(motor_left_speed > (motor_forward_speed / 3) && motor_right_speed > (motor_forward_speed / 3)){
+        if(motor_left_speed > 500 && motor_right_speed > 500){
             motor_soft_start_flag = 1;
         }
     }
@@ -386,7 +386,7 @@ void forward_speed_decision(void){
             if( feature_T_index == 3    || feature_T_index == 4 || feature_T_index == 5 ||
                 feature_T_index == 14 || feature_T_index == 15 || feature_T_index == 16)
             {
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED + 450;
+                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;
             }else if(feature_T_index >= 18){
                 motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;
             }else{

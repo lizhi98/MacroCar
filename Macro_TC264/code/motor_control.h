@@ -75,8 +75,8 @@ extern int16 motor_steering_speed;
 #define MOTOR_FORWARD_NORMAL_SPEED      1100  // 前进正常速度
 
 // 进行速度决策
-#define MOTOR_FORWARD_LINEAR_SPEED      1800    // 前进直线速度 1500    1450
-#define MOTOR_FORWARD_CURVE_SPEED       1600    // 前进转角速度 1200    1250
+#define MOTOR_FORWARD_LINEAR_SPEED      1700    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1700    // 前进转角速度 1200    1250
 
 // 负压风扇直线行驶开度
 #define MOTOR_FUN_LINEAR_OPEN_PERCENT   50

@@ -3,9 +3,9 @@
 
 
 extern uint32 image_to_image_time;
-extern uint32 image_process_time;
-extern volatile uint8 image_process_finish_flag; // 图像处理标志位，0表示CPU1正在处理图像，1表示CPU1处理完图像了，CPU0可以访问图像数据了
-extern uint8 image_process_flag; // 为1时图像开始处理
+//extern uint32 image_process_time;
+//extern volatile uint8 image_process_finish_flag; // 图像处理标志位，0表示CPU1正在处理图像，1表示CPU1处理完图像了，CPU0可以访问图像数据了
+//extern uint8 image_process_flag; // 为1时图像开始处理
 
 KeyCmd current_key_cmd = KEY_NO_CMD; // 当前按键命令
 
@@ -376,7 +376,7 @@ void network_print_info(void){
     //     motor_traveling_left_target_speed,motor_traveling_right_target_speed,
     //     error_image,image_to_image_time,condition_T,feature_T,detect_feature_row,img_threshold,image_to_image_time,zhuan_row,right_lost_times,right_run_flag,feature_T_left,feature_T_right
     // );
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%f,%f,%f\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%f,%f,%f,%d\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
@@ -384,7 +384,7 @@ void network_print_info(void){
         battery_voltage,
         motor_traveling_left_target_speed,motor_traveling_right_target_speed,
         error_image,image_to_image_time,condition_T,feature_T,img_threshold,
-        motor_steering_pid.error, motor_steering_pid.error_delta, motor_steering_pid.fuzzy_kp
+        motor_steering_pid.error, motor_steering_pid.error_delta, motor_steering_pid.fuzzy_kp,detect_feature_row
     );
     network_vofa_send_str(info_buffer);
 }
