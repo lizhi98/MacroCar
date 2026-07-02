@@ -61,7 +61,7 @@
 
 #define WIFI_CONNECT_TIME_OUT       10000       // 单位毫秒
 #define SOCKET_CONNECT_TIME_OUT     50000       // 单位毫秒
-#define OTHER_TIME_OUT              1000        // 单位毫秒
+#define OTHER_TIME_OUT              500        // 单位毫秒
 
 char wifi_spi_version[12];                      // 保存模块固件版本信息
 char wifi_spi_mac_addr[20];                     // 保存模块MAC地址信息

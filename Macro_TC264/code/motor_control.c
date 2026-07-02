@@ -32,6 +32,27 @@ static const float fuzzy_pid_rule_table_kd[7][7] = {
     { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f}
 };
 
+static const float segment_pid_rule_table_kp[3][2] = {
+//   ABS_E  DK
+    {20.0 , 0.0},
+    {50.0 , 0.0},
+    {94.0 , 0.0}
+};
+
+static const float segment_pid_rule_table_ki[3][2] = {
+//   ABS_E  DK
+    {20.0 , 0.0},
+    {50.0 , 0.0},
+    {94.0 , 0.0}
+};
+
+static const float segment_pid_rule_table_kd[3][2] = {
+//   ABS_E  DK
+    {20.0 , 0.0},
+    {50.0 , 0.0},
+    {94.0 , 0.0}
+};
+
 // 单电机速度控制
 // PIDParam motor_left_speed_pid   = {
 //     .type = PID_INC,
@@ -138,23 +159,25 @@ void fuzzy_pid_update(PIDParam* pid_param){
     float dkp3 = fuzzy_pid_rule_table_kp[(int)error_level_up   + 3][(int)error_delta_level_down + 3];
     float dkp4 = fuzzy_pid_rule_table_kp[(int)error_level_up   + 3][(int)error_delta_level_up   + 3];
 
-    float dki1 = fuzzy_pid_rule_table_ki[(int)error_level_down + 3][(int)error_delta_level_down + 3];
-    float dki2 = fuzzy_pid_rule_table_ki[(int)error_level_down + 3][(int)error_delta_level_up   + 3];
-    float dki3 = fuzzy_pid_rule_table_ki[(int)error_level_up   + 3][(int)error_delta_level_down + 3];
-    float dki4 = fuzzy_pid_rule_table_ki[(int)error_level_up   + 3][(int)error_delta_level_up   + 3];
+    // float dki1 = fuzzy_pid_rule_table_ki[(int)error_level_down + 3][(int)error_delta_level_down + 3];
+    // float dki2 = fuzzy_pid_rule_table_ki[(int)error_level_down + 3][(int)error_delta_level_up   + 3];
+    // float dki3 = fuzzy_pid_rule_table_ki[(int)error_level_up   + 3][(int)error_delta_level_down + 3];
+    // float dki4 = fuzzy_pid_rule_table_ki[(int)error_level_up   + 3][(int)error_delta_level_up   + 3];
 
-    float dkd1 = fuzzy_pid_rule_table_kd[(int)error_level_down + 3][(int)error_delta_level_down + 3];
-    float dkd2 = fuzzy_pid_rule_table_kd[(int)error_level_down + 3][(int)error_delta_level_up   + 3];
-    float dkd3 = fuzzy_pid_rule_table_kd[(int)error_level_up   + 3][(int)error_delta_level_down + 3];
-    float dkd4 = fuzzy_pid_rule_table_kd[(int)error_level_up   + 3][(int)error_delta_level_up   + 3];
+    // float dkd1 = fuzzy_pid_rule_table_kd[(int)error_level_down + 3][(int)error_delta_level_down + 3];
+    // float dkd2 = fuzzy_pid_rule_table_kd[(int)error_level_down + 3][(int)error_delta_level_up   + 3];
+    // float dkd3 = fuzzy_pid_rule_table_kd[(int)error_level_up   + 3][(int)error_delta_level_down + 3];
+    // float dkd4 = fuzzy_pid_rule_table_kd[(int)error_level_up   + 3][(int)error_delta_level_up   + 3];
     // 计算权重和（防止除 0）
     float sum_w = w1 + w2 + w3 + w4;
     if(sum_w < 0.001f) sum_w = 1.0f;
 
     // 解模糊（重心法）
     float delta_kp = (w1 * dkp1 + w2 * dkp2 + w3 * dkp3 + w4 * dkp4) / sum_w;
-    float delta_ki = (w1 * dki1 + w2 * dki2 + w3 * dki3 + w4 * dki4) / sum_w;
-    float delta_kd = (w1 * dkd1 + w2 * dkd2 + w3 * dkd3 + w4 * dkd4) / sum_w;
+    // float delta_ki = (w1 * dki1 + w2 * dki2 + w3 * dki3 + w4 * dki4) / sum_w;
+    // float delta_kd = (w1 * dkd1 + w2 * dkd2 + w3 * dkd3 + w4 * dkd4) / sum_w;
+    float delta_ki = 0.0;
+    float delta_kd = 0.0;
     // 更新PID参数
     if(fabs(pid_param->kp) >= 0.01f){    
         pid_param->fuzzy_kp = pid_param->kp + delta_kp;
@@ -164,6 +187,33 @@ void fuzzy_pid_update(PIDParam* pid_param){
     }
     if(fabs(pid_param->kd) >= 0.01f){    
         pid_param->fuzzy_kd = pid_param->kd + delta_kd;
+    }
+}
+
+void segment_pid_update(PIDParam* pid_param){
+    // 根据error的绝对值，选择不同的PID参数
+    float segment_kp, segment_ki, segment_kd;
+    if(fabs(pid_param->error) <= segment_pid_rule_table_kp[0][0]){
+        segment_kp = pid_param->kp + segment_pid_rule_table_kp[0][1];
+        segment_ki = pid_param->ki + segment_pid_rule_table_ki[0][1];
+        segment_kd = pid_param->kd + segment_pid_rule_table_kd[0][1];
+    }else if(fabs(pid_param->error) <= segment_pid_rule_table_kp[1][0]){
+        segment_kp = pid_param->kp + segment_pid_rule_table_kp[1][1];
+        segment_ki = pid_param->ki + segment_pid_rule_table_ki[1][1];
+        segment_kd = pid_param->kd + segment_pid_rule_table_kd[1][1];
+    }else{
+        segment_kp = pid_param->kp + segment_pid_rule_table_kp[2][1];
+        segment_ki = pid_param->ki + segment_pid_rule_table_ki[2][1];
+        segment_kd = pid_param->kd + segment_pid_rule_table_kd[2][1];
+    }
+    if(fabs(pid_param->kp) >= 0.01f){
+        pid_param->segment_kp = segment_kp;
+    }
+    if(fabs(pid_param->ki) >= 0.01f){
+        pid_param->segment_ki = segment_ki;
+    }
+    if(fabs(pid_param->kd) >= 0.01f){
+        pid_param->segment_kd = segment_kd;
     }
 }
 
@@ -216,8 +266,18 @@ float PID_calculate(PIDParam* pid_param, float target, float current){
         output = pid_param->fuzzy_kp * pid_param->error
                + pid_param->fuzzy_ki * pid_param->integral
                + pid_param->fuzzy_kd * pid_param->error_delta;
+    }else if(pid_param->type == SEGMENT_PID_POS){
+        // 分段位置式PID
+        segment_pid_update(pid_param);
+        pid_param->integral += pid_param->error;
+        // 积分限幅
+        pid_param->integral =   (pid_param->integral > pid_param->integral_limit) ? 
+                                (pid_param->integral_limit) : 
+                                ((pid_param->integral < -pid_param->integral_limit) ? -pid_param->integral_limit : pid_param->integral);
+        output = pid_param->segment_kp * pid_param->error
+               + pid_param->segment_ki * pid_param->integral
+               + pid_param->segment_kd * pid_param->error_delta;
     }else{
-        // 未写
         zf_assert(0); // PID类型错误
     }
     pid_param->previous_error = pid_param->error; // PID计算器记录上次误差，可以在计算前手动修改此值

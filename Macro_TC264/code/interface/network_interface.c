@@ -1,7 +1,7 @@
 #include "network_interface.h"
 #include "zf_driver_delay.h"
 
-uint8 network_status = 1; // 网络状态，0表示正常 1表示未初始化 2表示连接失败
+uint8 network_status = 1; // 网络状态，0表示正常 1表示未初始化 2表示初始化失败
 
 uint32 pack_id = 0;
 
@@ -42,6 +42,9 @@ void network_interface_seekfree_host_config(uint8 *image_addr){
 
 // VOFA+
 void network_vofa_send_str(char * str){
+    if(network_status != 0){
+        return; // 网络未初始化或初始化失败，不发送数据
+    }
     // sprintf(network_vofa_send_buffer, "%lu,%s\n" , vofa_pack_id++, str);
     sprintf(network_vofa_send_buffer, "%lu,%s\n" , system_getval_ms(), str);
     wifi_spi_send_buffer((const uint8 *)network_vofa_send_buffer, strlen(network_vofa_send_buffer));

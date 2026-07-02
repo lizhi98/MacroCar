@@ -364,19 +364,9 @@ void menu_key_init(void){
     pit_ms_init(MENU_KEY_PIT_INDEX, KEY_PIT_TIME); // 按键扫描PIT初始化
 }
 
-extern PIDParam motor_steering_pid;
 void network_print_info(void){
     static char info_buffer[128];
-    // sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%u,%lu,%d,%d,%d,%d,%d\0",
-    //     motor_forward_speed,
-    //     motor_left_speed,motor_right_speed,
-    //     motor_left_pwm, motor_right_pwm,
-    //     attitude.yaw, gyro_current_data.gyro_z,
-    //     battery_voltage,
-    //     motor_traveling_left_target_speed,motor_traveling_right_target_speed,
-    //     error_image,image_to_image_time,condition_T,feature_T,detect_feature_row,img_threshold,image_to_image_time,zhuan_row,right_lost_times,right_run_flag,feature_T_left,feature_T_right
-    // );
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%f,%f,%f,%d\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%d\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
@@ -384,8 +374,17 @@ void network_print_info(void){
         battery_voltage,
         motor_traveling_left_target_speed,motor_traveling_right_target_speed,
         error_image,image_to_image_time,condition_T,feature_T,img_threshold,
-        motor_steering_pid.error, motor_steering_pid.error_delta, motor_steering_pid.fuzzy_kp,detect_feature_row
+        detect_feature_row
     );
+    // sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u\0",
+    //     motor_forward_speed,
+    //     motor_left_speed,motor_right_speed,
+    //     motor_left_pwm, motor_right_pwm,
+    //     attitude.yaw, gyro_current_data.gyro_z,
+    //     battery_voltage,
+    //     motor_traveling_left_target_speed,motor_traveling_right_target_speed,
+    //     error_image,image_to_image_time,condition_T,feature_T,img_threshold
+    // );
     network_vofa_send_str(info_buffer);
 }
 

@@ -38,7 +38,7 @@ void core1_main(void)
             image_process_finish_flag = 0;
             network_interface_copy_image(mt9v03x_image[0], MT9V03X_W * MT9V03X_H); // 复制图像
             mt9v03x_finish_flag = 0; // 让摄像头继续采集下一帧图像并通过DMA传输到RAM中
-#ifdef SMARTCAR_DEBUG_NET_IMG
+#ifdef SMARTCAR_DEBUG_NET_IMG_2
             if(!network_status)seekfree_assistant_camera_send(); // 网络状态正常则发送数据
 #endif
             image_to_image_time = (system_getval_ms() - image_time);
