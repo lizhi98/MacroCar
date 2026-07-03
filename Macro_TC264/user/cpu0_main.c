@@ -23,9 +23,9 @@ int core0_main(void)
 #if defined(SMARTCAR_DEBUG_IPS) || defined(SMARTCAR_DEBUG_IPS_PRO)
     menu_interface_init();          // 菜单初始化
 #endif
-#if defined(SMARTCAR_DEBUG_NET_IMG) || defined(SMARTCAR_DEBUG_NET_INFO)
+#if defined(SMARTCAR_DEBUG_NET_IMG_1) || defined(SMARTCAR_DEBUG_NET_IMG_2) || defined(SMARTCAR_DEBUG_NET_INFO)
     network_interface_init();
-    network_interface_seekfree_host_config(&mt9v03x_copy_image[0][0]); // 配置逐飞助手摄像头信息
+    network_interface_seekfree_host_config(&mt9v03x_image[0][0]); // 配置逐飞助手摄像头信息
 #endif
 
     menu_key_init();                // 按键初始化
@@ -71,6 +71,9 @@ int core0_main(void)
         if(system_getval_ms() % 4 == 0){
             network_print_info();
         }
+#endif
+#ifdef SMARTCAR_DEBUG_NET_IMG_1
+            if(!network_status)seekfree_assistant_camera_send(); // 网络状态正常则发送数据
 #endif
     }
 }

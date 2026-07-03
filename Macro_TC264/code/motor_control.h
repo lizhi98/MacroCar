@@ -15,7 +15,8 @@ typedef enum _PIDType{
     PID_INC, // 增量式PID
     PID_POS, // 位置式PID
     FUZZY_PID_POS, // 模糊位置式PID
-    FUZZY_PID_INC  // 模糊增量式PID
+    FUZZY_PID_INC, // 模糊增量式PID
+    SEGMENT_PID_POS, // 分段位置式PID
 } PIDType;
 
 typedef struct _PIDParam{
@@ -41,6 +42,11 @@ typedef struct _PIDParam{
     float fuzzy_kp;
     float fuzzy_ki;
     float fuzzy_kd;
+    
+    // 分段PID用到的
+    float segment_kp;
+    float segment_ki;
+    float segment_kd;
 
     // 记录
     float previous_error;
@@ -72,16 +78,16 @@ extern int16 motor_steering_speed;
 #define MOTOR_SOFT_START_PWM            3500// 电机软启动PWM占空比
 
 // 不进行速度决策
-#define MOTOR_FORWARD_NORMAL_SPEED      1100  // 前进正常速度
+#define MOTOR_FORWARD_NORMAL_SPEED      1500  // 前进正常速度
 
 // 进行速度决策
-#define MOTOR_FORWARD_LINEAR_SPEED      1700    // 前进直线速度 1500    1450
-#define MOTOR_FORWARD_CURVE_SPEED       1700    // 前进转角速度 1200    1250
+#define MOTOR_FORWARD_LINEAR_SPEED      1950    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1850    // 前进转角速度 1200    1250
 
 // 负压风扇直线行驶开度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   50
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   55
 
-#define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
+// #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 
 #define RUN_PROTECT_IMG_TH_MAX      220 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
 #define RUN_PROTECT_IMG_TH_MIN      145  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
