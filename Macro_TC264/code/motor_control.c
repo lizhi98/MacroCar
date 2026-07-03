@@ -2,14 +2,14 @@
 
 // 规则表
 static const float fuzzy_pid_rule_table_kp[7][7] = {
-// EC→  NB      NM      NS      ZO      PS      PM      PB      E ↓
-    {0.40f, 0.40f, 0.37f, 0.37f, 0.34f, 0.34f, 0.31f}, // E=-3 负大
-    {0.37f, 0.37f, 0.34f, 0.34f, 0.31f, 0.31f, 0.28f}, // E=-2 负中
-    {0.28f, 0.28f, 0.25f, 0.25f, 0.22f, 0.22f, 0.18f}, // E=-1 负小
-    {0.06f, 0.03f, 0.00f, 0.00f, 0.00f, 0.03f, 0.06f}, // E=0  零
-    {0.18f, 0.22f, 0.22f, 0.25f, 0.25f, 0.28f, 0.28f}, // E=1  正小
-    {0.28f, 0.31f, 0.31f, 0.34f, 0.34f, 0.37f, 0.37f}, // E=2  正中
-    {0.31f, 0.34f, 0.34f, 0.37f, 0.37f, 0.40f, 0.40f}  // E=3  正大
+// EC→  NB     NM     NS     ZO     PS     PM     PB      E ↓
+    {1.00f, 1.00f, 0.93f, 0.93f, 0.87f, 0.87f, 0.80f}, // E=-3 负大
+    {0.93f, 0.93f, 0.87f, 0.87f, 0.80f, 0.80f, 0.73f}, // E=-2 负中
+    {0.73f, 0.73f, 0.67f, 0.67f, 0.60f, 0.60f, 0.53f}, // E=-1 负小
+    {0.33f, 0.27f, 0.20f, 0.20f, 0.20f, 0.27f, 0.33f}, // E=0  零
+    {0.53f, 0.60f, 0.60f, 0.67f, 0.67f, 0.73f, 0.73f}, // E=1  正小
+    {0.73f, 0.80f, 0.80f, 0.87f, 0.87f, 0.93f, 0.93f}, // E=2  正中
+    {0.80f, 0.87f, 0.87f, 0.93f, 0.93f, 1.00f, 1.00f}  // E=3  正大
 };
 
 static const float fuzzy_pid_rule_table_ki[7][7] = {
@@ -48,9 +48,9 @@ static const float segment_pid_rule_table_ki[3][2] = {
 
 static const float segment_pid_rule_table_kd[3][2] = {
 //   ABS_E      K
-    {30.0   , 2.5},
-    {92.0   , 2.5},
-    {100.0  , 3.0}
+    {30.0   , 2.6},
+    {92.0   , 2.6},
+    {100.0  , 2.7}
 };
 
 // 单电机速度控制
@@ -84,10 +84,10 @@ PIDParam motor_right_speed_pid  = {
 //7.2 1.9 1.1 0.1
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
-    .type = SEGMENT_PID_POS,
-    .kp = 7.2f, .ki = 0.0f, .kd = 3.0f,
+    .type = PID_POS,
+    .kp = 8.0f, .ki = 0.0f, .kd = 2.1f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
-    .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
+    .error_max = 94.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
 
 // 实际转向pid
@@ -99,9 +99,9 @@ PIDParam motion_image_steering_pid = {
 
 PIDParam motor_steering_pid = {
     .type = FUZZY_PID_POS,
-    .kp = 1.1f, .ki = 0.0f, .kd = 0.1f,
+    .kp = 1.0f, .ki = 0.0f, .kd = 0.1f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
-    .error_max = 800.0f,     .error_min = -800.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
+    .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
 
 uint8 motion_control_run_flag = 0;      // 作用于单电机速度环，让速度=0

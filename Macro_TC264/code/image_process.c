@@ -1,7 +1,7 @@
 #include "image_process.h"
 
-#define ERROR_IMAGE_LINE 40
-#define ERROR_IMAGE_LINE_2 40
+#define ERROR_IMAGE_LINE 42
+#define ERROR_IMAGE_LINE_2 42
 // #define index_num 6
 // int T_index_list[index_num]={-1,-1,-1,-1,-1,-1};
 // int T_index_list[index_num]={1,-1,-1,1,1,1};
@@ -17,8 +17,11 @@
 // #define index_num 23
 // int T_index_list[index_num]={-1,-1,1,1,0,-1,-1,0,-1,-1,-1,1,0,1,0,0,1,1,-1,-1,1,-1,-1};
 
-#define index_num 23
-int T_index_list[index_num]={-1,-1,1,0,0,1,1,1,-1,-1,0,-1,1,1,0,0,1,1,-1,-1,1,-1,-1};
+// #define index_num 24
+// int T_index_list[index_num]={-1,-1,1,0,0,1,1,1,-1,-1,0,-1,0,1,1,0,0,1,1,-1,-1,1,-1,-1};
+
+#define index_num 18
+int T_index_list[index_num]={1,0,0,1,1,0,-1,-1,1,-1,1,0,0,1,0,1,0,0};
 
 #define GrayScale 256
 #define grayscale 256
@@ -514,6 +517,7 @@ int feature_T_index=0;
 uint8 detect_feature_row=0;
 int up_feature_row=MT9V03X_H-1;
 int feature_row_run=0;
+
 void detect_feature()
 {
     // printf("left_lost_times=%d, right_lost_times=%d\n", left_lost_times, right_lost_times);
@@ -767,11 +771,11 @@ void detect_feature()
     // printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d,feature_label=%d,feature_row_run=%d\n",detect_feature_row, feature_raw_l, feature_raw_r, feature_label, feature_row_run);
     if(left_lost_times!=0 ||right_lost_times!=0)
     {
-        for(int i=MT9V03X_H-31;i>=feature_raw;i--)
+        for(int i=MT9V03X_H-31;i>=20;i--)
         {
             int left_line_lost_label=0;
             int right_line_lost_label=0;
-            for(int j=-8;j<=8;j++)
+            for(int j=-15;j<=15;j++)
             {
                 if(image[i+j][0]==white_point)
                 {
@@ -780,16 +784,16 @@ void detect_feature()
                 if(image[i+j][image_w-1]==white_point)
                 {
                     right_line_lost_label++;
-                }
+                }   
             }    
-            if((left_line_list[i]-left_line_list[i-1]>8 || left_line_list[i]-left_line_list[i-2]>8 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>8)
+            if((left_line_list[i]-left_line_list[i-1]>12 || left_line_list[i]-left_line_list[i-2]>15 || left_line_list[i]-left_line_list[i-3]>15 || left_line_list[i]-left_line_list[i-4]>12)
                 && left_line_lost_label!=0 && (T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0))
             {   
                 detect_feature_row=(uint8)i;
                 feature_raw_l=1;
                 break;
             }
-            if((right_line_list[i-1]-right_line_list[i]>8 || right_line_list[i-2]-right_line_list[i]>8 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>8) 
+            if((right_line_list[i-1]-right_line_list[i]>15 || right_line_list[i-2]-right_line_list[i]>15 || right_line_list[i-3]-right_line_list[i]>15 || right_line_list[i-4]-right_line_list[i]>15) 
                 && right_line_lost_label!=0&&(T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0))
             {
                 detect_feature_row=(uint8)i;
@@ -809,12 +813,14 @@ void detect_feature()
     int seek_col_start=0;
     if(feature_raw_r)
     {
-        seek_col_start=right_line_list[detect_feature_row]+10;
+        seek_col_start=right_line_list[detect_feature_row]+30;
     }
     if(feature_raw_l)
     {
-        seek_col_start=left_line_list[detect_feature_row]-10;
+        seek_col_start=left_line_list[detect_feature_row]-30;
     }
+    // image[seek_row_start][seek_col_start-10]=5;
+    // image[seek_row_end][seek_col_start-25]=5;
     if(seek_col_start>30 && seek_col_start<image_w-30)
     {
         int up_row=0;
@@ -852,7 +858,7 @@ void detect_feature()
         if(feature_raw_r)
         {
             int k=0;
-            for(int i=seek_col_start;i<seek_col_start+15;i=i+3)
+            for(int i=seek_col_start+15;i<seek_col_start+30;i=i+3)
             {
                 up_row = 0;
                 down_row = 0;
@@ -883,7 +889,7 @@ void detect_feature()
             feature_label = 1;
         }
     }
-    // printf("feature_label=%d, up_feature_row=%d\n", feature_label, up_feature_row);
+        // printf("feature_label=%d, up_feature_row=%d\n", feature_label, up_feature_row);
 
     // feature_label=0;
     // feature_raw_r=0;
@@ -1133,7 +1139,7 @@ void feature_square()
     {
         if(T_index_list[feature_T-1]!=0&&(zhuan_condition_right==1||zhuan_condition_left==1))
         {
-            if(get_angle_err(angle_T) > 45.0f)
+            if(get_angle_err(angle_T) > 53.0f)
             {
                 condition_T=0;
                 deceleration_label=0;
