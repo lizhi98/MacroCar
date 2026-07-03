@@ -81,11 +81,11 @@ extern int16 motor_steering_speed;
 #define MOTOR_FORWARD_NORMAL_SPEED      1500  // 前进正常速度
 
 // 进行速度决策
-#define MOTOR_FORWARD_LINEAR_SPEED      1800    // 前进直线速度 1500    1450
-#define MOTOR_FORWARD_CURVE_SPEED       1800    // 前进转角速度 1200    1250
+#define MOTOR_FORWARD_LINEAR_SPEED      1950    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1850    // 前进转角速度 1200    1250
 
 // 负压风扇直线行驶开度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   52
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   55
 
 // #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 

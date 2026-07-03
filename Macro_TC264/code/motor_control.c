@@ -33,24 +33,24 @@ static const float fuzzy_pid_rule_table_kd[7][7] = {
 };
 
 static const float segment_pid_rule_table_kp[3][2] = {
-//   ABS_E  DK
-    {20.0 , 0.0},
-    {50.0 , 0.0},
-    {94.0 , 0.0}
+//   ABS_E      K
+    {30.0   , 7.0},
+    {92.0   , 7.0}, // Condition = 0
+    {100.0  , 7.2}  // Condition = 1
 };
 
 static const float segment_pid_rule_table_ki[3][2] = {
-//   ABS_E  DK
-    {20.0 , 0.0},
-    {50.0 , 0.0},
-    {94.0 , 0.0}
+//   ABS_E      K
+    {30.0   , 0.0},
+    {60.0   , 0.0},
+    {100.0  , 0.0}
 };
 
 static const float segment_pid_rule_table_kd[3][2] = {
-//   ABS_E  DK
-    {20.0 , 0.0},
-    {50.0 , 0.0},
-    {94.0 , 0.0}
+//   ABS_E      K
+    {30.0   , 2.5},
+    {92.0   , 2.5},
+    {100.0  , 3.0}
 };
 
 // 单电机速度控制
@@ -84,8 +84,8 @@ PIDParam motor_right_speed_pid  = {
 //7.2 1.9 1.1 0.1
 //6.9 2.8 1.1  0.12
 PIDParam motion_image_steering_pid = {
-    .type = PID_POS,
-    .kp = 7.8f, .ki = 0.0f, .kd = 2.7f,
+    .type = SEGMENT_PID_POS,
+    .kp = 7.2f, .ki = 0.0f, .kd = 3.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -99,7 +99,7 @@ PIDParam motion_image_steering_pid = {
 
 PIDParam motor_steering_pid = {
     .type = FUZZY_PID_POS,
-    .kp = 1.2f, .ki = 0.0f, .kd = 0.1f,
+    .kp = 1.1f, .ki = 0.0f, .kd = 0.1f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 800.0f,     .error_min = -800.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
@@ -194,17 +194,17 @@ void segment_pid_update(PIDParam* pid_param){
     // 根据error的绝对值，选择不同的PID参数
     float segment_kp, segment_ki, segment_kd;
     if(fabs(pid_param->error) <= segment_pid_rule_table_kp[0][0]){
-        segment_kp = pid_param->kp + segment_pid_rule_table_kp[0][1];
-        segment_ki = pid_param->ki + segment_pid_rule_table_ki[0][1];
-        segment_kd = pid_param->kd + segment_pid_rule_table_kd[0][1];
+        segment_kp = segment_pid_rule_table_kp[0][1];
+        segment_ki = segment_pid_rule_table_ki[0][1];
+        segment_kd = segment_pid_rule_table_kd[0][1];
     }else if(fabs(pid_param->error) <= segment_pid_rule_table_kp[1][0]){
-        segment_kp = pid_param->kp + segment_pid_rule_table_kp[1][1];
-        segment_ki = pid_param->ki + segment_pid_rule_table_ki[1][1];
-        segment_kd = pid_param->kd + segment_pid_rule_table_kd[1][1];
+        segment_kp = segment_pid_rule_table_kp[1][1];
+        segment_ki = segment_pid_rule_table_ki[1][1];
+        segment_kd = segment_pid_rule_table_kd[1][1];
     }else{
-        segment_kp = pid_param->kp + segment_pid_rule_table_kp[2][1];
-        segment_ki = pid_param->ki + segment_pid_rule_table_ki[2][1];
-        segment_kd = pid_param->kd + segment_pid_rule_table_kd[2][1];
+        segment_kp = segment_pid_rule_table_kp[2][1];
+        segment_ki = segment_pid_rule_table_ki[2][1];
+        segment_kd = segment_pid_rule_table_kd[2][1];
     }
     if(fabs(pid_param->kp) >= 0.01f){
         pid_param->segment_kp = segment_kp;
@@ -402,8 +402,10 @@ void motion_control_init(void){
 void motor_fun_soft_start(void){
     motor_fun_open_percent = 20;
     system_delay_ms(1500);
+    motor_fun_open_percent = 40;
+    system_delay_ms(1500);
     motor_fun_open_percent = MOTOR_FUN_LINEAR_OPEN_PERCENT;
-    system_delay_ms(2000);
+    system_delay_ms(1500);
 }
 
 void    motor_traveling_soft_start(void){
