@@ -771,26 +771,26 @@ void detect_feature()
         {
             int left_line_lost_label=0;
             int right_line_lost_label=0;
-            // for(int j=-8;j<=8;j++)
-            // {
-            //     if(image[i+j][0]==white_point)
-            //     {
-            //         left_line_lost_label++;
-            //     }
-            //     if(image[i+j][image_w-1]==white_point)
-            //     {
-            //         right_line_lost_label++;
-            //     }
-            // }    
-            if((left_line_list[i]-left_line_list[i-1]>10 || left_line_list[i]-left_line_list[i-2]>10 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>10)
-                && left_lost_times!=0 && (T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0))
+            for(int j=-8;j<=8;j++)
+            {
+                if(image[i+j][0]==white_point)
+                {
+                    left_line_lost_label++;
+                }
+                if(image[i+j][image_w-1]==white_point)
+                {
+                    right_line_lost_label++;
+                }
+            }    
+            if((left_line_list[i]-left_line_list[i-1]>8 || left_line_list[i]-left_line_list[i-2]>8 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>8)
+                && left_line_lost_label!=0 && (T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0))
             {   
                 detect_feature_row=(uint8)i;
                 feature_raw_l=1;
                 break;
             }
-            if((right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>10 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>10) 
-                && right_lost_times!=0&&(T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0))
+            if((right_line_list[i-1]-right_line_list[i]>8 || right_line_list[i-2]-right_line_list[i]>8 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>8) 
+                && right_line_lost_label!=0&&(T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0))
             {
                 detect_feature_row=(uint8)i;
                 feature_raw_r=1;
