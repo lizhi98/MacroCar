@@ -18,7 +18,7 @@
 // int T_index_list[index_num]={-1,-1,1,1,0,-1,-1,0,-1,-1,-1,1,0,1,0,0,1,1,-1,-1,1,-1,-1};
 
 #define index_num 23
-int T_index_list[index_num]={1,-1,1,0,0,1,1,1,-1,-1,0,-1,1,1,0,0,1,1,-1,-1,1,-1,-1};
+int T_index_list[index_num]={-1,-1,1,0,0,1,1,1,-1,-1,0,-1,1,1,0,0,1,1,-1,-1,1,-1,-1};
 
 #define GrayScale 256
 #define grayscale 256
@@ -487,16 +487,16 @@ void detect_feature()
             int suspect_row=0;
             int white_line_position=0;
             // 先找跳变
-            if(left_line_list[i]-left_line_list[i-1]>8 && left_line_list[i]-left_line_list[i-2]>8 )
+            if(left_line_list[i]-left_line_list[i-1]>10 || left_line_list[i]-left_line_list[i-2]>10 || left_line_list[i]-left_line_list[i-3]>10 || left_line_list[i]-left_line_list[i-4]>10)
             {
                 suspect_row=i;
             }
             // 再找横向白线
             if(suspect_row!=0)
             {
-                if(suspect_row>20)
+                if(suspect_row>30)
                 {
-                    for(int j=suspect_row+20;j>suspect_row-20;j--)
+                    for(int j=suspect_row+20;j>suspect_row-30;j--)
                     {
                         if(image[j][left_suspect_col_start]==white_point && image[j][left_suspect_col_start+1]==white_point && image[j][left_suspect_col_start+2]==white_point && image[j][left_suspect_col_start+3]==white_point && image[j][left_suspect_col_start+4]==white_point)
                         {
@@ -520,7 +520,7 @@ void detect_feature()
             if(white_line_position!=0)
             {
                 feature_raw_l=1;
-                detect_feature_row=(uint8)suspect_row;
+                detect_feature_row=(uint8)white_line_position;
                 break;
             }
         }
@@ -532,7 +532,7 @@ void detect_feature()
             int suspect_row=0;
             int white_line_position=0;
             // 先找跳变
-            if(right_line_list[i-1]-right_line_list[i]>8 && right_line_list[i-2]-right_line_list[i]>8 )
+            if(right_line_list[i-1]-right_line_list[i]>10 || right_line_list[i-2]-right_line_list[i]>10 || right_line_list[i-3]-right_line_list[i]>10 || right_line_list[i-4]-right_line_list[i]>10)
             {
                 suspect_row=i;
             }
@@ -578,7 +578,9 @@ void detect_feature()
         int k=0;
         if(detect_feature_row>10)
         {
-            for(int i=left_suspect_col_start+25;i>left_suspect_col_start+10;i-=3)
+            image[detect_feature_row-10][left_suspect_col_start+10]=5;
+            image[detect_feature_row+10][left_suspect_col_start+10]=5;
+            for(int i=left_suspect_col_start+10;i>left_suspect_col_start-5;i-=3)
             {
                 up_row = 0;
                 down_row = 0;
@@ -593,6 +595,7 @@ void detect_feature()
                         up_row=j;
                     }
                 }
+                printf("up_row=%d, down_row=%d\n", up_row, down_row);
                 if(up_row!=0 && down_row!=0)
                 {
                     row_diff[k]=down_row-up_row;
@@ -606,7 +609,7 @@ void detect_feature()
         int k=0;
         if(detect_feature_row>10)
         {
-            for(int i=right_suspect_col_start-25;i<right_suspect_col_start-10;i+=3)
+            for(int i=right_suspect_col_start-10;i<right_suspect_col_start+5;i+=3)
             {
                 up_row = 0;
                 down_row = 0;
@@ -633,7 +636,7 @@ void detect_feature()
     {
         feature_label = 1;
     }
-    // printf("feature_raw_l=%d, feature_raw_r=%d, detect_feature_row=%d, feature_label=%d\n", feature_raw_l, feature_raw_r, detect_feature_row, feature_label);
+    printf("feature_raw_l=%d, feature_raw_r=%d, detect_feature_row=%d, feature_label=%d\n", feature_raw_l, feature_raw_r, detect_feature_row, feature_label);
     // printf("left_lost_times=%d, right_lost_times=%d\n", left_lost_times, right_lost_times);
     
     // detect_feature_row=0;
@@ -1219,7 +1222,7 @@ void feature_square()
             if(zhuan_row>ERROR_IMAGE_LINE_2 &&zhuan_condition_left ==0)
             {
                 zhuan_condition_left=1;
-                angle_T=attitude.yaw;
+                // angle_T=attitude.yaw;
             }
         }
         else if(T_index_list[feature_T-1]==1)
@@ -1227,7 +1230,7 @@ void feature_square()
             if(zhuan_row>ERROR_IMAGE_LINE_2 && zhuan_condition_right==0)
             {
                 zhuan_condition_right=1;
-                angle_T=attitude.yaw;
+                // angle_T=attitude.yaw;
             }
         }
         else if(T_index_list[feature_T-1]==0)
@@ -1250,16 +1253,16 @@ void feature_square()
     {
         if(T_index_list[feature_T-1]!=0&&(zhuan_condition_right==1||zhuan_condition_left==1))
         {
-            if(get_angle_err(angle_T) > 48.0f)
-            {
-                condition_T=0;
-                deceleration_label=0;
-                zhuan_left_flag=0;
-                zhuan_right_flag=0;
-                zhuan_condition_right=0;
-                zhuan_condition_left=0;
-                feature_label=0;    
-            }
+            // if(get_angle_err(angle_T) > 48.0f)
+            // {
+            //     condition_T=0;
+            //     deceleration_label=0;
+            //     zhuan_left_flag=0;
+            //     zhuan_right_flag=0;
+            //     zhuan_condition_right=0;
+            //     zhuan_condition_left=0;
+            //     feature_label=0;    
+            // }
         }
         else if(T_index_list[feature_T-1]==0)
         {
