@@ -74,6 +74,9 @@ extern int T_corner;
 extern int zhuan_row;
 extern int up_feature_row;
 extern FeatureDetectResult image_feature;
+
+extern int feature_condition_error;
+extern float angle_T;
 // extern int condition;
 
 // extern int feature_corner_l;

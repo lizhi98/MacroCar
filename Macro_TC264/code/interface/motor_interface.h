@@ -19,7 +19,7 @@
 #define MOTOR_FUN_PWM_PIN               ATOM1_CH0_P21_2
 
 #define MOTOR_PWM_FREQUENCY             17000  // 17kHz
-#define MOTOR_PWM_MAX_DUTY              9200   // 最大占空比
+#define MOTOR_PWM_MAX_DUTY              9350   // 最大占空比
 #define MOTOR_PWM_INIT_DUTY             0       // 最小占空比
 
 #define MOTOR_FUN_FREQUENCY             50     // 50Hz

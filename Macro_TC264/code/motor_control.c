@@ -12,25 +12,25 @@ static const float fuzzy_pid_rule_table_kp[7][7] = {
     {0.80f, 0.87f, 0.87f, 0.93f, 0.93f, 1.00f, 1.00f}  // E=3  正大
 };
 
-static const float fuzzy_pid_rule_table_ki[7][7] = {
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f}, // NB
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f}
-};
-
-static const float fuzzy_pid_rule_table_kd[7][7] = {
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
-    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f}
-};
+//static const float fuzzy_pid_rule_table_ki[7][7] = {
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f}, // NB
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f}
+//};
+//
+//static const float fuzzy_pid_rule_table_kd[7][7] = {
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f},
+//    { 0.0f,     0.0f,   0.0f,   0.0f,   0.0f,   0.0f,   0.00f}
+//};
 
 static const float segment_pid_rule_table_kp[3][2] = {
 //   ABS_E      K
@@ -77,15 +77,10 @@ PIDParam motor_right_speed_pid  = {
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
-// 图像误差要求的转向pid   //6.2   1.0   1.0   0.0
-// 6.7 1.5 1.1 0.05 // 科目1
-// 6.75 2.0 1.1 0.1 // 科目2
-// 6.4 1.7 1.1 0.08 // 科目3
-//7.2 1.9 1.1 0.1
-//6.9 2.8 1.1  0.12
+
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 8.0f, .ki = 0.0f, .kd = 2.1f,
+    .kp = 27.0f, .ki = 0.0f, .kd = 5.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
@@ -98,8 +93,8 @@ PIDParam motion_image_steering_pid = {
 // };
 
 PIDParam motor_steering_pid = {
-    .type = FUZZY_PID_POS,
-    .kp = 1.0f, .ki = 0.0f, .kd = 0.1f,
+    .type = PID_POS,
+    .kp = 1.4f, .ki = 0.0f, .kd = 0.5f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
@@ -303,7 +298,7 @@ void PID_clear(PIDParam* pid_param){
 int16 motor_traveling_left_target_speed = 0;
 int16 motor_traveling_right_target_speed = 0;
 
-float motor_steering_speed_up_k = 1.0f;
+float motor_steering_speed_up_k = 0.6f;
 
 void motion_control_pit_callback(){
     // motor_left_current_pwm_duty = 0;
@@ -335,12 +330,18 @@ void motion_control_pit_callback(){
     // 运行保护
     run_control_protect();
 
+    int error_image_real = error_image;
+    // if(condition_T){
+    //     if(get_angle_err(angle_T) > 53.0f)
+    //     {
+    //         error_image_real = feature_condition_error;
+    //     }
+    // }
+
     // 图像要求的转向环
-    if(motor_pit_count % 2 == 0){ // 转向环10ms运行一次
-        motion_image_steering_pid.previous_error = (float)error_image_last;
-        motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)error_image); // 这里的目标值和当前值需要根据具体应用修改
-        // motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)0.0); // 这里的目标值和当前值需要根据具体应用修改
-    }
+    motion_image_steering_pid.previous_error = 0.0-(float)error_image_last;
+    motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)error_image_real); // 这里的目标值和当前值需要根据具体应用修改
+    // motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)0.0); // 这里的目标值和当前值需要根据具体应用修改
     // 转向闭环
     motor_steering_speed = (int16)PID_calculate(&motor_steering_pid, (float)motion_image_steering_speed, gyro_current_data.gyro_z); // 这里的当前值需要根据具体应用修改
     
@@ -428,7 +429,7 @@ void    motor_traveling_soft_start(void){
 uint8 forward_speed_decision_enable = 0; // 0表示不执行速度决策，1表示执行速度决策
 
 static uint8    curve_speed_lock = 0;
-static float    curve_speed_lock_angle = 0.0f; // 锁定转弯速度时的转向角
+// static float    curve_speed_lock_angle = 0.0f; // 锁定转弯速度时的转向角
 static uint32   turn_time_start = 0; // 转弯开始时间
 
 // 速度决策
@@ -438,7 +439,7 @@ void forward_speed_decision(void){
         return;
     }else{
         if(deceleration_label && !curve_speed_lock){ // 进行速度决策
-            curve_speed_lock_angle = attitude.yaw; // 记录当前转向角
+            // curve_speed_lock_angle = attitude.yaw; // 记录当前转向角
             turn_time_start = system_getval_ms(); // 记录转弯开始时间
             curve_speed_lock = 1;
         }

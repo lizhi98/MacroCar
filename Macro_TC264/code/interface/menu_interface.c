@@ -3,7 +3,7 @@
 
 
 extern uint32 image_to_image_time;
-//extern uint32 image_process_time;
+extern uint32 image_process_time;
 //extern volatile uint8 image_process_finish_flag; // 图像处理标志位，0表示CPU1正在处理图像，1表示CPU1处理完图像了，CPU0可以访问图像数据了
 //extern uint8 image_process_flag; // 为1时图像开始处理
 
@@ -366,15 +366,14 @@ void menu_key_init(void){
 
 void network_print_info(void){
     static char info_buffer[128];
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%d\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%d,%d,%u\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
         attitude.yaw, gyro_current_data.gyro_z,
         battery_voltage,
         motor_traveling_left_target_speed,motor_traveling_right_target_speed,
-        error_image,image_to_image_time,condition_T,feature_T,img_threshold,
-        detect_feature_row
+        error_image,image_process_time,condition_T,feature_T,img_threshold,motion_image_steering_speed,motor_steering_speed,detect_feature_row
     );
     // sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u\0",
     //     motor_forward_speed,
