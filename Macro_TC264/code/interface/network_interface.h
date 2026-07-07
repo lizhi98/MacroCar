@@ -6,6 +6,7 @@
 #include "seekfree_assistant_interface.h"
 #include "zf_device_mt9v03x_double.h"
 #include "zf_driver_timer.h"
+#include "motor_control.h"
 
 #define WIFI_SSID           "XIAOMI_GoGoGo"
 #define WIFI_PASSWORD       "9894653xxk"
@@ -25,27 +26,17 @@ typedef struct _NetworkPack{
     uint8  buffer[];
 }NetworkPack;
 
-extern uint32 pack_id;
-extern NetworkPack * network_image_pack;
 extern uint8 mt9v03x_copy_image[MT9V03X_H][MT9V03X_W];
 extern uint8 network_status;
 
 void  network_interface_init(void);
 
 void  network_interface_copy_image(uint8 * image, size_t length);
-
 // 逐飞助手
 void network_interface_seekfree_host_config(uint8 *image_addr);
-
-// VOFA+
-// typedef enum _NetworkVofaInfoType{
-//     VOFA_INFO_TYPE_ALL,
-//     VOFA_INFO_TYPE_SPEED,
-    
-// }NetworkVofaInfoType;
-
 void network_vofa_send_str(char * str);
-
 void network_print_info(void);
+
+void network_vofa_cmd_process(void);
 
 #endif

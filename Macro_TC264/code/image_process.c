@@ -1,11 +1,14 @@
 #include "image_process.h"
 
-#define ERROR_IMAGE_LINE 70
+#define ERROR_IMAGE_LINE 60
 #define ERROR_IMAGE_LINE_2 43
 
 
+// #define index_num 28
+// int T_index_list[index_num]={1,1,-1,-1,0,1,1,1,0,-1,-1,-1,0,-1,-1,-1,1,0,0,1,1,1,1,1,0,0,0,1};
+
 #define index_num 28
-int T_index_list[index_num]={1,1,-1,-1,0,1,1,1,0,-1,-1,-1,0,-1,-1,-1,1,0,0,1,1,1,1,1,0,0,0,1};
+int T_index_list[index_num]={-1,0,-1,1,0,-1,0,-1,1,-1,-1,-1,1,0,1,0,0,1,0,1,1,-1,0,-1,-1,0,0,-1};
 
 
 #define GrayScale 256
@@ -756,7 +759,7 @@ void detect_feature()
     // printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d,feature_label=%d,feature_row_run=%d\n",detect_feature_row, feature_raw_l, feature_raw_r, feature_label, feature_row_run);
     if(left_lost_times!=0 ||right_lost_times!=0)
     {
-        for(int i=MT9V03X_H-26;i>=20;i--)
+        for(int i=MT9V03X_H-31;i>=20;i--)
         {
             int left_line_lost_label=0;
             int right_line_lost_label=0;
@@ -776,14 +779,14 @@ void detect_feature()
             {   
                 detect_feature_row=(uint8)i;
                 feature_raw_l=1;
-                break;
+                // break;
             }
             if((right_line_list[i-1]-right_line_list[i]>12 || right_line_list[i-2]-right_line_list[i]>15 || right_line_list[i-3]-right_line_list[i]>15 || right_line_list[i-4]-right_line_list[i]>12) 
                 && right_line_lost_label!=0&&(T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0))
             {
                 detect_feature_row=(uint8)i;
                 feature_raw_r=1;
-                break;   
+                // break;   
             }
             
         }
@@ -794,87 +797,112 @@ void detect_feature()
             if(detect_feature_row>20)
             {
                 seek_row_start=detect_feature_row-20;
-                seek_row_end=detect_feature_row+15;
+                seek_row_end=detect_feature_row+20;
             }
-            int seek_col_start=0;
-            if(feature_raw_r)
-            {
-                seek_col_start=right_line_list[detect_feature_row]+30;
-            }
-            if(feature_raw_l)
-            {
-                seek_col_start=left_line_list[detect_feature_row]-30;
-            }
+            // int seek_col_start=0;
+            // if(feature_raw_r)
+            // {
+            //     seek_col_start=right_line_list[detect_feature_row]+30;
+            // }
+            // if(feature_raw_l)
+            // {
+            //     seek_col_start=left_line_list[detect_feature_row]-30;
+            // }
             // image[seek_row_start][seek_col_start-10]=5;
             // image[seek_row_end][seek_col_start-25]=5;
-            if(seek_col_start>30 && seek_col_start<image_w-30)
-            {
+            // if(seek_col_start>30 && seek_col_start<image_w-30)
+            // {
+            
                 int up_row=0;
                 int down_row=0;
                 int row_diff[5]={0};
                 if(feature_raw_l)
                 {
-                    int k=0;
-                    for(int i=seek_col_start;i>seek_col_start-10;i=i-2)
+                    if(left_line_list[detect_feature_row]>40 && left_line_list[detect_feature_row]<image_w-41)
                     {
-                        up_row = 0;
-                        down_row = 0;
-                        for(int j=seek_row_start;j<seek_row_end;j++)
+                        for(int i=10;i<90;i++)
                         {
-                            if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+                            if(image[i][col_left]==white_point && image[i][col_left-1]==white_point && image[i][col_left+1]==white_point 
+                                &&image[i+1][col_left]==white_point)
                             {
-                                down_row=j;
-                            }
-                            else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
-                            {
-                                up_row=j;
+                                feature_label=1;
+                                break;
                             }
                         }
-                        if(up_row<up_feature_row)
-                        {
-                            up_feature_row=up_row;
-                        }
-                        if(up_row!=0 && down_row!=0)
-                        {
-                            row_diff[k]=down_row-up_row;
-                        }
-                        k++;
                     }
+                    // int k=0;
+                    // for(int i=seek_col_start;i>seek_col_start-10;i=i-2)
+                    // {
+                    //     up_row = 0;
+                    //     down_row = 0;
+                    //     for(int j=seek_row_start;j<seek_row_end;j++)
+                    //     {
+                    //         if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+                    //         {
+                    //             down_row=j;
+                    //         }
+                    //         else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
+                    //         {
+                    //             up_row=j;
+                    //         }
+                    //     }
+                    //     if(up_row<up_feature_row)
+                    //     {
+                    //         up_feature_row=up_row;
+                    //     }
+                    //     if(up_row!=0 && down_row!=0)
+                    //     {
+                    //         row_diff[k]=down_row-up_row;
+                    //     }
+                    //     k++;
+                    // }
                 }
                 if(feature_raw_r)
                 {
-                    int k=0;
-                    for(int i=seek_col_start;i<seek_col_start+10;i=i+2)
+                    if(right_line_list[detect_feature_row]>40 && right_line_list[detect_feature_row]<image_w-41)
                     {
-                        up_row = 0;
-                        down_row = 0;
-                        for(int j=seek_row_start;j<seek_row_end;j++)
+                        for(int i=10;i<90;i++)
                         {
-                            if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+                            if(image[i][col_right]==white_point && image[i][col_right-1]==white_point && image[i][col_right+1]==white_point 
+                                &&image[i+1][col_right]==white_point)
                             {
-                                down_row=j;
-                            }
-                            else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
-                            {
-                                up_row=j;
+                                feature_label=1;
+                                break;
                             }
                         }
-                        if(up_row<up_feature_row)
-                        {
-                            up_feature_row=up_row;
-                        }
-                        if(up_row!=0 && down_row!=0)
-                        {
-                            row_diff[k]=down_row-up_row;
-                        }
-                        k++;
                     }
-                }
-                if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
-                {
-                    feature_label = 1;
+                    // int k=0;
+                    // for(int i=seek_col_start;i<seek_col_start+10;i=i+2)
+                    // {
+                    //     up_row = 0;
+                    //     down_row = 0;
+                    //     for(int j=seek_row_start;j<seek_row_end;j++)
+                    //     {
+                    //         if(image[j+1][i]==black_point && image[j][i]==white_point && image[j-1][i]==white_point)
+                    //         {
+                    //             down_row=j;
+                    //         }
+                    //         else if(image[j+1][i]==white_point && image[j][i]==white_point && image[j-1][i]==black_point)
+                    //         {
+                    //             up_row=j;
+                    //         }
+                    //     }
+                    //     if(up_row<up_feature_row)
+                    //     {
+                    //         up_feature_row=up_row;
+                    //     }
+                    //     if(up_row!=0 && down_row!=0)
+                    //     {
+                    //         row_diff[k]=down_row-up_row;
+                    //     }
+                    //     k++;
+                    // }
+                // }
+                // if(detect_row_diff(row_diff, 10) &&row_diff[0]!=0 && row_diff[1]!=0 && row_diff[2]!=0 && row_diff[3]!=0 && row_diff[4]!=0)
+                // {
+                //     feature_label = 1;
                     
-                }
+                // }
             }
     // printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d\n",detect_feature_row, feature_raw_l, feature_raw_r);
     
@@ -950,6 +978,7 @@ int feature_T_right=0;
 uint8 condition_T=0;
 float angle_T=0.0f;
 int feature_condition_error=0;
+int row_times=0;
 void feature_square()
 {
     //路口判断
@@ -1107,7 +1136,11 @@ void feature_square()
         }
         else if(T_index_list[feature_T-1]==0)
         {
-            Add_Line(mid_line_list[115],115,mid_line_list[5],5);
+            if(feature_T==18)
+            {
+                Add_Line(mid_line_list[115],115,mid_line_list[20],20);
+            }
+            // Add_Line(mid_line_list[115],115,mid_line_list[20],20);
         }
     }
     feature_condition_error=93-mid_line_list[ERROR_IMAGE_LINE];
@@ -1131,68 +1164,97 @@ void feature_square()
         }
         else if(T_index_list[feature_T-1]==0)
         {
-            // if(feature_row_run>=MT9V03X_H-30)
-            // {
-            //     condition_T=0;
-            //     right_run_flag=0;
-            //     feature_T_right=0;
-            //     feature_T_left=0;
-            //     feature_label=0;
-            // }
-            if(feature_T_left==1 && feature_T_right==0)
+            if(feature_T_left)
             {
-                // if(lost_row_down_l>90)
-                // {
-                //     feature_T_left=0;
-                //     condition_T=0;
-                // }
-                // 原退出方案
-                int left_lost_count=0;
-                for(int i=MT9V03X_H-30;i>5;i--)
+                
+                int row_least=0;
+                for(int i=MT9V03X_H-1;i>10;i--)
                 {
                     if(image[i][col_left]==white_point)
                     {
-                        left_lost_count++;
+                        row_least=i;
+                        break;
                     }
                 }
-                if(left_lost_count==0)
+                if(row_least>95)
                 {
-                    left_run_flag++;
+                    row_times++;
                 }
-                if(left_run_flag!=0)
+                else
+                {
+                    row_times=0;
+                }
+                if(row_times>1)
                 {
                     condition_T=0;
                     left_run_flag=0;
                     feature_T_left=0;
                 }
-            }
-            else if(feature_T_left==0 && feature_T_right==1)
-            {
-                // if(lost_row_down_r>90)
+                
+                // int left_lost_count=0;
+                // for(int i=MT9V03X_H-36;i>10;i--)
                 // {
-                //     feature_T_right=0;
-                //     condition_T=0;
+                //     if(image[i][col_left]==white_point)
+                //     {
+                //         left_lost_count++;
+                //     }
                 // }
-                // 原退出方案
-                int right_lost_count=0;
-                for(int i=MT9V03X_H-40;i>10;i--)
+                // if(left_lost_count==0)
+                // {
+                //     left_run_flag++;
+                // }
+                // if(left_run_flag!=0)
+                // {
+                //     condition_T=0;
+                //     left_run_flag=0;
+                //     feature_T_left=0;
+                // }
+            }
+            else if( feature_T_right)
+            {
+                int row_least=0;
+                for(int i=MT9V03X_H-1;i>10;i--)
                 {
                     if(image[i][col_right]==white_point)
                     {
-                        right_lost_count++;
+                        row_least=i;
+                        break;
                     }
                 }
-                if(right_lost_count==0)
+                if(row_least>95)
                 {
-                    right_run_flag++;
+                    row_times++;
                 }
-                
-                if(right_run_flag!=0)
+                else
+                {
+                    row_times=0;
+                }
+                if(row_times>1)
                 {
                     condition_T=0;
                     right_run_flag=0;
                     feature_T_right=0;
                 }
+
+                // int right_lost_count=0;
+                // for(int i=MT9V03X_H-36;i>10;i--)
+                // {
+                //     if(image[i][col_right]==white_point)
+                //     {
+                //         right_lost_count++;
+                //     }
+                // }
+                // if(right_lost_count==0)
+                // {
+                //     right_run_flag++;
+                // }
+                
+                // if(right_run_flag!=0)
+                // {
+                //     condition_T=0;
+                //     right_run_flag=0;
+                //     feature_T_right=0;
+                // }
             }   
         }
         

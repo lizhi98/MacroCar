@@ -72,6 +72,9 @@ int core0_main(void)
             network_print_info();
         }
 #endif
+#ifdef SMARTCAR_DEBUG_NET_CMD
+        network_vofa_cmd_process(); // 处理上位机发送的命令
+#endif
 #ifdef SMARTCAR_DEBUG_NET_IMG_1
             if(!network_status)seekfree_assistant_camera_send(); // 网络状态正常则发送数据
 #endif

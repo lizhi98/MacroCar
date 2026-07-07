@@ -1,5 +1,8 @@
 #include "motor_control.h"
 
+int32 motor_forward_linear_speed = MOTOR_FORWARD_LINEAR_SPEED;
+int32 motor_forward_curve_speed = MOTOR_FORWARD_CURVE_SPEED;
+
 // 规则表
 static const float fuzzy_pid_rule_table_kp[7][7] = {
 // EC→  NB     NM     NS     ZO     PS     PM     PB      E ↓
@@ -449,15 +452,15 @@ void forward_speed_decision(void){
             if( feature_T_index == 3    || feature_T_index == 4 || feature_T_index == 5 ||
                 feature_T_index == 14 || feature_T_index == 15 || feature_T_index == 16)
             {
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;
+                motor_forward_speed = motor_forward_linear_speed;
             }else if(feature_T_index >= 18){
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;
+                motor_forward_speed = motor_forward_linear_speed;
             }else{
-                motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED; // 直线行驶时正常速度
+                motor_forward_speed = motor_forward_linear_speed; // 直线行驶时正常速度
             }
             curve_speed_lock = 0; // 解除转弯速度锁定
         }else{
-            motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED; // 转弯时降低速度
+            motor_forward_speed = motor_forward_curve_speed; // 转弯时降低速度
             // 转弯超时停车
             if(system_getval_ms() > turn_time_start){ // 防止系统时钟溢出导致车辆误停车
                 if(system_getval_ms() - turn_time_start > 2000){ // 转弯超过2秒
