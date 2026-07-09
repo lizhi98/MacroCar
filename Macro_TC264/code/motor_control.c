@@ -6,13 +6,13 @@ int32 motor_forward_curve_speed = MOTOR_FORWARD_CURVE_SPEED;
 // 规则表
 static const float fuzzy_pid_rule_table_kp[7][7] = {
 // EC→  NB     NM     NS     ZO     PS     PM     PB      E ↓
-    {1.00f, 1.00f, 0.93f, 0.93f, 0.87f, 0.87f, 0.80f}, // E=-3 负大
-    {0.93f, 0.93f, 0.87f, 0.87f, 0.80f, 0.80f, 0.73f}, // E=-2 负中
-    {0.73f, 0.73f, 0.67f, 0.67f, 0.60f, 0.60f, 0.53f}, // E=-1 负小
-    {0.33f, 0.27f, 0.20f, 0.20f, 0.20f, 0.27f, 0.33f}, // E=0  零
-    {0.53f, 0.60f, 0.60f, 0.67f, 0.67f, 0.73f, 0.73f}, // E=1  正小
-    {0.73f, 0.80f, 0.80f, 0.87f, 0.87f, 0.93f, 0.93f}, // E=2  正中
-    {0.80f, 0.87f, 0.87f, 0.93f, 0.93f, 1.00f, 1.00f}  // E=3  正大
+    {4.0f, 4.0f, 3.5f, 3.5f, 3.5f, 3.0f, 3.0f}, // E=-3
+    {3.5f, 3.5f, 3.5f, 3.0f, 3.0f, 3.0f, 2.5f}, // E=-2
+    {2.5f, 2.5f, 2.5f, 2.0f, 2.0f, 2.0f, 1.5f}, // E=-1
+    {0.5f, 0.5f, 0.0f, 0.0f, 0.0f, 0.5f, 0.5f}, // E=0
+    {1.5f, 2.0f, 2.0f, 2.0f, 2.5f, 2.5f, 2.5f}, // E=1
+    {2.5f, 3.0f, 3.0f, 3.0f, 3.5f, 3.5f, 3.5f}, // E=2
+    {3.0f, 3.0f, 3.5f, 3.5f, 3.5f, 4.0f, 4.0f}  // E=3
 };
 
 //static const float fuzzy_pid_rule_table_ki[7][7] = {
@@ -56,18 +56,6 @@ static const float segment_pid_rule_table_kd[3][2] = {
     {100.0  , 2.7}
 };
 
-// 单电机速度控制
-// PIDParam motor_left_speed_pid   = {
-//     .type = PID_INC,
-//     .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
-//     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
-// };
-// PIDParam motor_right_speed_pid  = {
-//     .type = PID_INC,
-//     .kp = 8.0f, .ki = 0.56f, .kd = 0.0f,
-//     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
-// };
-
 PIDParam motor_left_speed_pid   = {
     .type = PID_INC,
     .kp = 4.3f, .ki = 0.48f, .kd = 0.1f,
@@ -83,17 +71,10 @@ PIDParam motor_right_speed_pid  = {
 
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 27.0f, .ki = 0.0f, .kd = 5.0f,
+    .kp = 26.0f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
-    .error_max = 94.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
-
-// 实际转向pid
-// PIDParam motor_steering_pid = {
-//     .type = PID_POS,
-//     .kp = 0.5f, .ki = 0.0f, .kd = 0.0f,
-//     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
-// };
 
 PIDParam motor_steering_pid = {
     .type = PID_POS,
@@ -179,12 +160,18 @@ void fuzzy_pid_update(PIDParam* pid_param){
     // 更新PID参数
     if(fabs(pid_param->kp) >= 0.01f){    
         pid_param->fuzzy_kp = pid_param->kp + delta_kp;
+    }else{
+        pid_param->fuzzy_kp = 0.0f;
     }
     if(fabs(pid_param->ki) >= 0.01f){    
         pid_param->fuzzy_ki = pid_param->ki + delta_ki;
+    }else{
+        pid_param->fuzzy_ki = 0.0f;
     }
     if(fabs(pid_param->kd) >= 0.01f){    
         pid_param->fuzzy_kd = pid_param->kd + delta_kd;
+    }else{
+        pid_param->fuzzy_kd = 0.0f;
     }
 }
 
@@ -314,7 +301,7 @@ void motion_control_pit_callback(){
     motor_pit_count++;
     
     // 电机接口PIT，获取速度
-    motor_interface_pit_callback();
+    motor_interface_pit_callback(); 
     motor_get_speed(&motor_left_speed, &motor_right_speed);
     // return;
 
@@ -404,12 +391,14 @@ void motion_control_init(void){
 
 // 主循环中调用的函数，不要在中断中调用
 void motor_fun_soft_start(void){
-    motor_fun_open_percent = 20;
+    motor_fun_open_percent = 15;
     system_delay_ms(1500);
-    motor_fun_open_percent = 40;
-    system_delay_ms(1500);
+    motor_fun_open_percent = 30;
+    system_delay_ms(1000);
+    motor_fun_open_percent = 45;
+    system_delay_ms(1000);
     motor_fun_open_percent = MOTOR_FUN_LINEAR_OPEN_PERCENT;
-    system_delay_ms(1500);
+    system_delay_ms(1000);
 }
 
 void    motor_traveling_soft_start(void){
@@ -480,6 +469,11 @@ void run_control_protect(){
         run_control_protect_trigger_flag = 1; // 设置运行保护触发标志位
         // 记录保护触发时间
         run_protect_trigger_time = system_getval_ms();
+        int16 percent_temp = (int16)motor_fun_open_percent - 20; // 检测到异常时负压是否开启
+        if(percent_temp <= 0){
+            percent_temp = 0;
+        }
+        motor_fun_open_percent = percent_temp; // 负压风扇关闭
     }
     if(run_control_protect_trigger_flag && system_getval_ms() - run_protect_trigger_time > 1000){ // 保护触发超过1秒，停止负压风扇
         motor_fun_open_percent = 0; // 负压风扇关闭

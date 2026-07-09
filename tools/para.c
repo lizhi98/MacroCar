@@ -45,66 +45,58 @@ typedef struct _PIDParam{
     float output_max;
 } PIDParam;
 
-// 1200
-#define MOTOR_FORWARD_LINEAR_SPEED      1200    // 前进直线速度 1500    1450
-#define MOTOR_FORWARD_CURVE_SPEED       1100    // 前进转角速度 1200    1250
-PIDParam motion_image_steering_pid = {
-    .type = PID_POS,
-    .kp = 12.0f, .ki = 0.0f, .kd = 0.0f,
-    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
-    .error_max = 94.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
-};
-PIDParam motor_steering_pid = {
-    .type = PID_POS,
-    .kp = 1.1f, .ki = 0.0f, .kd = 0.1f,
-    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
-    .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
-};
-
-
-
-
-#define MOTOR_FORWARD_LINEAR_SPEED      1500    // 前进直线速度 1500    1450
-#define MOTOR_FORWARD_CURVE_SPEED       1400    // 前进转角速度 1200    1250
 
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 16.0f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 24.0f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
 
-
-
-#define MOTOR_FORWARD_LINEAR_SPEED      1600    // 前进直线速度 1500    1450
-#define MOTOR_FORWARD_CURVE_SPEED       1400    // 前进转角速度 1200    1250
-
-PIDParam motion_image_steering_pid = {
-    .type = PID_POS,
-    .kp = 18.0f, .ki = 0.0f, .kd = 3.0f,
-    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
-    .error_max = 94.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
-};
 
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.38f, .ki = 0.0f, .kd = 0.1f,
+    .kp = 1.4f, .ki = 0.0f, .kd = 0.5f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
+#define MOTOR_FORWARD_LINEAR_SPEED      1550    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1450    // 前进转角速度 1200    1250
 
+// 负压风扇直线行驶开度
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   48
 
 
 
 // 进行速度决策
-#define MOTOR_FORWARD_LINEAR_SPEED      1800    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_LINEAR_SPEED      1700    // 前进直线速度 1500    1450
 #define MOTOR_FORWARD_CURVE_SPEED       1600    // 前进转角速度 1200    1250
+// 负压风扇直线行驶开度
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   50
 
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 25.0f, .ki = 0.0f, .kd = 5.0f,
+    .kp = 30.0f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 94.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
+};
+
+/*/
+//第二版
+*/
+
+#define MOTOR_FORWARD_LINEAR_SPEED      1800    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1650    // 前进转角速度 1200    1250
+
+// 负压风扇直线行驶开度
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   52
+
+
+PIDParam motion_image_steering_pid = {
+    .type = PID_POS,
+    .kp = 28.0f, .ki = 0.0f, .kd = 0.0f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
 
 PIDParam motor_steering_pid = {
@@ -113,3 +105,34 @@ PIDParam motor_steering_pid = {
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
+
+
+// 进行速度决策
+#define MOTOR_FORWARD_LINEAR_SPEED      1850    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1700    // 前进转角速度 1200    1250
+
+// 负压风扇直线行驶开度
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   53
+// 前瞻 42 
+PIDParam motion_image_steering_pid = {
+    .type = PID_POS,
+    .kp = 30.0f, .ki = 0.0f, .kd = 0.0f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
+};
+
+
+// 进行速度决策
+#define MOTOR_FORWARD_LINEAR_SPEED      1800    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1700    // 前进转角速度 1200    1250
+
+#define ERROR_IMAGE_LINE_2 42
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   60
+
+PIDParam motion_image_steering_pid = {
+    .type = PID_POS,
+    .kp = 34.0f, .ki = 0.0f, .kd = 0.0f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
+};
+

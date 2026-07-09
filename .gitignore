@@ -39,3 +39,5 @@ CMakeFiles/
 *.ilk
 *.pdb
 tools/ImageDebug/CmakeLists.txt
+
+TimeKeeper/
