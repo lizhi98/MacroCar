@@ -11,7 +11,7 @@
 // 正
 // int T_index_list[index_num]={-1,0,-1,1,0,-1,0,-1,1,-1,-1,-1,1,0,1,0,0,1,0,1,1,-1,0,-1,-1,0,0,-1};
 // 反方向 从正的最后一个->第一个 1变-1 -1变1 0不变
-int T_index_list[index_num] = {1,0,0,1,1,0,1,-1,-1,0,-1,0,0,-1,0,-1,1,1,1,-1,1,0,1,0,-1,1,0,1};
+int T_index_list[index_num] = {-1,0,0,1,1,0,1,-1,-1,0,-1,0,0,-1,0,-1,1,1,1,-1,1,0,1,0,-1,1,0,1};
 
 
 #define GrayScale 256
@@ -508,13 +508,14 @@ int up_feature_row=MT9V03X_H-1;
 int feature_row_run=0;
 #define col_left 30
 #define col_right 150
-
+int feature_row_down=0;
 void detect_feature()
 {
     // printf("left_lost_times=%d, right_lost_times=%d\n", left_lost_times, right_lost_times);
     feature_raw_l=0;
     feature_raw_r=0;
     detect_feature_row=0;
+    feature_row_down=0;
     feature_label=0;
     up_feature_row=MT9V03X_H-1;
     // if(feature_label==1)
@@ -764,50 +765,41 @@ void detect_feature()
     int seek_col_start=0;
     if(left_lost_times!=0 )
     {
-        for(int i=MT9V03X_H-31;i>=15;i--)
+        for(int i=MT9V03X_H-31;i>=20;i--)
         {
             int left_line_lost_label=0;
             for(int j=-10;j<=10;j++)
             {
-                if(i>60)
+                if(image[i+j][col_left]==white_point)
                 {
-                    if(image[i+j][col_left-10]==white_point)
-                    {
-                        left_line_lost_label++;
-                    }
-                }
-                else 
-                {
-                    if(image[i+j][col_left]==white_point)
-                    {
-                        left_line_lost_label++;
-                    }
-                }
-                
-            }    
-            if((left_line_list[i]-left_line_list[i-1]>8 || left_line_list[i]-left_line_list[i-2]>10 || left_line_list[i]-left_line_list[i-3]>12 || left_line_list[i]-left_line_list[i-4]>10)
+                    left_line_lost_label++;
+                }     
+            }
+            if(left_line_list[i]>40 && left_line_list[i]<image_w-41 && (left_line_list[i]-left_line_list[i-1]>15 || left_line_list[i]-left_line_list[i-2]>15 || left_line_list[i]-left_line_list[i-3]>15 || left_line_list[i]-left_line_list[i-4]>15)
                 && left_line_lost_label>1 && (T_index_list[feature_T_index]==-1||T_index_list[feature_T_index]==0))
             {   
                 detect_feature_row=(uint8)i;
                 feature_raw_l=1;
             }
+            
             if(feature_raw_l)
             {
-                if(left_line_list[detect_feature_row]>50 && left_line_list[detect_feature_row]<image_w-51)
+                if(left_line_list[detect_feature_row]>40 && left_line_list[detect_feature_row]<image_w-41)
                 {
                     if(detect_feature_row>20 &&detect_feature_row<60)
                     {
-                        seek_col_start=left_line_list[detect_feature_row]-40;
+                        seek_col_start=left_line_list[detect_feature_row]-25;
                     }
                     else if(detect_feature_row>=60)
                     {
-                        seek_col_start=left_line_list[detect_feature_row]-60;
+                        seek_col_start=left_line_list[detect_feature_row]-35;
                     }
                     for(int i=100;i>20;i--)
                     {
                         if(image[i-1][seek_col_start]==white_point && image[i][seek_col_start]==white_point &&image[i+1][seek_col_start]==black_point)
                         {
                             feature_label=1;
+                            feature_row_down=i;
                             break;
                         }
                     }
@@ -855,22 +847,12 @@ void detect_feature()
             int right_line_lost_label=0;
             for(int j=-10;j<=10;j++)
             {
-                if(i>60)
+                if(image[i+j][col_right+10]==white_point)
                 {
-                    if(image[i+j][col_right+10]==white_point)
-                    {
-                        right_line_lost_label++;
-                    }
-                }
-                else 
-                {
-                    if(image[i+j][col_right]==white_point)
-                    {
-                        right_line_lost_label++;
-                    }   
+                    right_line_lost_label++;
                 }
             }
-            if((right_line_list[i-1]-right_line_list[i]>8 || right_line_list[i-2]-right_line_list[i]>10 || right_line_list[i-3]-right_line_list[i]>12 || right_line_list[i-4]-right_line_list[i]>10) 
+            if(right_line_list[i]>50 && right_line_list[i]<image_w-51 && (right_line_list[i-1]-right_line_list[i]>15 || right_line_list[i-2]-right_line_list[i]>15 || right_line_list[i-3]-right_line_list[i]>15 || right_line_list[i-4]-right_line_list[i]>15) 
                 && right_line_lost_label>1&&(T_index_list[feature_T_index]==1||T_index_list[feature_T_index]==0))
             {
                 detect_feature_row=(uint8)i;
@@ -885,17 +867,18 @@ void detect_feature()
                     seek_row_end=detect_feature_row+30;
                     if(detect_feature_row>20 &&detect_feature_row<60)
                     {
-                        seek_col_start=right_line_list[detect_feature_row]+30;
+                        seek_col_start=right_line_list[detect_feature_row]+25;
                     }
-                    else if(detect_feature_row>=50)
+                    else if(detect_feature_row>=60)
                     {
-                    seek_col_start=right_line_list[detect_feature_row]+50;
+                    seek_col_start=right_line_list[detect_feature_row]+35;
                     }
                     for(int i=100;i>20;i--)
                     {
                         if(image[i-1][seek_col_start]==white_point && image[i][seek_col_start]==white_point&&image[i+1][seek_col_start]==black_point)
                         {
                             feature_label=1;
+                            feature_row_down=i;
                             break;
                         }
                     }
@@ -940,6 +923,8 @@ void detect_feature()
         
 
     }
+    printf("detect_feature_row=%d, feature_raw_l=%d, feature_raw_r=%d, feature_label=%d\n",detect_feature_row, feature_raw_l, feature_raw_r, feature_label);
+    
 
             
             // if(feature_raw_r)
@@ -1087,8 +1072,6 @@ void feature_square()
         // }
         zhuan_left_flag=1;
         condition_T=1;
-
-        
     }
     else if(T_index_list[feature_T_index]==0&&feature_label==1 && condition_T==0 && feature_raw_l==1)
     {
@@ -1147,14 +1130,9 @@ void feature_square()
     zhuan_row=0;
     if(condition_T==1 &&zhuan_left_flag==1)
     {
-        for(int i=MT9V03X_H-41;i>10;i--)
+        for(int i=MT9V03X_H-31;i>10;i--)
         {
-            if( i>60 && image[i-1][col_left-10]==white_point && image[i][col_left-10]==white_point && image[i+1][col_left-10]==black_point )
-            {
-                zhuan_row=i;
-                break;
-            }
-            else if(i<=60 && image[i-1][col_left+5]==white_point && image[i][col_left+5]==white_point && image[i+1][col_left+5]==black_point ) 
+            if( image[i-1][col_left]==white_point && image[i][col_left]==white_point && image[i+1][col_left]==black_point )
             {
                 zhuan_row=i;
                 break;
@@ -1164,14 +1142,9 @@ void feature_square()
     }
     else if(condition_T==1 && zhuan_right_flag==1)
     {
-        for(int i=MT9V03X_H-41;i>5;i--)
+        for(int i=MT9V03X_H-31;i>5;i--)
         {
-            if( i>60 && image[i-1][col_right+10]==white_point && image[i][col_right+10]==white_point && image[i+1][col_right+10]==black_point )
-            {
-                zhuan_row=i;
-                break;
-            }
-            else if(i<=60 && image[i-1][col_right-5]==white_point && image[i][col_right-5]==white_point && image[i+1][col_right-5]==black_point )
+            if( i>60 && image[i-1][col_right]==white_point && image[i][col_right]==white_point && image[i+1][col_right]==black_point )
             {
                 zhuan_row=i;
                 break;
@@ -1183,8 +1156,6 @@ void feature_square()
     {
         deceleration_label=1;
     }
-
-    
     //路口处理
     if(feature_T!=0)
     {
@@ -1258,11 +1229,10 @@ void feature_square()
         {
             if(feature_T_left)
             {
-                
                 int row_least=0;
                 for(int i=MT9V03X_H-1;i>10;i--)
                 {
-                    if(image[i][col_left+10]==white_point)
+                    if(image[i][col_left]==white_point && image[i-1][col_left]==white_point)
                     {
                         row_least=i;
                         break;
@@ -1272,7 +1242,7 @@ void feature_square()
                 {
                     for(int i=60;i>10;i--)
                     {
-                        if(image[i][col_left+10]==white_point)
+                        if(image[i][col_left]==white_point && image[i-1][col_left]==white_point)
                         {
                             row_detect_least=1;
                             break;
@@ -1283,7 +1253,7 @@ void feature_square()
                 {
                     for(int i=MT9V03X_H-21;i>50;i--)
                     {
-                        if(image[i][col_left+10]==white_point)
+                        if(image[i][col_left]==white_point && image[i-1][col_left]==white_point)
                         {
                             row_detect_least=2;
                             break;
@@ -1329,7 +1299,7 @@ void feature_square()
                 int row_least=0;
                 for(int i=MT9V03X_H-1;i>10;i--)
                 {
-                    if(image[i][col_right-10]==white_point)
+                    if(image[i][col_right]==white_point && image[i-1][col_right]==white_point)
                     {
                         row_least=i;
                         break;
@@ -1339,7 +1309,7 @@ void feature_square()
                 {
                     for(int i=60;i>10;i--)
                     {
-                        if(image[i][col_right-10]==white_point)
+                        if(image[i][col_right]==white_point && image[i-1][col_right]==white_point)
                         {
                             row_detect_least=1;
                             break;
@@ -1350,7 +1320,7 @@ void feature_square()
                 {
                     for(int i=MT9V03X_H-21;i>50;i--)
                     {
-                        if(image[i][col_right-10]==white_point)
+                        if(image[i][col_right]==white_point && image[i-1][col_right]==white_point)
                         {
                             row_detect_least=2;
                             break;
@@ -1725,7 +1695,19 @@ void image_draw_pre()
         image[i][left_line_list[i]]  = 5;
         image[i][right_line_list[i]]  = 15;
         image[i][mid_line_list[i]]  = 10;        
+        image[i][col_left]  = 10;
+        image[i][col_right]  = 10;
+        image[i][50]  = 10;
+        image[i][image_w-51]=10;
     }
+    for(int i=0 ;i< MT9V03X_W;i++)
+    {
+        image[20][i] = 5;
+        image[90][i] = 5;
+        image[80][i] = 5;
+        image[detect_feature_row][i]=15;
+    }
+
 }
 
 void image_process(uint8 (*source_image)[MT9V03X_W])
