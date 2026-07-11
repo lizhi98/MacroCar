@@ -136,3 +136,43 @@ PIDParam motion_image_steering_pid = {
     .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
 };
 
+
+
+// =========
+#define ERROR_IMAGE_LINE_2 48
+PIDParam motion_image_steering_pid = {
+    .type = PID_POS,
+    .kp = 26.0f, .ki = 0.0f, .kd = 0.0f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f,    .error_delta_min = -100.0f,
+};
+
+#define MOTOR_FORWARD_LINEAR_SPEED      1850    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1650    // 前进转角速度 1200    1250
+
+// 负压风扇直线行驶开度
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   55
+
+
+//++++++++
+
+PIDParam motor_steering_pid = {
+    .type = PID_POS,
+    .kp = 1.3f, .ki = 0.0f, .kd = 0.5f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
+};
+
+PIDParam motion_image_steering_pid = {
+    .type = PID_POS,
+    .kp = 28.0f, .ki = 0.0f, .kd = 0.0f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f,    .error_delta_min = -100.0f,
+};
+#define MOTOR_FORWARD_LINEAR_SPEED      1850    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1750    // 前进转角速度 1200    1250
+
+// 负压风扇直线行驶开度
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   58
+#define ERROR_IMAGE_LINE_2 43
+

@@ -71,14 +71,14 @@ PIDParam motor_right_speed_pid  = {
 
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 26.0f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 20.0f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
-    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f, .error_delta_min = -100.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f,    .error_delta_min = -100.0f,
 };
 
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.4f, .ki = 0.0f, .kd = 0.5f,
+    .kp = 1.1f, .ki = 0.0f, .kd = 0.5f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
@@ -288,7 +288,7 @@ void PID_clear(PIDParam* pid_param){
 int16 motor_traveling_left_target_speed = 0;
 int16 motor_traveling_right_target_speed = 0;
 
-float motor_steering_speed_up_k = 0.6f;
+float motor_steering_speed_up_k = 1.0f;
 
 void motion_control_pit_callback(){
     // motor_left_current_pwm_duty = 0;
