@@ -1,8 +1,7 @@
 #include "image_process.h"
 
 #define ERROR_IMAGE_LINE 50
-#define ERROR_IMAGE_LINE_2 43
-
+#define ERROR_IMAGE_LINE_2 48
 
 // ++++++++++ 预赛赛道 ++++++++++
 
@@ -496,6 +495,46 @@ void Add_Line(int x1,int y1,int x2,int y2)//补中线
         mid_line_list[i]=(uint8)hx;
     }
 }
+void Add_Line1(int x1,int y1,int x2,int y2)//补中线
+{
+    int i,max,a1,a2;
+    int hx;
+    if(x1>=image_w-1)//起始点位置校正，排除数组越界的可能
+       x1=image_w-1;
+    else if(x1<=0)
+        x1=0;
+    if(y1>=image_h-1)
+        y1=image_h-1;
+    else if(y1<=0)
+        y1=0;
+    if(x2>=image_w-1)
+        x2=image_w-1;
+    else if(x2<=0)
+        x2=0;
+    if(y2>=image_h-1)
+        y2=image_h-1;
+    else if(y2<=0)
+         y2=0;
+    a1=y1;
+    a2=y2;
+    if(a1>a2)//坐标互换
+    {
+        max=a1;
+        a1=a2;
+        a2=max;
+    }
+
+    
+    for(i=a1;i<=a2;i++)//根据斜率补线即可
+    {       //-46      //45 //-46 +89
+        hx=(i-y1)*parameterB+ x1;
+        if(hx>=image_w-1)
+            hx=image_w-1;
+        else if(hx<=0)
+            hx=0;
+        mid_line_list[i]=(uint8)hx;
+    }
+}
 int longest_col=0;
 void detect_longest_col()
 {
@@ -510,6 +549,171 @@ void detect_longest_col()
     }
 }
 
+
+float parameterA;
+float parameterB;
+void regression(int type, int startline, int endline)//最小二乘法拟合曲线，分别拟合中线，左线，右线,type表示拟合哪几条线
+{
+    int i = 0;
+    int sumlines = endline - startline;
+    int sumX = 0;
+    int sumY = 0;
+    float averageX = 0;
+    float averageY = 0;
+    float sumUp = 0;
+    float sumDown = 0;
+    if (type == 0)      //拟合中线
+    {
+        for (i = startline; i < endline; i++)
+        {
+            sumX += i;
+            sumY += mid_line_list[i];
+        }
+        if (sumlines != 0)
+        {
+            averageX = (float)(sumX / sumlines);     //x的平均值
+            averageY = (float)(sumY / sumlines);     //y的平均值
+        }
+        else
+        {
+            averageX = 0;     //x的平均值
+            averageY = 0;     //y的平均值
+        }
+        for (i = startline; i < endline; i++)
+        {
+            sumUp += (mid_line_list[i] - averageY) * (i - averageX);
+            sumDown += (i - averageX) * (i - averageX);
+        }
+        if (sumDown == 0) parameterB = 0;
+        else parameterB = sumUp / sumDown;
+        parameterA = averageY - parameterB * averageX;
+    }
+    else if (type == 1)//拟合左线
+    {
+        for (i = startline; i < endline; i++)
+        {
+            sumX += i;
+            sumY += left_line_list[i];
+        }
+        if (sumlines == 0) sumlines = 1;
+        averageX = (float)(sumX / sumlines);     //x的平均值
+        averageY = (float)(sumY / sumlines);     //y的平均值
+        for (i = startline; i < endline; i++)
+        {
+            sumUp += (left_line_list[i] - averageY) * (i - averageX);
+            sumDown += (i - averageX) * (i - averageX);
+        }
+        if (sumDown == 0) parameterB = 0;
+        else parameterB = sumUp / sumDown;
+        parameterA = averageY - parameterB * averageX;
+    }
+    else if (type == 2)//拟合右线
+    {
+        for (i = startline; i < endline; i++)
+        {
+            sumX += i;
+            sumY += right_line_list[i];
+        }
+        if (sumlines == 0) sumlines = 1;
+        averageX = (float)(sumX / sumlines);     //x的平均值
+        averageY = (float)(sumY / sumlines);     //y的平均值
+        for (i = startline; i < endline; i++)
+        {
+            sumUp += (right_line_list[i] - averageY) * (i - averageX);
+            sumDown += (i - averageX) * (i - averageX);
+        }
+        if (sumDown == 0) parameterB = 0;
+        else parameterB = sumUp / sumDown;
+        parameterA = averageY - parameterB * averageX;
+
+    }
+
+}
+int monileft[MT9V03X_H];
+int moniright[MT9V03X_H];
+int monimiddle[MT9V03X_H];
+void monileftfuzhi(float A, float B, int start_point, int end_point)
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
+        if ((B * m + A) >= 255) monileft[m] = 255;
+        if ((B * m + A) <= 0) monileft[m] = 0;
+        else if (0 < (B * m + A) && (B * m + A) < 255) monileft[m] = (int)(B * m + A);
+    }
+}
+void monirightfuzhi(float A, float B, int start_point, int end_point)
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
+        if ((B * m + A) >= 255) moniright[m] = 255;
+        if ((B * m + A) <= 0) moniright[m] = 0;
+        else if (0 < (B * m + A) && (B * m + A) < 255) moniright[m] = (int)(B * m + A);
+    }
+}
+
+void monizhongfuzhi(float A, float B, int start_point, int end_point)
+{
+    int m;
+    for (m = start_point; m <= end_point; m++)
+    {
+         if ((B * m + A) >= 255) monimiddle[m] = 255;
+         if ((B * m + A) <= 0) monimiddle[m] = 0;
+         else if (0 < (B * m + A) && (B * m + A) < 255) monimiddle[m] = (int)(B * m + A);
+    }
+}
+
+double pianfangleft;
+double pianfangright;
+double pianfangmid;
+void pianfangcal(int begin, int end, int type)
+{
+    int i = 0;
+    if (type == 1)//左线拟合差平方计算
+    {
+        pianfangleft = 0;
+        regression(1, begin, end);
+        monileftfuzhi(parameterA, parameterB, (int)begin, (int)end);
+        for (i = begin; i <= end; i++)
+        {
+            pianfangleft = pianfangleft + (left_line_list[i] - monileft[i]) * (left_line_list[i] - monileft[i]);
+        }
+        pianfangleft = pianfangleft / (end - begin + 1);
+    }
+    if (type == 2)//右线拟合差平方计算
+    {
+        pianfangright = 0;
+        regression(2, begin, end);
+        monirightfuzhi(parameterA, parameterB, (int)begin, (int)end);
+        for (i = begin; i <= end; i++)
+        {
+            pianfangright = pianfangright + (right_line_list[i] - moniright[i]) * (right_line_list[i] - moniright[i]);
+        }
+        pianfangright = pianfangright / (end - begin + 1);
+    }
+    if (type == 0)//中线拟合差平方计算
+    {
+        pianfangmid = 0;
+        regression(0, begin, end);
+        monizhongfuzhi(parameterA, parameterB, (int)begin, (int)end);
+        int fangjun = 0;
+        int junfang = 0;
+        for (i = begin; i <= end; i++)
+        {
+            fangjun = fangjun + (mid_line_list[i]) * (mid_line_list[i]);
+        }
+        fangjun = fangjun / (end - begin + 1);
+        for (i = begin; i <= end; i++)
+        {
+            junfang = junfang + (mid_line_list[i]);
+        }
+        junfang = junfang / (end - begin + 1);
+        junfang = junfang * junfang;
+        pianfangmid = (fangjun - junfang) * 1.0;
+    }
+
+}
 uint8 feature_label=0;
 uint8 deceleration_label=0;
 uint8 feature_raw_l=0;
@@ -525,7 +729,7 @@ int feature_row_run=0;
 int feature_row_down=0;
 int feature_row_up=0;
 int activate_condition=0;
-#define row_diff_feature 12
+#define row_diff_feature 8
 
 void detect_feature()
 {
@@ -787,9 +991,9 @@ void detect_feature()
         for(int i=MT9V03X_H-35;i>=20;i--)
         {
             int left_line_lost_label=0;
-            for(int j=-10;j<=10;j++)
+            for(int j=-15;j<=15;j++)
             {
-                if(image[i+j][10]==white_point)
+                if(image[i+j][0]==white_point)
                 {
                     left_line_lost_label++;
                 }     
@@ -811,7 +1015,7 @@ void detect_feature()
                 {
                     if(detect_feature_row>20 &&detect_feature_row<60)
                     {
-                        seek_col_start=left_line_list[detect_feature_row]-25;
+                        seek_col_start=left_line_list[detect_feature_row]-35;
                     }
                     else if(detect_feature_row>=60)
                     {
@@ -826,7 +1030,7 @@ void detect_feature()
                             break;
                         }
                     }
-                    for(int i=20;i<100;i++)
+                    for(int i=100;i>20;i--)
                     {
                         if(image[i-1][seek_col_start]==black_point && image[i][seek_col_start]==white_point &&image[i+1][seek_col_start]==white_point)
                         {
@@ -882,7 +1086,7 @@ void detect_feature()
             int right_line_lost_label=0;
             for(int j=-10;j<=10;j++)
             {
-                if(image[i+j][image_w-11]==white_point)
+                if(image[i+j][image_w-1]==white_point)
                 {
                     right_line_lost_label++;
                 }
@@ -919,7 +1123,7 @@ void detect_feature()
                             break;
                         }
                     }
-                    for(int i=20;i<100;i++)
+                    for(int i=100;i>20;i--)
                     {
                         if(image[i-1][seek_col_start]==black_point && image[i][seek_col_start]==white_point &&image[i+1][seek_col_start]==white_point)
                         {
@@ -1188,11 +1392,11 @@ void feature_square()
     int zhuan_row_temp=0;
     if(condition_T==1 &&zhuan_left_flag==1)
     {
-        if(left_line_list[MT9V03X_H-40]<30)
+        if(left_line_list[MT9V03X_H-50]<30)
         {
             zhuan_row_temp=0;
         }
-        else if(left_line_list[MT9V03X_H-40]<60)
+        else if(left_line_list[MT9V03X_H-50]<60)
         {
             zhuan_row_temp=10;
         }
@@ -1200,7 +1404,7 @@ void feature_square()
         {
             zhuan_row_temp=left_line_list[MT9V03X_H-40]-55;
         }
-        for(int i=MT9V03X_H-40;i>10;i--)
+        for(int i=MT9V03X_H-50;i>20;i--)
         {
             if( image[i-1][zhuan_row_temp]==white_point && image[i][zhuan_row_temp]==white_point && image[i+1][zhuan_row_temp]==black_point )
             {
@@ -1208,7 +1412,7 @@ void feature_square()
                 break;
             }
         }
-        for(int i=10;i<MT9V03X_H-40;i++)
+        for(int i=MT9V03X_H-50;i>20;i--)
         {
             if( image[i-1][zhuan_row_temp]==black_point && image[i][zhuan_row_temp]==white_point && image[i+1][zhuan_row_temp]==white_point )
             {
@@ -1216,7 +1420,7 @@ void feature_square()
                 break;
             }
         }
-        if(zhuan_row_try1!=0 && zhuan_row_try2!=0 && zhuan_row_try1-zhuan_row_try2<15)
+        if(zhuan_row_try1!=0 && zhuan_row_try2!=0 && zhuan_row_try1-zhuan_row_try2<10)
         {
             zhuan_row=zhuan_row_try1;
         }
@@ -1224,15 +1428,19 @@ void feature_square()
     }
     else if(condition_T==1 && zhuan_right_flag==1)
     {
-        if(right_line_list[MT9V03X_H-40]>image_w-30)
+        if(right_line_list[MT9V03X_H-50]>image_w-30)
         {
             zhuan_row_temp=image_w-1;
         }
-        else 
+        else if(right_line_list[MT9V03X_H-50]>image_w-60)
         {
-            zhuan_row_temp=right_line_list[MT9V03X_H-40]+10;
+            zhuan_row_temp=image_w-10;
         }
-        for(int i=MT9V03X_H-40;i>10;i--)
+        else
+        {
+            zhuan_row_temp=right_line_list[MT9V03X_H-50]+55;
+        }
+        for(int i=MT9V03X_H-50;i>10;i--)
         {
             if(  image[i-1][zhuan_row_temp]==white_point && image[i][zhuan_row_temp]==white_point && image[i+1][zhuan_row_temp]==black_point )
             {
@@ -1240,7 +1448,7 @@ void feature_square()
                 break;
             }
         }
-        for(int i=10;i<MT9V03X_H-40;i++)
+        for(int i=MT9V03X_H-50;i>20;i--)
         {
             if( image[i-1][zhuan_row_temp]==black_point && image[i][zhuan_row_temp]==white_point && image[i+1][zhuan_row_temp]==white_point )
             {
@@ -1258,6 +1466,7 @@ void feature_square()
     {
         deceleration_label=1;
     }
+
     //路口处理
     if(feature_T!=0)
     {
@@ -1309,6 +1518,8 @@ void feature_square()
                             }
                         }
                     }
+
+
                     // else if(detect_feature_row==0)
                     // {
                     //     if(feature_row_down<90 &&feature_row_down>30 &&feature_row_up>20 && feature_row_up<70)
@@ -1337,9 +1548,17 @@ void feature_square()
                 
             }
         }
-        
+        // if(feature_T-1==0)
+        // {
+        //     regression(0,100,110);
+        //     if(fabs(parameterB)<0.3f)
+        //     {
+        //         Add_Line1(mid_line_list[115],115,mid_line_list[25],25);
+        //     }
+        // }
+
     }
-    feature_condition_error=93-mid_line_list[ERROR_IMAGE_LINE];
+    
 
     // printf("condition_T=%d, feature_T=%d, zhuan_row=%d, zhuan_condition_left=%d, zhuan_condition_right=%d, deceleration_label=%d\n", condition_T, feature_T, zhuan_row, zhuan_condition_left, zhuan_condition_right, deceleration_label);
     //转向退出处理
@@ -1351,7 +1570,7 @@ void feature_square()
             {
                 output_feature=0;
             }
-            if(get_angle_err(angle_T) > 75.0f)
+            if(get_angle_err(angle_T) > 70.0f)
             {
                 condition_T=0;
                 deceleration_label=0;
@@ -1379,7 +1598,7 @@ void feature_square()
                 }
                 if(row_detect_least==0)
                 {
-                    for(int i=50;i>10;i--)
+                    for(int i=70;i>10;i--)
                     {
                         if(image[i][col_left]==white_point && image[i-1][col_left]==white_point)
                         {
@@ -1390,7 +1609,7 @@ void feature_square()
                 }
                 else if(row_detect_least==1)
                 {
-                    for(int i=80;i>50;i--)
+                    for(int i=110;i>70;i--)
                     {
                         if(image[i][col_left]==white_point && image[i-1][col_left]==white_point)
                         {
@@ -1399,18 +1618,8 @@ void feature_square()
                         }
                     }
                 }
-                else if(row_detect_least==2)
-                {
-                    for(int i=110;i>80;i--)
-                    {
-                        if(image[i][col_left]==white_point && image[i-1][col_left]==white_point)
-                        {
-                            row_detect_least=3;
-                            break;
-                        }
-                    }
-                }
-                if(row_least>95 )
+
+                if(row_least>90 )
                 {
                     row_times++;
                 }
@@ -1418,7 +1627,7 @@ void feature_square()
                 {
                     row_times=0;
                 }
-                if(row_times>1 && row_detect_least==3 &&activate_condition_straight)
+                if(row_times!=0 && row_detect_least==2 &&activate_condition_straight)
                 {
                     condition_T=0;
                     left_run_flag=0;
@@ -1449,7 +1658,7 @@ void feature_square()
             else if( feature_T_right)
             {
                 int row_least=0;
-                for(int i=MT9V03X_H-1;i>10;i--)
+                for(int i=MT9V03X_H-1;i>70;i--)
                 {
                     if(image[i][col_right]==white_point && image[i-1][col_right]==white_point)
                     {
@@ -1459,7 +1668,7 @@ void feature_square()
                 }
                 if(row_detect_least==0)
                 {
-                    for(int i=50;i>10;i--)
+                    for(int i=60;i>10;i--)
                     {
                         if(image[i][col_right]==white_point && image[i-1][col_right]==white_point)
                         {
@@ -1470,7 +1679,7 @@ void feature_square()
                 }
                 else if(row_detect_least==1)
                 {
-                    for(int i=80;i>50;i--)
+                    for(int i=110;i>60;i--)
                     {
                         if(image[i][col_right]==white_point && image[i-1][col_right]==white_point)
                         {
@@ -1479,18 +1688,7 @@ void feature_square()
                         }
                     }
                 }
-                else if(row_detect_least==2)
-                {
-                    for(int i=110;i>80;i--)
-                    {
-                        if(image[i][col_right]==white_point && image[i-1][col_right]==white_point)
-                        {
-                            row_detect_least=3;
-                            break;
-                        }
-                    }
-                }
-                if(row_least>95 )
+                if(row_least>90 )
                 {
                     row_times++;
                 }
@@ -1498,7 +1696,7 @@ void feature_square()
                 {
                     row_times=0;
                 }
-                if(row_times>1 && row_detect_least==3 &&activate_condition_straight)
+                if(row_times!=0 &&row_detect_least==2 &&activate_condition_straight)
                 {
                     condition_T=0;
                     right_run_flag=0;
@@ -1851,6 +2049,8 @@ void get_error_image()
     // }
     error_image_last=error_image;
     error_image=93-mid_line_list[ERROR_IMAGE_LINE];
+
+
 
 }
 
@@ -2332,170 +2532,7 @@ void image_process(uint8 (*source_image)[MT9V03X_W])
 // //求斜率和方差
 // //--------------------------------------------------------------------------------------------
 
-// float parameterA;
-// float parameterB;
-// void regression(int type, int startline, int endline)//最小二乘法拟合曲线，分别拟合中线，左线，右线,type表示拟合哪几条线
-// {
-//     int i = 0;
-//     int sumlines = endline - startline;
-//     int sumX = 0;
-//     int sumY = 0;
-//     float averageX = 0;
-//     float averageY = 0;
-//     float sumUp = 0;
-//     float sumDown = 0;
-//     if (type == 0)      //拟合中线
-//     {
-//         for (i = startline; i < endline; i++)
-//         {
-//             sumX += i;
-//             sumY += mid_line_list[i];
-//         }
-//         if (sumlines != 0)
-//         {
-//             averageX = (float)(sumX / sumlines);     //x的平均值
-//             averageY = (float)(sumY / sumlines);     //y的平均值
-//         }
-//         else
-//         {
-//             averageX = 0;     //x的平均值
-//             averageY = 0;     //y的平均值
-//         }
-//         for (i = startline; i < endline; i++)
-//         {
-//             sumUp += (mid_line_list[i] - averageY) * (i - averageX);
-//             sumDown += (i - averageX) * (i - averageX);
-//         }
-//         if (sumDown == 0) parameterB = 0;
-//         else parameterB = sumUp / sumDown;
-//         parameterA = averageY - parameterB * averageX;
-//     }
-//     else if (type == 1)//拟合左线
-//     {
-//         for (i = startline; i < endline; i++)
-//         {
-//             sumX += i;
-//             sumY += left_line_list[i];
-//         }
-//         if (sumlines == 0) sumlines = 1;
-//         averageX = (float)(sumX / sumlines);     //x的平均值
-//         averageY = (float)(sumY / sumlines);     //y的平均值
-//         for (i = startline; i < endline; i++)
-//         {
-//             sumUp += (left_line_list[i] - averageY) * (i - averageX);
-//             sumDown += (i - averageX) * (i - averageX);
-//         }
-//         if (sumDown == 0) parameterB = 0;
-//         else parameterB = sumUp / sumDown;
-//         parameterA = averageY - parameterB * averageX;
-//     }
-//     else if (type == 2)//拟合右线
-//     {
-//         for (i = startline; i < endline; i++)
-//         {
-//             sumX += i;
-//             sumY += right_line_list[i];
-//         }
-//         if (sumlines == 0) sumlines = 1;
-//         averageX = (float)(sumX / sumlines);     //x的平均值
-//         averageY = (float)(sumY / sumlines);     //y的平均值
-//         for (i = startline; i < endline; i++)
-//         {
-//             sumUp += (right_line_list[i] - averageY) * (i - averageX);
-//             sumDown += (i - averageX) * (i - averageX);
-//         }
-//         if (sumDown == 0) parameterB = 0;
-//         else parameterB = sumUp / sumDown;
-//         parameterA = averageY - parameterB * averageX;
 
-//     }
-
-// }
-// int monileft[MT9V03X_H];
-// int moniright[MT9V03X_H];
-// int monimiddle[MT9V03X_H];
-// void monileftfuzhi(float A, float B, int start_point, int end_point)
-// {
-//     int m;
-//     for (m = start_point; m <= end_point; m++)
-//     {
-//         if ((B * m + A) >= 255) monileft[m] = 255;
-//         if ((B * m + A) <= 0) monileft[m] = 0;
-//         else if (0 < (B * m + A) && (B * m + A) < 255) monileft[m] = (int)(B * m + A);
-//     }
-// }
-// void monirightfuzhi(float A, float B, int start_point, int end_point)
-// {
-//     int m;
-//     for (m = start_point; m <= end_point; m++)
-//     {
-//         if ((B * m + A) >= 255) moniright[m] = 255;
-//         if ((B * m + A) <= 0) moniright[m] = 0;
-//         else if (0 < (B * m + A) && (B * m + A) < 255) moniright[m] = (int)(B * m + A);
-//     }
-// }
-
-// void monizhongfuzhi(float A, float B, int start_point, int end_point)
-// {
-//     int m;
-//     for (m = start_point; m <= end_point; m++)
-//     {
-//          if ((B * m + A) >= 255) monimiddle[m] = 255;
-//          if ((B * m + A) <= 0) monimiddle[m] = 0;
-//          else if (0 < (B * m + A) && (B * m + A) < 255) monimiddle[m] = (int)(B * m + A);
-//     }
-// }
-
-// double pianfangleft;
-// double pianfangright;
-// double pianfangmid;
-// void pianfangcal(int begin, int end, int type)
-// {
-//     int i = 0;
-//     if (type == 1)//左线拟合差平方计算
-//     {
-//         pianfangleft = 0;
-//         regression(1, begin, end);
-//         monileftfuzhi(parameterA, parameterB, (int)begin, (int)end);
-//         for (i = begin; i <= end; i++)
-//         {
-//             pianfangleft = pianfangleft + (left_line_list[i] - monileft[i]) * (left_line_list[i] - monileft[i]);
-//         }
-//         pianfangleft = pianfangleft / (end - begin + 1);
-//     }
-//     if (type == 2)//右线拟合差平方计算
-//     {
-//         pianfangright = 0;
-//         regression(2, begin, end);
-//         monirightfuzhi(parameterA, parameterB, (int)begin, (int)end);
-//         for (i = begin; i <= end; i++)
-//         {
-//             pianfangright = pianfangright + (right_line_list[i] - moniright[i]) * (right_line_list[i] - moniright[i]);
-//         }
-//         pianfangright = pianfangright / (end - begin + 1);
-//     }
-//     if (type == 0)//中线拟合差平方计算
-//     {
-//         pianfangmid = 0;
-//         regression(0, begin, end);
-//         monizhongfuzhi(parameterA, parameterB, (int)begin, (int)end);
-//         int fangjun = 0;
-//         int junfang = 0;
-//         for (i = begin; i <= end; i++)
-//         {
-//             fangjun = fangjun + (mid_line_list[i]) * (mid_line_list[i]);
-//         }
-//         fangjun = fangjun / (end - begin + 1);
-//         for (i = begin; i <= end; i++)
-//         {
-//             junfang = junfang + (mid_line_list[i]);
-//         }
-//         junfang = junfang / (end - begin + 1);
-//         junfang = junfang * junfang;
-//         pianfangmid = (fangjun - junfang) * 1.0;
-//     }
-
-// }
 
 
 // //--------------------------------------------------------------------------------------------

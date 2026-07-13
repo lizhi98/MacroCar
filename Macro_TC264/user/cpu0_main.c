@@ -18,7 +18,7 @@ int core0_main(void)
 {
     clock_init();                   // 获取时钟频率<务必保留>
     debug_init();                   // 初始化默认调试串口
-    system_start();                 // 启动系统计时器，计算车上电时间
+    system_start();                 // 启动系统计时器
     // 外设初始化
 #if defined(SMARTCAR_DEBUG_IPS) || defined(SMARTCAR_DEBUG_IPS_PRO)
     menu_interface_init();          // 菜单初始化
@@ -45,7 +45,7 @@ int core0_main(void)
 #endif
     uint8 battery_checked_flag = 0;
     // 延迟一段时间，等待负压自检
-    system_delay_ms(200);
+    system_delay_ms(500);
     while (TRUE)
     {
         // if(T_index == 7){

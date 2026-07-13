@@ -20,7 +20,7 @@ typedef enum _KeyCmd{
     KEY_NO_CMD = 0,
     KEY_UP, KEY_DOWN, KEY_ENTER, KEY_BACK
 }KeyCmd;
-
+extern uint32 car_start_time;
 
 #ifdef SMARTCAR_DEBUG_IPS
 // =========================================SMARTCAR_DEBUG_IPS=========================================

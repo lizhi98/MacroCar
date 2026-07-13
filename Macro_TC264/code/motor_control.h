@@ -6,6 +6,7 @@
 #include "gyroscope_interface.h"
 #include "zf_common_clock.h"
 #include "zf_driver_delay.h"
+#include "menu_interface.h"
 #include <math.h>
 #include "zf_driver_timer.h"
 
@@ -72,20 +73,20 @@ extern PIDParam motor_steering_pid;
 extern int16 motor_steering_speed;
 
 // 运动控制
-#define MOTION_CONTROL_PIT_TIME         5  // 单位ms
+#define MOTION_CONTROL_PIT_TIME         3  // 单位ms
 #define MOTION_CONTROL_PIT_INDEX        CCU61_CH0
 
-#define MOTOR_SOFT_START_PWM            3500// 电机软启动PWM占空比
+#define MOTOR_SOFT_START_PWM            3000// 电机软启动PWM占空比
 
 // 不进行速度决策
 #define MOTOR_FORWARD_NORMAL_SPEED      1500  // 前进正常速度
 
 // 进行速度决策
-#define MOTOR_FORWARD_LINEAR_SPEED      1900    // 前进直线速度 1500    1450
-#define MOTOR_FORWARD_CURVE_SPEED       1700    // 前进转角速度 1200    1250
+#define MOTOR_FORWARD_LINEAR_SPEED      470    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       470    // 前进转角速度
 
 // 负压风扇直线行驶开度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   58
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   65
 
 // #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 

@@ -58,27 +58,27 @@ static const float segment_pid_rule_table_kd[3][2] = {
 
 PIDParam motor_left_speed_pid   = {
     .type = PID_INC,
-    .kp = 4.3f, .ki = 0.48f, .kd = 0.1f,
+    .kp = 25.0f, .ki = 3.5f, .kd = 0.0f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 PIDParam motor_right_speed_pid  = {
     .type = PID_INC,
-    .kp = 4.3f, .ki = 0.48f, .kd = 0.1f,
+    .kp = 25.0f, .ki = 3.5f, .kd = 0.0f,
     .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
 };
 
 
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 20.0f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 21.5f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f,    .error_delta_min = -100.0f,
 };
 
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.1f, .ki = 0.0f, .kd = 0.5f,
+    .kp = 0.12f, .ki = 0.0f, .kd = 0.06f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
@@ -288,7 +288,7 @@ void PID_clear(PIDParam* pid_param){
 int16 motor_traveling_left_target_speed = 0;
 int16 motor_traveling_right_target_speed = 0;
 
-float motor_steering_speed_up_k = 1.0f;
+// float motor_steering_speed_up_k = 1.0f;
 
 void motion_control_pit_callback(){
     // motor_left_current_pwm_duty = 0;
@@ -334,7 +334,6 @@ void motion_control_pit_callback(){
     // motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)0.0); // 这里的目标值和当前值需要根据具体应用修改
     // 转向闭环
     motor_steering_speed = (int16)PID_calculate(&motor_steering_pid, (float)motion_image_steering_speed, gyro_current_data.gyro_z); // 这里的当前值需要根据具体应用修改
-    
     if(motor_traveling_pid_run_flag){   
         // 单电机速度环
         // if(motor_left_speed_pid.type == PID_INC){
@@ -345,13 +344,9 @@ void motion_control_pit_callback(){
         //     motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motion_control_run_flag ? motor_forward_speed : 0), (float)motor_right_speed);
         // }
         // 加速轮加速少，减速轮减速多
-        if(motor_steering_speed >= 0){
-            motor_traveling_left_target_speed  =    motion_control_run_flag ?   motor_forward_speed     +   motor_steering_speed  *  motor_steering_speed_up_k  : 0;
-            motor_traveling_right_target_speed =    motion_control_run_flag ?   motor_forward_speed     -   motor_steering_speed  : 0;
-        }else{
-            motor_traveling_left_target_speed  =    motion_control_run_flag ?   motor_forward_speed     +   motor_steering_speed  : 0;
-            motor_traveling_right_target_speed =    motion_control_run_flag ?   motor_forward_speed     -   motor_steering_speed  *  motor_steering_speed_up_k  : 0;
-        }
+        motor_traveling_left_target_speed  =    motion_control_run_flag ?   motor_forward_speed     +   motor_steering_speed  : 0;
+        motor_traveling_right_target_speed =    motion_control_run_flag ?   motor_forward_speed     -   motor_steering_speed  : 0;
+
         if(motor_left_speed_pid.type == PID_INC){
             motor_left_current_pwm_duty  += (int16)PID_calculate(&motor_left_speed_pid,  (float)(motor_traveling_left_target_speed), (float)motor_left_speed);
             motor_right_current_pwm_duty += (int16)PID_calculate(&motor_right_speed_pid, (float)(motor_traveling_right_target_speed), (float)motor_right_speed);
@@ -412,7 +407,7 @@ void    motor_traveling_soft_start(void){
             motor_right_current_pwm_duty = (motor_right_current_pwm_duty > 0) ? MOTOR_SOFT_START_PWM : -MOTOR_SOFT_START_PWM;
         }
         // 当电机转速大于前进速度时，认为软启动完成
-        if(motor_left_speed > 500 && motor_right_speed > 500){
+        if(motor_left_speed > 400 && motor_right_speed > 400){
             motor_soft_start_flag = 1;
         }
     }
@@ -464,12 +459,12 @@ volatile uint32 run_protect_trigger_time = 0; // 保护触发时间
 volatile uint8 run_control_protect_trigger_flag = 0; // 运行保护触发标志位
 
 void run_control_protect(){
-    if(!run_control_protect_trigger_flag && (img_threshold > RUN_PROTECT_IMG_TH_MAX || img_threshold < RUN_PROTECT_IMG_TH_MIN || run_once_flag)){
+    if(system_getval_ms() >= 3000 && !run_control_protect_trigger_flag && (img_threshold > RUN_PROTECT_IMG_TH_MAX || img_threshold < RUN_PROTECT_IMG_TH_MIN || run_once_flag)){
         motor_traveling_power_flag = 0; // 停车
         run_control_protect_trigger_flag = 1; // 设置运行保护触发标志位
         // 记录保护触发时间
         run_protect_trigger_time = system_getval_ms();
-        int16 percent_temp = (int16)motor_fun_open_percent - 20; // 检测到异常时负压是否开启
+        int16 percent_temp = (int16)motor_fun_open_percent - 10; // 检测到异常时负压是否开启
         if(percent_temp <= 0){
             percent_temp = 0;
         }

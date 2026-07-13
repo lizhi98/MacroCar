@@ -11,7 +11,7 @@
 #define WIFI_SSID           "XIAOMI_GoGoGo"
 #define WIFI_PASSWORD       "9894653xxk"
 
-#define HOST_IP             "192.168.31.98"
+#define HOST_IP             "192.168.31.223"
 #define HOST_PORT           "9895"
 #define HOST_CONNECT_MODE   "TCP"
 

@@ -348,7 +348,7 @@ void menu_interface_init(){
 void menu_run_1(void){
     // ips200_show_string(0, 130, "RUN_1 function");
 }
-
+uint32 car_start_time = 0;
 void menu_run_2(void){
     motor_fun_soft_start();         // 负压风扇软启动
     motor_traveling_power_flag = 1; // 使能行进电机PWM输出

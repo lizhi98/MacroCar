@@ -98,7 +98,8 @@ extern uint8 right_line_list[MT9V03X_H];
 extern uint8 mid_line_list[MT9V03X_H];
 
 extern uint8 speed_select_label;
-
+extern float parameterA;
+extern float parameterB;
 extern feature_result result_feature;
 
 extern uint8 deceleration_label;

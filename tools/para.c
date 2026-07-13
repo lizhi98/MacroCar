@@ -158,21 +158,103 @@ PIDParam motion_image_steering_pid = {
 
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 1.3f, .ki = 0.0f, .kd = 0.5f,
+    .kp = 1.1f, .ki = 0.0f, .kd = 0.5f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
 };
 
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 28.0f, .ki = 0.0f, .kd = 0.0f,
+    .kp = 24.0f, .ki = 0.0f, .kd = 0.0f,
     .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
     .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f,    .error_delta_min = -100.0f,
 };
-#define MOTOR_FORWARD_LINEAR_SPEED      1850    // 前进直线速度 1500    1450
-#define MOTOR_FORWARD_CURVE_SPEED       1750    // 前进转角速度 1200    1250
+#define MOTOR_FORWARD_LINEAR_SPEED      1900    // 前进直线速度 1500    1450
+#define MOTOR_FORWARD_CURVE_SPEED       1700    // 前进转角速度 1200    1250
 
 // 负压风扇直线行驶开度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   58
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   60
 #define ERROR_IMAGE_LINE_2 43
+
+
+
+// 3ms
+#define MOTOR_FORWARD_LINEAR_SPEED      400    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       400    // 前进转角速度
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   50
+
+#define ERROR_IMAGE_LINE 70
+#define ERROR_IMAGE_LINE_2 53
+
+PIDParam motor_left_speed_pid   = {
+    .type = PID_INC,
+    .kp = 25.0f, .ki = 3.5f, .kd = 0.0f,
+    .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+};
+
+PIDParam motor_right_speed_pid  = {
+    .type = PID_INC,
+    .kp = 25.0f, .ki = 3.5f, .kd = 0.0f,
+    .integral_limit = 3000.0f,   .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f
+};
+
+
+PIDParam motion_image_steering_pid = {
+    .type = PID_POS,
+    .kp = 18.0f, .ki = 0.0f, .kd = 0.0f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f,    .error_delta_min = -100.0f,
+};
+
+PIDParam motor_steering_pid = {
+    .type = PID_POS,
+    .kp = 0.12f, .ki = 0.0f, .kd = 0.05f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
+};
+
+
+
+// +++
+PIDParam motion_image_steering_pid = {
+    .type = PID_POS,
+    .kp = 19.5f, .ki = 0.0f, .kd = 0.0f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f,    .error_delta_min = -100.0f,
+};
+
+PIDParam motor_steering_pid = {
+    .type = PID_POS,
+    .kp = 0.12f, .ki = 0.0f, .kd = 0.06f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
+};
+
+#define ERROR_IMAGE_LINE_2 48
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   60
+
+#define MOTOR_FORWARD_LINEAR_SPEED      420    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       420    // 前进转角速度
+
+
+// +++
+#define MOTOR_FORWARD_LINEAR_SPEED      450    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       450    // 前进转角速度
+
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   60
+
+#define ERROR_IMAGE_LINE 50
+PIDParam motion_image_steering_pid = {
+    .type = PID_POS,
+    .kp = 19.5f, .ki = 0.0f, .kd = 0.0f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 93.0f, .error_min  = -93.0f, .error_delta_max = 100.0f,    .error_delta_min = -100.0f,
+};
+
+PIDParam motor_steering_pid = {
+    .type = PID_POS,
+    .kp = 0.12f, .ki = 0.0f, .kd = 0.06f,
+    .integral_limit = 0.0f,    .integral = 0.0f,   .previous_error = 0.0f,   .previous_previous_error = 0.0f,
+    .error_max = 1000.0f,     .error_min = -1000.0f, .error_delta_max = 800.0f, .error_delta_min = -800.0f,
+};
 
