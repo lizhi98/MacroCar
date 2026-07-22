@@ -9,7 +9,7 @@ float gyro_z_sum = 0.0f;
 int gyro_z_count = 0;
 void gyro_pit_callback(void){
     imu660rc_get_gyro();
-    gyro_z_sum += imu660rc_gyro_transition(imu660rc_gyro_z);
+    gyro_z_sum += -imu660rc_gyro_transition(imu660rc_gyro_z);
     gyro_z_count++;
     if(gyro_z_count >= 3){ // 每3次取平均值，减少噪声影响
         float gyro_z_avg = gyro_z_sum / gyro_z_count;
@@ -24,6 +24,7 @@ void gyro_pit_callback(void){
     // gyro_current_data.angle_z += gyro_current_data.gyro_z * GYRO_PIT_TIME / 1000.0f;
     quaternion_update();
 }
+
 
 // void gyro_get_data();
 

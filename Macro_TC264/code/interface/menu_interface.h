@@ -132,7 +132,7 @@ void network_print_info(void);
 
 // 分科目跑
 void menu_run_1(void);
-void menu_run_2(void);
+void menu_run(void);
 void menu_run_3(void);
 
 

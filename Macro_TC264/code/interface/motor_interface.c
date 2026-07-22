@@ -11,6 +11,8 @@ uint8 motor_traveling_power_flag = 0;
 uint16 motor_get_speed_pit_time = 1;
 
 void motor_interface_init(uint16 pit_time){
+    gpio_init(P20_9, GPO, 1, GPO_PUSH_PULL); // 关闭8701睡眠
+
     gpio_init(MOTOR_LEFT_PH_PIN,  GPO, 1, GPO_PUSH_PULL);
     gpio_init(MOTOR_RIGHT_PH_PIN, GPO, 1, GPO_PUSH_PULL);
     pwm_init(MOTOR_LEFT_EN_PIN,  MOTOR_PWM_FREQUENCY, MOTOR_PWM_INIT_DUTY);
@@ -44,7 +46,7 @@ void motor_traveling_set_pwm(int16 * left_pwm, int16 *right_pwm){
         motor_right_pwm = 0;
     }
     gpio_set_level(MOTOR_LEFT_PH_PIN,  (motor_left_pwm  > 0) ? 1 : 0);
-    gpio_set_level(MOTOR_RIGHT_PH_PIN, (motor_right_pwm >= 0) ? 0 : 1);
+    gpio_set_level(MOTOR_RIGHT_PH_PIN, (motor_right_pwm > 0) ? 1 : 0);
     pwm_set_duty(MOTOR_LEFT_EN_PIN,  abs(motor_left_pwm));
     pwm_set_duty(MOTOR_RIGHT_EN_PIN, abs(motor_right_pwm));
 }

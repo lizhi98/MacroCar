@@ -184,7 +184,7 @@ uint8 mt9v03x_set_exposure_time_sccb(m9v03x_double_init_type_enum init_type,unsi
 
 //================================================声明 MT9V03X 基础函数================================================
 
-// Lizhi
+// USER
 #define mt9v03x_init()      (mt9v03x_double_init(mt9v03x_1))
 #define mt9v03x_finish_flag (mt9v03x_finish_flag_1)
 #define mt9v03x_image       (mt9v03x_image_1)

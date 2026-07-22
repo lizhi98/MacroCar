@@ -10,16 +10,16 @@
 
 // 有刷电机接口
 // 有刷电机PWM输出
-#define MOTOR_LEFT_EN_PIN              ATOM3_CH5_P11_10
-#define MOTOR_LEFT_PH_PIN              P11_9
+#define MOTOR_RIGHT_EN_PIN              ATOM3_CH5_P11_10
+#define MOTOR_RIGHT_PH_PIN              P11_9
 
-#define MOTOR_RIGHT_EN_PIN             ATOM2_CH7_P11_12
-#define MOTOR_RIGHT_PH_PIN             P11_11
+#define MOTOR_LEFT_EN_PIN               ATOM2_CH7_P11_12
+#define MOTOR_LEFT_PH_PIN               P11_11
 
 #define MOTOR_FUN_PWM_PIN               ATOM1_CH0_P21_2
 
 #define MOTOR_PWM_FREQUENCY             17000  // 17kHz
-#define MOTOR_PWM_MAX_DUTY              9350   // 最大占空比
+#define MOTOR_PWM_MAX_DUTY              9500   // 最大占空比
 #define MOTOR_PWM_INIT_DUTY             0       // 最小占空比
 
 #define MOTOR_FUN_FREQUENCY             50     // 50Hz

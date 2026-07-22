@@ -349,10 +349,12 @@ void menu_run_1(void){
     // ips200_show_string(0, 130, "RUN_1 function");
 }
 uint32 car_start_time = 0;
-void menu_run_2(void){
+void menu_run(void){
+    run_control_protect_trigger_flag = 0;
     motor_fun_soft_start();         // 负压风扇软启动
     motor_traveling_power_flag = 1; // 使能行进电机PWM输出
     motor_traveling_pid_run_flag = 1; // 使能行进电机速度环运行
+    run_control_protect_trigger_flag = 0;
 }
 
 void menu_run_3(void){
@@ -375,7 +377,7 @@ void network_print_info(void){
     //     motor_traveling_left_target_speed,motor_traveling_right_target_speed,
     //     error_image,image_process_time,condition_T,feature_T,img_threshold,motion_image_steering_speed,motor_steering_speed,detect_feature_row
     // );
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%d,%d,%u\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%d,%d,%u,%u,%d,%u\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
@@ -383,27 +385,29 @@ void network_print_info(void){
         battery_voltage,
         motor_traveling_left_target_speed,motor_traveling_right_target_speed,
         error_image,image_to_image_time,condition_T,feature_T,img_threshold,
-        motion_image_steering_speed,motor_steering_speed,detect_feature_row
+        motion_image_steering_speed,motor_steering_speed,detect_feature_row,motor_fun_open_percent,back_condition_row,car_run_state
     );
     network_vofa_send_str(info_buffer);
 }
 
 void no_screen_key_event_handle(void){
-    if((key_get_state(KEY_1) == KEY_SHORT_PRESS) || (key_get_state(KEY_1) == KEY_LONG_PRESS)){
-        menu_run_1(); // 直接运行科目1
-        key_clear_state(KEY_1);
+    if(car_run_state != INIT_WAIT){
+        return; // 只有在等待开始状态下才响应按键事件
     }
-    if((key_get_state(KEY_2) == KEY_SHORT_PRESS) || (key_get_state(KEY_2) == KEY_LONG_PRESS)){
-        menu_run_2(); // 直接运行科目2
-        key_clear_state(KEY_2);
-    }
-    if((key_get_state(KEY_3) == KEY_SHORT_PRESS) || (key_get_state(KEY_3) == KEY_LONG_PRESS)){
-        menu_run_3(); // 直接运行科目3
-        key_clear_state(KEY_3);
-    }
+    // if((key_get_state(KEY_1) == KEY_SHORT_PRESS) || (key_get_state(KEY_1) == KEY_LONG_PRESS)){
+    //     menu_run_1(); // 直接运行科目1
+    //     key_clear_state(KEY_1);
+    // }
+    // if((key_get_state(KEY_2) == KEY_SHORT_PRESS) || (key_get_state(KEY_2) == KEY_LONG_PRESS)){
+    //     // menu_run_2(); // 直接运行科目2
+    //     key_clear_state(KEY_2);
+    // }
+    // if((key_get_state(KEY_3) == KEY_SHORT_PRESS) || (key_get_state(KEY_3) == KEY_LONG_PRESS)){
+    //     menu_run_3(); // 直接运行科目3
+    //     key_clear_state(KEY_3);
+    // }
     if((key_get_state(KEY_4) == KEY_SHORT_PRESS) || (key_get_state(KEY_4) == KEY_LONG_PRESS)){
-        // 保留这个按键作为紧急停止按键，按下就停止电机运动
-        motor_traveling_power_flag = 0; // 关闭所有电机PWM输出
+        car_run_state = WAIT_START; // 切换到启动状态
         key_clear_state(KEY_4);
     }
 }

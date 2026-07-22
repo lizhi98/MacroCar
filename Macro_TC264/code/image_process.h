@@ -28,7 +28,7 @@ typedef signed int          int32;
 typedef signed long long    int64;
 #else
 #include "zf_device_mt9v03x_double.h"
-
+#include "zf_driver_timer.h"
 #endif
 #include "quaternion.h"
 #define image_w  (MT9V03X_W-1)
@@ -75,10 +75,13 @@ extern int zhuan_row;
 extern int up_feature_row;
 extern FeatureDetectResult image_feature;
 
+extern int feature_row_down;
+extern int feature_row_up;
 extern int feature_condition_error;
 extern float angle_T;
 // extern int condition;
-
+// #define index_num 26
+// int T_index_list[index_num]={-1,0,0,-1,-1,-1,-1,0,-1,0,0,0,-1,0,1,1,1,1,-1,-1,1,1,0,1,-1,-1};
 // extern int feature_corner_l;
 // extern int feature_corner_r;
 // extern float parameterB;
@@ -88,6 +91,7 @@ extern float angle_T;
 // //enum TurnDirection {LEFT=-1, STRAIGHT=0, RIGHT=1};
 // extern int stop_line;
 extern uint8 img_threshold;
+extern int back_condition_row;
 // extern int points_count;
 // extern int error_image;
 extern int run_once_flag;
@@ -115,5 +119,7 @@ extern int error_image;
 extern int feature_T;
 extern uint8 condition_T;
 void image_process(uint8 (*source_image)[MT9V03X_W]);
+uint8 white_sheet_start(uint8 (*source_image)[MT9V03X_W]);
+extern uint32 image_test;
 
 #endif
