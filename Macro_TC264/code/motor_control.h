@@ -1,6 +1,8 @@
 #ifndef __MOTOR_CONTROL_H__
 #define __MOTOR_CONTROL_H__
 
+#define SPEED_CHOICE 1 // 预赛1 决赛2
+
 #include "motor_interface.h"
 #include "image_process.h"
 #include "gyroscope_interface.h"
@@ -95,16 +97,30 @@ extern int16 motor_steering_speed;
 #define MOTOR_FORWARD_NORMAL_SPEED      1500  // 前进正常速度
 
 // 进行速度决策
-#define MOTOR_FORWARD_LINEAR_SPEED      650    // 前进直线速度
-#define MOTOR_FORWARD_CURVE_SPEED       630    // 前进转角速度
+
+// 4.2
+// #define MOTOR_FORWARD_LINEAR_SPEED      630    // 前进直线速度
+// #define MOTOR_FORWARD_CURVE_SPEED       620    // 前进转角速度
+
+// 3.7-3.8
+// #define MOTOR_FORWARD_LINEAR_SPEED      600    // 前进直线速度
+// #define MOTOR_FORWARD_CURVE_SPEED       600    // 前进转角速度
+
+// 3.6
+// #define MOTOR_FORWARD_LINEAR_SPEED      560    // 前进直线速度
+// #define MOTOR_FORWARD_CURVE_SPEED       550    // 前进转角速度
+
+// 3.45
+#define MOTOR_FORWARD_LINEAR_SPEED      520    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       500    // 前进转角速度
 
 // 负压风扇直线行驶开度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   73
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   65
 
 // #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 
 #define RUN_PROTECT_IMG_TH_MAX      210 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
-#define RUN_PROTECT_IMG_TH_MIN      150  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
+#define RUN_PROTECT_IMG_TH_MIN      140  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
 
 extern int32 motor_forward_linear_speed;
 extern int32 motor_forward_curve_speed;

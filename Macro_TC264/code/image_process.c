@@ -1,9 +1,11 @@
 #include "image_process.h"
 
 #define ERROR_IMAGE_LINE 52
-#define ERROR_IMAGE_LINE_2 43
+#define ERROR_IMAGE_LINE_2 43 
 
 #define STROP_FEATURE_T 1
+
+#define IMG_THRESHOLD_DIFF 25
 
 // ++++++++++ 预赛赛道 ++++++++++
 
@@ -17,8 +19,8 @@
 // #define index_num 26
 // int T_index_list[index_num]={1,1,-1,0,-1,-1,1,1,-1,-1,-1,-1,0,1,0,0,0,1,1,1,1,1,0,0,0,1};
 
-// #define index_num 26
-// int T_index_list[index_num]={1,0,0,1,1,-1,-1,-1,-1,0,1,-1,-1,-1,0,1,0,1,1,1,1,1,0,0,0,1};
+#define index_num 26
+int T_index_list[index_num]={1,0,0,1,1,-1,-1,-1,-1,0,1,-1,-1,-1,0,1,0,1,1,1,1,1,0,0,0,1};
 
 
 // 17.2 反
@@ -28,6 +30,7 @@
 // 三极管有问题
 // #define index_num 26
 // int T_index_list[index_num]={-1,0,0,-1,-1,-1,-1,0,-1,0,0,0,-1,0,1,1,1,1,-1,-1,1,1,0,1,-1,-1};
+
 // 正常完赛
 // #define index_num 26
 // int T_index_list[index_num]={-1,0,0,-1,-1,-1,-1,0,-1,0,-1,0,1,1,0,1,1,-1,-1,-1,-1,0,1,-1,0,-1};
@@ -52,8 +55,11 @@
 
 // #define index_num 48
 // int T_index_list[index_num] = {1,0,0,1,1,0,-1,-1,-1,-1,1,-1,1,-1,-1,0,-1,-1,1,0,0,1,1,1,0,0,0,0,1,0,0,1,0,1,0,1,1,0,1,0,0,1,0,0,0,0,0,1};
-#define index_num 38
-int T_index_list[index_num] = {1,1,-1,0,-1,0,-1,-1,-1,-1,-1,0,1,1,0,0,0,1,0,1,1,1,1,0,0,1,0,0,1,1,0,1,1,0,0,0,0,1};
+
+// #define index_num 38
+// int T_index_list[index_num] = {1,1,-1,0,-1,0,-1,-1,-1,-1,-1,0,1,1,0,0,0,1,0,1,1,1,1,0,0,1,0,0,1,1,0,1,1,0,0,0,0,1};
+
+
 uint32 image_test = 0;
 uint8 image_start_flag=0;
 
@@ -149,13 +155,13 @@ void Binarization()
         }
         else
         {
-            if(img_threshold-threshold>8)
+            if(img_threshold-threshold>IMG_THRESHOLD_DIFF)
             {
-                img_threshold=img_threshold-8;
+                img_threshold=img_threshold-IMG_THRESHOLD_DIFF;
             }
-            else if(threshold-img_threshold>8)
+            else if(threshold-img_threshold>IMG_THRESHOLD_DIFF)
             {
-                img_threshold=img_threshold+8;
+                img_threshold=img_threshold+IMG_THRESHOLD_DIFF;
             }
             else
             {
@@ -2199,6 +2205,11 @@ uint8 white_sheet_start(uint8 (*source_image)[MT9V03X_W])
     // image_start_flag = 1;
 
     return image_start_flag;
+}
+void detect_threshold(uint8 (*source_image)[MT9V03X_W])
+{
+    image = source_image;
+    Binarization();
 }
 
 void image_process(uint8 (*source_image)[MT9V03X_W])

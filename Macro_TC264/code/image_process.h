@@ -119,6 +119,7 @@ extern int error_image;
 extern int feature_T;
 extern uint8 condition_T;
 void image_process(uint8 (*source_image)[MT9V03X_W]);
+void detect_threshold(uint8 (*source_image)[MT9V03X_W]);
 uint8 white_sheet_start(uint8 (*source_image)[MT9V03X_W]);
 extern uint32 image_test;
 

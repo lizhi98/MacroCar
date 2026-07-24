@@ -1,5 +1,7 @@
 #include "motor_control.h"
 
+//#define SPEED_CHOICE 2 // 预赛1 决赛2
+
 int32 motor_forward_linear_speed = MOTOR_FORWARD_LINEAR_SPEED;
 int32 motor_forward_curve_speed = MOTOR_FORWARD_CURVE_SPEED;
 
@@ -80,7 +82,7 @@ PIDParam motor_right_speed_pid = {
 
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 27.5f,
+    .kp = 24.0f,
     .ki = 0.0f,
     .kd = 2.0f,
     .integral_limit = 0.0f,
@@ -92,6 +94,10 @@ PIDParam motion_image_steering_pid = {
     .error_delta_max = 100.0f,
     .error_delta_min = -100.0f,
 };
+
+// 27.5 4.2
+// 24.0 3.8-4.0
+// 23.0
 
 PIDParam motor_steering_pid = {
     .type = PID_POS,
@@ -496,6 +502,11 @@ void forward_speed_decision(void)
         }
         if (!deceleration_label)
         {
+            motor_forward_speed = motor_forward_linear_speed; // 直线行驶时正常速度
+
+#if SPEED_CHOICE == 1
+
+#elif SPEED_CHOICE == 2
             // 长直道
             if (((feature_T_index == 14 && condition_T == 0) || feature_T_index > 14 && feature_T_index <= 16) ||
                 ((feature_T_index == 33 && condition_T == 0) || feature_T_index > 33 && feature_T_index <= 36) ||
@@ -521,6 +532,8 @@ void forward_speed_decision(void)
             {
                 motor_forward_speed = motor_forward_linear_speed; // 直线行驶时正常速度
             }
+#endif
+
             curve_speed_lock = 0; // 解除转弯速度锁定
         }
         else

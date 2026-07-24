@@ -63,12 +63,12 @@ int core0_main(void)
         no_screen_key_event_handle(); // 没有屏幕时的按键事件处理
 #endif
         if(battery_protection_check()){
-            if(!battery_checked_flag)
-            {
-                motor_traveling_power_flag = 0; // 关闭电机PWM输出
-                // zf_assert(0); // 电池电压过低
-                // while(1);
-            }
+            // if(!battery_checked_flag)
+            // {
+            //     // motor_traveling_power_flag = 0; // 关闭电机PWM输出
+            //     // zf_assert(0); // 电池电压过低
+            //     // while(1);
+            // }
         }
         battery_checked_flag = 1;
 
