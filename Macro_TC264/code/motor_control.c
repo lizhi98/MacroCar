@@ -80,9 +80,12 @@ PIDParam motor_right_speed_pid = {
     .previous_previous_error = 0.0f
 };
 
+
+
+
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 24.0f,
+    .kp = 26.5f,
     .ki = 0.0f,
     .kd = 2.0f,
     .integral_limit = 0.0f,

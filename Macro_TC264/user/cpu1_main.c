@@ -45,18 +45,18 @@ void core1_main(void)
             image_to_image_time = (system_getval_ms() - image_time);
             image_time = system_getval_ms();
 
-            image_process(mt9v03x_copy_image);
-            // if(car_run_state == RUNNING || car_run_state == STARTING){
-            // }else if(car_run_state == WAIT_START){
-            //     // if(white_sheet_start(mt9v03x_copy_image))// 发车函数
-            //     // {
-            //     //     // system_delay_ms(1500); // 延迟一段时间，等待图像稳定
-            //     //     car_run_state = STARTING; // 切换到测试状态
-            //     // }
-            //     car_run_state = STARTING; // 切换到发车开始
-            // }else{
-            //     detect_threshold(mt9v03x_copy_image);
-            // }
+            if(car_run_state == RUNNING || car_run_state == STARTING){
+                image_process(mt9v03x_copy_image);
+            }else if(car_run_state == WAIT_START){
+                // if(white_sheet_start(mt9v03x_copy_image))// 发车函数
+                // {
+                //     // system_delay_ms(1500); // 延迟一段时间，等待图像稳定
+                //     car_run_state = STARTING; // 切换到测试状态
+                // }
+                car_run_state = STARTING; // 切换到发车开始
+            }else{
+                detect_threshold(mt9v03x_copy_image);
+            }
 
             image_process_finish_flag = 1;
             image_process_time = system_getval_ms() - image_time; // 记录图像处理时间

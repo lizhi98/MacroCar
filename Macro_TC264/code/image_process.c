@@ -1,11 +1,11 @@
 #include "image_process.h"
 
 #define ERROR_IMAGE_LINE 52
-#define ERROR_IMAGE_LINE_2 43 
+#define ERROR_IMAGE_LINE_2 50
 
 #define STROP_FEATURE_T 1
 
-#define IMG_THRESHOLD_DIFF 25
+#define IMG_THRESHOLD_DIFF 15
 
 // ++++++++++ 预赛赛道 ++++++++++
 
@@ -19,8 +19,8 @@
 // #define index_num 26
 // int T_index_list[index_num]={1,1,-1,0,-1,-1,1,1,-1,-1,-1,-1,0,1,0,0,0,1,1,1,1,1,0,0,0,1};
 
-#define index_num 26
-int T_index_list[index_num]={1,0,0,1,1,-1,-1,-1,-1,0,1,-1,-1,-1,0,1,0,1,1,1,1,1,0,0,0,1};
+// #define index_num 26
+// int T_index_list[index_num]={1,0,0,1,1,-1,-1,-1,-1,0,1,-1,-1,-1,0,1,0,1,1,1,1,1,0,0,0,1};
 
 
 // 17.2 反
@@ -56,9 +56,15 @@ int T_index_list[index_num]={1,0,0,1,1,-1,-1,-1,-1,0,1,-1,-1,-1,0,1,0,1,1,1,1,1,
 // #define index_num 48
 // int T_index_list[index_num] = {1,0,0,1,1,0,-1,-1,-1,-1,1,-1,1,-1,-1,0,-1,-1,1,0,0,1,1,1,0,0,0,0,1,0,0,1,0,1,0,1,1,0,1,0,0,1,0,0,0,0,0,1};
 
-// #define index_num 38
-// int T_index_list[index_num] = {1,1,-1,0,-1,0,-1,-1,-1,-1,-1,0,1,1,0,0,0,1,0,1,1,1,1,0,0,1,0,0,1,1,0,1,1,0,0,0,0,1};
+#define index_num 38
+int T_index_list[index_num] = {1,1,-1,0,-1,0,-1,-1,-1,-1,-1,0,1,1,0,0,0,1,0,1,1,1,1,0,0,1,0,0,1,1,0,1,1,0,0,0,0,1};
 
+//正向最后一个BJT有问题
+// #define index_num 38
+// int T_index_list[index_num] = {1,1,-1,0,-1,0,-1,-1,-1,-1,-1,0,1,1,0,0,0,1,0,1,1,1,1,0,1,0,0,-1,-1,0,-1,-1,0,-1,1,0,0,1};
+//反向
+// #define index_num 39
+// int T_index_list[index_num] = {-1,0,0,0,0,-1,-1,0,-1,-1,0,0,-1,0,-1,1,1,1,1,1,1,-1,-1,0,0,-1,-1,1,-1,-1,-1,-1,-1,1,1,0,1,-1,-1};
 
 uint32 image_test = 0;
 uint8 image_start_flag=0;
@@ -369,7 +375,8 @@ void search_line()
             {
                 left_lost_times++;
             }
-            if(image[i][image_w-21]==white_point)
+            if(image[i][image_w-21]==white_point) 
+            // if(image[i][image_w-31]==white_point)   
             {
                 right_lost_times++;
             }

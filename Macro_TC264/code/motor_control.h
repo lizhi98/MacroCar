@@ -99,28 +99,28 @@ extern int16 motor_steering_speed;
 // 进行速度决策
 
 // 4.2
-// #define MOTOR_FORWARD_LINEAR_SPEED      630    // 前进直线速度
-// #define MOTOR_FORWARD_CURVE_SPEED       620    // 前进转角速度
+// #define MOTOR_FORWARD_LINEAR_SPEED      640    // 前进直线速度
+// #define MOTOR_FORWARD_CURVE_SPEED       630    // 前进转角速度
 
 // 3.7-3.8
-// #define MOTOR_FORWARD_LINEAR_SPEED      600    // 前进直线速度
-// #define MOTOR_FORWARD_CURVE_SPEED       600    // 前进转角速度
+#define MOTOR_FORWARD_LINEAR_SPEED      610    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       610    // 前进转角速度
 
 // 3.6
-// #define MOTOR_FORWARD_LINEAR_SPEED      560    // 前进直线速度
+// #define MOTOR_FORWARD_LINEAR_SPEED      570    // 前进直线速度
 // #define MOTOR_FORWARD_CURVE_SPEED       550    // 前进转角速度
 
 // 3.45
-#define MOTOR_FORWARD_LINEAR_SPEED      520    // 前进直线速度
-#define MOTOR_FORWARD_CURVE_SPEED       500    // 前进转角速度
+// #define MOTOR_FORWARD_LINEAR_SPEED      500    // 前进直线速度
+// #define MOTOR_FORWARD_CURVE_SPEED       500    // 前进转角速度
 
 // 负压风扇直线行驶开度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   65
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   78
 
 // #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 
 #define RUN_PROTECT_IMG_TH_MAX      210 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
-#define RUN_PROTECT_IMG_TH_MIN      140  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
+#define RUN_PROTECT_IMG_TH_MIN      90  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
 
 extern int32 motor_forward_linear_speed;
 extern int32 motor_forward_curve_speed;
