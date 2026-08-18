@@ -1,11 +1,93 @@
 #include "motor_control.h"
 
-//#define SPEED_CHOICE 2 // 预赛1 决赛2
-
 int32 motor_forward_linear_speed = MOTOR_FORWARD_LINEAR_SPEED;
 int32 motor_forward_curve_speed = MOTOR_FORWARD_CURVE_SPEED;
 
+#define TEST_SPEED_H 700
+#define TEST_SPEED_L 540
+
 CarRunState car_run_state = INIT_WAIT;
+
+static const SpeedDecisionParam speed_decision_param_list[SPEED_DECISION_PARAM_LIST_SIZE] = {
+    // {.index = 6,    .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 7,    .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    // {.index = 8,    .condition = -1, .motor_average_distance = 69000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 9,    .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 10,   .condition = -1, .motor_average_distance = 69000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 11,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 12,   .condition = -1, .motor_average_distance = 42000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 13,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 14,   .condition = -1, .motor_average_distance = 26000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 15,   .condition = 0, .motor_average_distance = 49000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+
+    // {.index = 16,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+    // {.index = 17,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+    // {.index = 18,   .condition = 1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+
+
+    // {.index = 18,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 19,   .condition = -1, .motor_average_distance = 35000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 21,   .condition = 0, .motor_average_distance = 0,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = 0},
+    // {.index = 22,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = 0},
+
+    // {.index = 31,   .condition = 0, .motor_average_distance = 4000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 32,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    // {.index = 33,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    // {.index = 34,   .condition = -1, .motor_average_distance = 20000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+
+    // // {.index = 36,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // // {.index = 38,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 36,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 38,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+
+    // {.index = 59,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+    // {.index = 60,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+    // {.index = 61,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+    // {.index = 62,   .condition = 1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0}
+    
+
+    // {.index = 6,    .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 7,    .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    // {.index = 8,    .condition = -1, .motor_average_distance = 69000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 9,    .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 10,   .condition = -1, .motor_average_distance = 69000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    
+    {.index = 52,   .condition = -1, .motor_average_distance = 0,    .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    {.index = 51,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    
+    {.index = 50,   .condition = -1, .motor_average_distance = 10000,    .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    {.index = 49,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 48,   .condition = -1, .motor_average_distance = 10000,    .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    {.index = 47,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 46,   .condition = -1, .motor_average_distance = 15000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    {.index = 45,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 44,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    
+    
+    {.index = 41,   .condition = -1, .motor_average_distance = 20000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    {.index = 40,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    
+    {.index = 38,   .condition = -1, .motor_average_distance = 18000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    {.index = 37,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    {.index = 36,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    {.index = 35,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    
+    {.index = 27,   .condition = -1, .motor_average_distance = 40000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    {.index = 26,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    {.index = 25,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+
+    // {.index = 36,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 38,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    {.index = 21,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 23,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+
+    {.index = 42,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED, .motor_forward_speed_exit = 0},
+    {.index = 43,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+    {.index = 44,   .condition = 1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+    // {.index = 62,   .condition = 1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0}
+    
+};
+// index 为图像index condition为图像condition，motor_average_distance为前进速度对应的平均距离计数和，motor_forward_speed为前进基础速度
 
 // 规则表
 static const float fuzzy_pid_rule_table_kp[7][7] = {
@@ -41,9 +123,9 @@ static const float fuzzy_pid_rule_table_kp[7][7] = {
 
 static const float segment_pid_rule_table_kp[3][2] = {
     //   ABS_E      K
-    {30.0, 7.0},
-    {92.0, 7.0}, // Condition = 0
-    {100.0, 7.2} // Condition = 1
+    {30.0, 25.0},
+    {92.0, 27.0}, // Condition = 0
+    {100.0, 30.0} // Condition = 1
 };
 
 static const float segment_pid_rule_table_ki[3][2] = {
@@ -68,7 +150,6 @@ PIDParam motor_left_speed_pid = {
     .previous_error = 0.0f,
     .previous_previous_error = 0.0f
 };
-
 PIDParam motor_right_speed_pid = {
     .type = PID_INC,
     .kp = 25.0f,
@@ -80,19 +161,20 @@ PIDParam motor_right_speed_pid = {
     .previous_previous_error = 0.0f
 };
 
+
 PIDParam motion_image_steering_pid = {
-    .type = PID_POS,
-    .kp = 24.0f,
+    .type = FUZZY_PID_POS,
+    .kp = 26.0f,
     .ki = 0.0f,
-    .kd = 2.0f,
+    .kd = 0.0f,
     .integral_limit = 0.0f,
     .integral = 0.0f,
     .previous_error = 0.0f,
     .previous_previous_error = 0.0f,
     .error_max = 93.0f,
     .error_min = -93.0f,
-    .error_delta_max = 100.0f,
-    .error_delta_min = -100.0f,
+    .error_delta_max = 120.0f,
+    .error_delta_min = -120.0f,
 };
 
 // 27.5 4.2
@@ -338,7 +420,7 @@ void PID_clear(PIDParam *pid_param)
 int16 motor_traveling_left_target_speed = 0;
 int16 motor_traveling_right_target_speed = 0;
 
-// float motor_steering_speed_up_k = 1.0f;
+float motor_ins_to_image_error_k = 5.0f;
 
 void motion_control_pit_callback()
 {
@@ -349,10 +431,10 @@ void motion_control_pit_callback()
     // // motor_traveling_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
     // // motor_fun_set_open_percent(0); // 开度
 
-    motor_pit_count++;
+    // motor_pit_count++;
 
     // 电机接口PIT，获取速度
-    motor_interface_pit_callback();
+
     motor_get_speed(&motor_left_speed, &motor_right_speed);
     // return;
 
@@ -373,7 +455,7 @@ void motion_control_pit_callback()
     // 运行保护
     run_control_protect();
 
-    int error_image_real = error_image;
+    // int error_image_real = error_image;
     // if(condition_T){
     //     if(get_angle_err(angle_T) > 53.0f)
     //     {
@@ -382,8 +464,15 @@ void motion_control_pit_callback()
     // }
 
     // 图像要求的转向环
-    motion_image_steering_pid.previous_error = 0.0 - (float)error_image_last;
-    motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)error_image_real); // 这里的目标值和当前值需要根据具体应用修改
+    if(car_run_state == RUNNING_INS){
+        motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, -ins_output_angle * motor_ins_to_image_error_k, -angle_z * motor_ins_to_image_error_k); // 这里的目标值和当前值需要根据具体应用修改
+    }else{
+        motion_image_steering_pid.previous_error = 0.0 - (float)error_image_last;
+        motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)error_image); // 这里的目标值和当前值需要根据具体应用修改
+    }
+
+    // motion_image_steering_pid.previous_error = 0.0 - ins_output_angle * motor_ins_to_image_error_k;
+    
     // motion_image_steering_speed = (int16)PID_calculate(&motion_image_steering_pid, 0.0f, (float)0.0); // 这里的目标值和当前值需要根据具体应用修改
     // 转向闭环
     motor_steering_speed = (int16)PID_calculate(&motor_steering_pid, (float)motion_image_steering_speed, gyro_current_data.gyro_z); // 这里的当前值需要根据具体应用修改
@@ -480,94 +569,125 @@ void motor_traveling_soft_start(void)
 
 uint8 forward_speed_decision_enable = 0; // 0表示不执行速度决策，1表示执行速度决策
 
-static uint8 curve_speed_lock = 0;
-// static float    curve_speed_lock_angle = 0.0f; // 锁定转弯速度时的转向角
-static uint32 turn_time_start = 0; // 转弯开始时间
+// static uint8 curve_speed_lock = 0;
+// // static float    curve_speed_lock_angle = 0.0f; // 锁定转弯速度时的转向角
+// static uint32 turn_time_start = 0; // 转弯开始时间
+
+static uint8 speed_decision_list_effective = 0; // 速度决策锁，当其为1时，速度决策表生效，0时不生效
+
+static int8 speed_decision_index_temp = -1; // 速度决策索引缓存
+static int8 speed_decision_condition_temp = -2; // 速度决策条件缓存
+
+static int32 speed_decision_motor_average_distance_start_count = 0; // 速度决策索引缓存
+static int32 motor_average_target_distance = 0; // 电机平均距离计数总和
+
+static int32 motor_forward_target_speed_exit = 0; // 电机平均距离计数总和
 
 // 速度决策
 void forward_speed_decision(void)
 {
-    if (!forward_speed_decision_enable)
-    {
+    if (!forward_speed_decision_enable){
         motor_forward_speed = MOTOR_FORWARD_NORMAL_SPEED;
         return;
     }
-    else
-    {
-        if (deceleration_label && !curve_speed_lock)
-        { // 进行速度决策
-            // curve_speed_lock_angle = attitude.yaw; // 记录当前转向角
-            turn_time_start = system_getval_ms(); // 记录转弯开始时间
-            curve_speed_lock = 1;
-        }
-        if (!deceleration_label)
-        {
-            motor_forward_speed = motor_forward_linear_speed; // 直线行驶时正常速度
 
-#if SPEED_CHOICE == 1
-
-#elif SPEED_CHOICE == 2
-            // 长直道
-            if (((feature_T_index == 14 && condition_T == 0) || feature_T_index > 14 && feature_T_index <= 16) ||
-                ((feature_T_index == 33 && condition_T == 0) || feature_T_index > 33 && feature_T_index <= 36) ||
-                ( feature_T_index == 0  && condition_T == 0) ||
-                ( feature_T_index == 2  && condition_T == 0)
-            )
-            {
-                motor_forward_speed = motor_forward_linear_speed + 80;
-            }else 
-            if (((feature_T_index == 30 && condition_T == 0) || feature_T_index > 30 && feature_T_index <= 31) ||
-                ((feature_T_index == 23 && condition_T == 0) || feature_T_index > 23 && feature_T_index <= 24) ||
-                ((feature_T_index == 26 && condition_T == 0) || feature_T_index > 26 && feature_T_index <= 28) ||
-                ((feature_T_index == 19 && condition_T == 0) || feature_T_index > 19 && feature_T_index <= 20)
-            )
-            {
-                motor_forward_speed = motor_forward_linear_speed + 60;
-            }
-            else if (feature_T_index >= 6 && feature_T_index <= 10)
-            {
-                motor_forward_speed = motor_forward_curve_speed;
-            }
-            else
-            {
-                motor_forward_speed = motor_forward_linear_speed; // 直线行驶时正常速度
-            }
-#endif
-
-            curve_speed_lock = 0; // 解除转弯速度锁定
-        }
-        else
-        {
-            motor_forward_speed = motor_forward_curve_speed; // 转弯时降低速度
-            // 转弯超时停车
-            if (system_getval_ms() > turn_time_start)
-            { // 防止系统时钟溢出导致车辆误停车
-                if (system_getval_ms() - turn_time_start > 2000)
-                {                                   // 转弯超过2秒
-                    motor_traveling_power_flag = 0; // 停车
+    if(speed_decision_index_temp != feature_T_index || (speed_decision_condition_temp != -1 && speed_decision_condition_temp != condition_T)){
+        // 更新决策速度
+        // 从规则表中查找速度
+        for(int i = 0; i < SPEED_DECISION_PARAM_LIST_SIZE; i++){
+            // 0 && 为测试用，实际上删去
+            if(speed_decision_param_list[i].index == feature_T_index && (speed_decision_param_list[i].condition == -1 || speed_decision_param_list[i].condition == condition_T)){
+                    // 如果条件为-1，表示不区分条件，直接使用该速度
+                    motor_forward_speed = speed_decision_param_list[i].motor_forward_speed;
+                    if(speed_decision_param_list[i].motor_average_distance > 0){
+                        // 如果有平均距离计数要求，则需要更新起点
+                        speed_decision_motor_average_distance_start_count = motor_average_distance_count_sum; // 更新平均距离计数起点
+                        motor_average_target_distance = speed_decision_param_list[i].motor_average_distance; // 更新平均距离计数目标值
+                        motor_forward_target_speed_exit = speed_decision_param_list[i].motor_forward_speed_exit; // 更新平均距离计数目标速度
+                    }else{
+                        motor_average_target_distance = -1; // 没有平均距离计数要求，起点为-1
+                    }
+                    speed_decision_index_temp = speed_decision_param_list[i].index;
+                    speed_decision_condition_temp = speed_decision_param_list[i].condition;
+                    speed_decision_list_effective = 1; // 速度决策表生效
+                    break;
+            }else{
+                // 如果条件都不匹配，则使用默认速度
+                if(i == SPEED_DECISION_PARAM_LIST_SIZE - 1){
+                    if(deceleration_label){
+                        motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED;
+                    }else{
+                        // 小方框不采取直道速度
+                        if(feature_T_index >= 54 && feature_T_index <= 58 || feature_T_index >= 29 && feature_T_index <= 32){
+                            motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED;
+                        }else{
+                            motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;
+                        }
+                    }
+                    // 更新缓存
+                    speed_decision_index_temp = feature_T_index;
+                    speed_decision_condition_temp = condition_T;
+                    speed_decision_list_effective = 0; // 速度决策表不生效
                 }
             }
         }
     }
+    // 如果速度决策表生效，则需要判断是否满足平均距离计数要求
+    if(speed_decision_list_effective){
+        if(motor_average_target_distance != -1 && motor_average_distance_count_sum - speed_decision_motor_average_distance_start_count >= motor_average_target_distance){
+            motor_forward_speed = motor_forward_target_speed_exit; // 达到平均距离计数要求，恢复退出速度
+        }
+    }
+
+
+    // if (deceleration_label && !curve_speed_lock){ // 进行速度决策
+    //     // curve_speed_lock_angle = attitude.yaw; // 记录当前转向角
+    //     turn_time_start = system_getval_ms(); // 记录转弯开始时间
+    //     curve_speed_lock = 1;
+    // }
+    // if (!deceleration_label)
+    // {
+    //         motor_forward_speed = motor_forward_linear_speed; // 直线行驶时正常速度
+
+    //         curve_speed_lock = 0; // 解除转弯速度锁定
+    // }else{
+    //     motor_forward_speed = motor_forward_curve_speed; // 转弯时降低速度
+    //     // 转弯超时停车
+    //     if (system_getval_ms() > turn_time_start)
+    //     { // 防止系统时钟溢出导致车辆误停车
+    //         if (system_getval_ms() - turn_time_start > 2000)
+    //         {                                   // 转弯超过2秒
+    //             motor_traveling_power_flag = 0; // 停车
+    //         }
+    //     }
+    // }
 }
 
 volatile uint32 run_protect_trigger_time = 0;        // 保护触发时间
 volatile uint8 run_control_protect_trigger_flag = 0; // 运行保护触发标志位
 
-uint8 run_control_protect_enable = 0; // 运行保护使能标志位，0表示不使能，1表示使能
+volatile uint8 run_control_protect_enable = 0; // 运行保护使能标志位，0表示不使能，1表示使能
+
+volatile static uint32 img_threshold_abnormal_count = 0; // 图像阈值异常计数
 
 void run_control_protect()
 {
     if(!run_control_protect_enable){
         return;
     }
-    if (system_getval_ms() >= 3000 && !run_control_protect_trigger_flag && (img_threshold > RUN_PROTECT_IMG_TH_MAX || img_threshold < RUN_PROTECT_IMG_TH_MIN || run_once_flag))
+    if(img_threshold > RUN_PROTECT_IMG_TH_MAX || img_threshold < RUN_PROTECT_IMG_TH_MIN){
+        img_threshold_abnormal_count++;
+    }else{
+        img_threshold_abnormal_count = 0;
+    }
+
+    if (system_getval_ms() >= 3000 && !run_control_protect_trigger_flag && (img_threshold_abnormal_count >= 5 || run_once_flag))
     {
         motor_traveling_power_flag = 0;       // 停车
         run_control_protect_trigger_flag = 1; // 设置运行保护触发标志位
         // 记录保护触发时间
         run_protect_trigger_time = system_getval_ms();
-        int16 percent_temp = (int16)motor_fun_open_percent - 10; // 检测到异常时负压是否开启
+        int16 percent_temp = (int16)motor_fun_open_percent - 15; // 检测到异常时负压是否开启
         if (percent_temp <= 0)
         {
             percent_temp = 0;

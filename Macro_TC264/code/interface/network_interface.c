@@ -145,7 +145,7 @@ void network_vofa_cmd_process(){
                 if(sscanf(cmd, "EXP:%d", &exp_time) == 1){ // 从命令中提取曝光时间
                     if(exp_time < 0) exp_time = 0;
                     if(exp_time > 512) exp_time = 512;
-                    mt9v03x_set_exposure_time_sccb_1(exp_time);
+                    mt9v03x_set_exposure_time_sccb_1((uint16)exp_time);
                     // char buffer[32];
                     // sprintf(buffer, "EXP:%d\r\n", exp_time);
                     // wifi_spi_send_buffer(buffer, strlen(buffer)); // 通过WiFi模块的SPI发送数据

@@ -19,23 +19,28 @@
 #define MOTOR_FUN_PWM_PIN               ATOM1_CH0_P21_2
 
 #define MOTOR_PWM_FREQUENCY             17000  // 17kHz
-#define MOTOR_PWM_MAX_DUTY              9500   // 最大占空比
+#define MOTOR_PWM_MAX_DUTY              9700   // 最大占空比
 #define MOTOR_PWM_INIT_DUTY             0       // 最小占空比
 
 #define MOTOR_FUN_FREQUENCY             50     // 50Hz
 
 // 编码器引脚
-#define MOTOR_LEFT_ENCODER_PIN_1        TIM4_ENCODER_CH1_P02_8
-#define MOTOR_LEFT_ENCODER_PIN_2        TIM4_ENCODER_CH2_P00_9
-#define MOTOR_RIGHT_ENCODER_PIN_1       TIM6_ENCODER_CH1_P20_3
-#define MOTOR_RIGHT_ENCODER_PIN_2       TIM6_ENCODER_CH2_P20_0
+#define MOTOR_RIGHT_ENCODER_PIN_1        TIM4_ENCODER_CH1_P02_8
+#define MOTOR_RIGHT_ENCODER_PIN_2        TIM4_ENCODER_CH2_P00_9
+#define MOTOR_LEFT_ENCODER_PIN_1       TIM6_ENCODER_CH1_P20_3
+#define MOTOR_LEFT_ENCODER_PIN_2       TIM6_ENCODER_CH2_P20_0
 
-#define MOTOR_LEFT_ENCODER_INDEX        TIM4_ENCODER
-#define MOTOR_RIGHT_ENCODER_INDEX       TIM6_ENCODER
+#define MOTOR_RIGHT_ENCODER_INDEX        TIM4_ENCODER
+#define MOTOR_LEFT_ENCODER_INDEX       TIM6_ENCODER
 
 extern uint8 motor_traveling_power_flag; // 作用于PWM输出，让PWM=0
 extern int32 motor_left_pwm;
 extern int32 motor_right_pwm;
+
+extern int32 motor_left_distance_count_sum;
+extern int32 motor_right_distance_count_sum;
+extern int32 motor_average_distance_count_sum;
+
 void motor_interface_pit_callback(void);
 
 void motor_get_speed(int32 * left_speed, int32 * right_speed);

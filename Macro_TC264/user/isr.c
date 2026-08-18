@@ -37,6 +37,7 @@
 #include "isr.h"
 #include "motor_control.h"
 #include "gyroscope_interface.h"
+#include "inertial_navigation.h"
 
 // 对于TC系列默认是不支持中断嵌套的，希望支持中断嵌套需要在中断内使用 interrupt_global_enable(0); 来开启中断嵌套
 // 简单点说实际上进入中断后TC系列的硬件自动调用了 interrupt_global_disable(); 来拒绝响应任何的中断，因此需要我们自己手动调用 interrupt_global_enable(0); 来开启中断的响应。
@@ -64,7 +65,60 @@ IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
     cc61_ch0_pit_count++; // 每次进入中断，计数变量加1
     
     gyro_pit_callback(); // 陀螺仪
+
+    // 速度获取
+    motor_interface_pit_callback();
+
+    // if(feature_T_index == 52 && condition_T == 1){
+    //     ins_current_data_sheet_index = 2;
+    //     ins_finish_flag = 0;
+    //     car_run_state = RUNNING_INS;
+    //     ins_start_motor_average_distance_count_sum = motor_average_distance_count_sum;
+    //     ins_start_angle_z = angle_z;
+    //     inertial_navigation_mode = INERTIAL_NAVIGATION_MODE_NAVIGATION;
+    // }else if(feature_T_index == 47 && condition_T == 1){            
+    //     ins_current_data_sheet_index = 0;
+    //     ins_finish_flag = 0;
+    //     car_run_state = RUNNING_INS;
+    //     ins_start_motor_average_distance_count_sum = motor_average_distance_count_sum;
+    //     ins_start_angle_z = angle_z;
+    //     inertial_navigation_mode = INERTIAL_NAVIGATION_MODE_NAVIGATION;
+    // }
+    if(feature_T_index == 9 && condition_T == 1){
+        ins_current_data_sheet_index = 4;
+        ins_finish_flag = 0;
+        car_run_state = RUNNING_INS;
+        ins_start_motor_average_distance_count_sum = motor_average_distance_count_sum;
+        // ins_start_angle_z = angle_z;
+        ins_start_angle_z = 90.0f;
+        inertial_navigation_mode = INERTIAL_NAVIGATION_MODE_NAVIGATION;
+    }else if(feature_T_index == 13 && condition_T == 1){            
+        ins_current_data_sheet_index = 5;
+        ins_finish_flag = 0;
+        car_run_state = RUNNING_INS;
+        ins_start_motor_average_distance_count_sum = motor_average_distance_count_sum;
+        // ins_start_angle_z = angle_z;
+        ins_start_angle_z = -270.0f;
+        inertial_navigation_mode = INERTIAL_NAVIGATION_MODE_NAVIGATION;
+    }
+
     
+    // else if(feature_T_index == 60 && condition_T == 1){
+    //     ins_current_data_sheet_index = 3;
+    //     ins_finish_flag = 0;
+    //     car_run_state = RUNNING_INS;
+    //     ins_start_motor_average_distance_count_sum = motor_average_distance_count_sum;
+    //     ins_start_angle_z = angle_z;
+    //     inertial_navigation_mode = INERTIAL_NAVIGATION_MODE_NAVIGATION;
+    // }
+    if(ins_finish_flag == 1){
+        inertial_navigation_mode = INERTIAL_NAVIGATION_MODE_IDLE;
+        car_run_state = RUNNING_IMG;
+    }
+
+    inertial_navigation_update(); // 惯性导航更新
+
+    // 运动控制
     if(cc61_ch0_pit_count % MOTION_CONTROL_PIT_TIME == 0){
         motion_control_pit_callback(); // 运动控制
     }

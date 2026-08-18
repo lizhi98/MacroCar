@@ -3,6 +3,10 @@
 static int32 motor_left_speed = 0;
 static int32 motor_right_speed = 0;
 
+int32 motor_left_distance_count_sum = 0;
+int32 motor_right_distance_count_sum = 0;
+int32 motor_average_distance_count_sum = 0;
+
 int32 motor_left_pwm = 0;
 int32 motor_right_pwm = 0;
 
@@ -63,13 +67,40 @@ void motor_fun_set_open_percent(uint16 percent){
     // pwm_set_duty(MOTOR_FUN_PWM_PIN, 0);
 }
 
+static uint8 motor_interface_pit_count = 0;
+static int16 motor_left_last_encoder_count = 0;
+static int16 motor_right_last_encoder_count = 0;
+static int16 motor_left_current_encoder_count = 0;
+static int16 motor_right_current_encoder_count = 0;
+
 // 主要是用于获取速度
 void motor_interface_pit_callback(void){
-    // 获取速度
-    // 清零计数
-    motor_right_speed  = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX);
-    encoder_clear_count(MOTOR_LEFT_ENCODER_INDEX);
-    motor_left_speed = encoder_get_count(MOTOR_RIGHT_ENCODER_INDEX) * -1;
-    encoder_clear_count(MOTOR_RIGHT_ENCODER_INDEX);
+    motor_interface_pit_count++;
+
+    // 记录旧编码器数据
+    motor_left_last_encoder_count = motor_left_current_encoder_count;
+    motor_right_last_encoder_count = motor_right_current_encoder_count;
+    // 获取新编码器数据
+    motor_left_current_encoder_count = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX);
+    motor_right_current_encoder_count = encoder_get_count(MOTOR_RIGHT_ENCODER_INDEX);
+
+    motor_left_distance_count_sum += (motor_left_current_encoder_count - motor_left_last_encoder_count) * -1;
+    motor_right_distance_count_sum += (motor_right_current_encoder_count - motor_right_last_encoder_count);
+    motor_average_distance_count_sum = (motor_left_distance_count_sum + motor_right_distance_count_sum) / 2;
+
+    if(motor_interface_pit_count >= motor_get_speed_pit_time){
+        // 计算速度
+        motor_left_speed  = motor_left_current_encoder_count * -1;
+        encoder_clear_count(MOTOR_LEFT_ENCODER_INDEX);
+        motor_left_current_encoder_count = 0;
+
+        motor_right_speed = motor_right_current_encoder_count;
+        encoder_clear_count(MOTOR_RIGHT_ENCODER_INDEX);
+        motor_right_current_encoder_count = 0;
+        
+        motor_interface_pit_count = 0;
+
+    }
+
 }
 

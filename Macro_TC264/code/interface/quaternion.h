@@ -13,12 +13,15 @@ typedef struct {
     float pitch;
     float yaw;
 } Quaternion;
+
 extern Quaternion attitude;
+
+extern float angle_z;
+
 void quaternion_init(void);
 void quaternion_update(void);
 
 // tools
 float get_angle_err(float angle);
-
 
 #endif

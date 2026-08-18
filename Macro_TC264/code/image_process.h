@@ -31,6 +31,8 @@ typedef signed long long    int64;
 #include "zf_driver_timer.h"
 #endif
 #include "quaternion.h"
+#include "motor_interface.h"
+#include "inertial_navigation.h"
 #define image_w  (MT9V03X_W-1)
 #define image_h  (MT9V03X_H)
 
@@ -121,6 +123,7 @@ extern uint8 condition_T;
 void image_process(uint8 (*source_image)[MT9V03X_W]);
 void detect_threshold(uint8 (*source_image)[MT9V03X_W]);
 uint8 white_sheet_start(uint8 (*source_image)[MT9V03X_W]);
+void ins_image(uint8 (*source_image)[MT9V03X_W]);
 extern uint32 image_test;
 
 #endif

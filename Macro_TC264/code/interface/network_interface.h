@@ -10,14 +10,19 @@
 #include "motor_control.h"
 
 // #define WIFI_SSID           "AP-lizhi"
-// #define WIFI_SSID           "XIAOMI_GoGoGo"
-// #define WIFI_PASSWORD       "9894653xxk"
+#define WIFI_SSID           "XIAOMI_GoGoGo"
+#define WIFI_PASSWORD       "9894653xxk"
 
-#define WIFI_SSID           "abc123"
-#define WIFI_PASSWORD       "12345678"
-#define HOST_IP             "10.252.11.252"
+#define HOST_IP             "192.168.31.77"
 
-// #define HOST_IP             "192.168.31.98"
+// #define WIFI_SSID           "abc123"
+// #define WIFI_PASSWORD       "12345678"
+// #define HOST_IP             "10.252.11.252"
+
+// #define WIFI_SSID           "momo"
+// #define WIFI_PASSWORD       "shanhunwudui"
+// #define HOST_IP             "192.168.100.200"
+
 
 // #define HOST_IP             "10.132.126.252"
 

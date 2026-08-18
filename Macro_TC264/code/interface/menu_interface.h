@@ -11,6 +11,7 @@
 #include "image_process.h"
 #include "quaternion.h"
 #include "zf_common_font.h"
+#include "inertial_navigation.h"
 
 #define KEY_PIT_TIME           5 // 按键扫描时间，单位ms
 #define MENU_KEY_PIT_INDEX     CCU60_CH1

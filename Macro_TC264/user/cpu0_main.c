@@ -35,6 +35,8 @@ int core0_main(void)
     
     battery_protection_init();      // 电池保护初始化
 
+    inertial_navigation_init();      // 惯性导航初始化
+
     motion_control_init();          // 运动控制初始化
 
     cpu_wait_event_ready();         // 等待所有核心初始化完毕
@@ -42,6 +44,7 @@ int core0_main(void)
     motor_traveling_power_flag = 0;     // 行进电机PWM输出标志位，0:PWM输出为0  1:PWM输出正常
     motion_control_run_flag = 1;        // 行进电机运动标志位，0:电机速度环的目标速度为0，负压不变  1:电机速度和负压电压受到算法控制
     forward_speed_decision_enable = 1;  // 速度决策标志位，0:不执行速度决策  1:执行速度决策
+
 #ifdef SMARTCAR_DEBUG_IPS
     menu_show_main();                   // 显示主菜单
 #endif
@@ -53,24 +56,24 @@ int core0_main(void)
 
     while (TRUE)
     {
-        // if(T_index == 7){
-        //     motor_traveling_power_flag = 0;
-        // }
+        if(battery_protection_check()){
+            if(!battery_checked_flag)
+            {
+                motor_traveling_power_flag = 0; // 关闭电机PWM输出
+                motor_fun_open_percent = 0; // 关闭负压风扇
+                zf_assert(0); // 电池电压过低
+                while(1);
+            }
+        }
+        battery_checked_flag = 1;
+
 #ifdef SMARTCAR_DEBUG_IPS
         menu_get_key_event();
         menu_event_handle(); // 菜单事件处理函数，根据按键状态切换菜单和修改变量值
 #else
         no_screen_key_event_handle(); // 没有屏幕时的按键事件处理
 #endif
-        if(battery_protection_check()){
-            // if(!battery_checked_flag)
-            // {
-            //     // motor_traveling_power_flag = 0; // 关闭电机PWM输出
-            //     // zf_assert(0); // 电池电压过低
-            //     // while(1);
-            // }
-        }
-        battery_checked_flag = 1;
+
 
         if(car_run_state == STARTING){
             run_control_protect_trigger_flag = 0;
@@ -79,7 +82,7 @@ int core0_main(void)
             motor_traveling_power_flag = 1; // 使能行进电机PWM输出
             motor_traveling_pid_run_flag = 1; // 使能行进电机速度环运行
             run_control_protect_trigger_flag = 0;
-            car_run_state = RUNNING; // 切换到运行状态，电机速度环和负压风扇开度受到算法控制
+            car_run_state = RUNNING_IMG; // 切换到运行状态，电机速度环和负压风扇开度受到算法控制
         }
 #ifdef SMARTCAR_DEBUG_NET_INFO
         // 每隔4ms发送一次网络调试信息

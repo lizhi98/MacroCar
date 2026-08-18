@@ -377,16 +377,26 @@ void network_print_info(void){
     //     motor_traveling_left_target_speed,motor_traveling_right_target_speed,
     //     error_image,image_process_time,condition_T,feature_T,img_threshold,motion_image_steering_speed,motor_steering_speed,detect_feature_row
     // );
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%d,%d,%u,%u,%d,%u\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%d,%d,%u,%u,%d,%u,%d\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
         attitude.yaw, gyro_current_data.gyro_z,
         battery_voltage,
         motor_traveling_left_target_speed,motor_traveling_right_target_speed,
-        error_image,image_to_image_time,condition_T,feature_T,img_threshold,
-        motion_image_steering_speed,motor_steering_speed,detect_feature_row,motor_fun_open_percent,back_condition_row,car_run_state
+        error_image,image_process_time,condition_T,feature_T,img_threshold,
+        motion_image_steering_speed,motor_steering_speed,detect_feature_row,motor_fun_open_percent,back_condition_row,car_run_state,motor_average_distance_count_sum
     );
+    // sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%f,%d,%d,%d,%d,%d,%u,%f,%lu\0",
+    //     motor_forward_speed,
+    //     motor_left_speed,motor_right_speed,
+    //     motor_left_pwm, motor_right_pwm,
+    //     attitude.yaw, gyro_current_data.gyro_z,angle_z,
+    //     battery_voltage,
+    //     motor_traveling_left_target_speed,motor_traveling_right_target_speed,
+    //     motion_image_steering_speed,motor_steering_speed,
+    //     motor_average_distance_count_sum,ins_finish_flag,ins_output_angle,ins_data_record_index
+    // );
     network_vofa_send_str(info_buffer);
 }
 
@@ -408,6 +418,7 @@ void no_screen_key_event_handle(void){
     // }
     if((key_get_state(KEY_4) == KEY_SHORT_PRESS) || (key_get_state(KEY_4) == KEY_LONG_PRESS)){
         car_run_state = WAIT_START; // 切换到启动状态
+        // inertial_navigation_save_data(); // 保存惯性导航数据
         key_clear_state(KEY_4);
     }
 }
