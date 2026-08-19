@@ -84,8 +84,9 @@ IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
     //     ins_start_angle_z = angle_z;
     //     inertial_navigation_mode = INERTIAL_NAVIGATION_MODE_NAVIGATION;
     // }
-    if(feature_T_index == 9 && condition_T == 1){
+    if(feature_T_index == 3 && condition_T == 1){
         ins_current_data_sheet_index = 4;
+        // ins_current_data_sheet_index = 6;
         ins_finish_flag = 0;
         car_run_state = RUNNING_INS;
         ins_start_motor_average_distance_count_sum = motor_average_distance_count_sum;
@@ -98,7 +99,7 @@ IFX_INTERRUPT(cc61_pit_ch0_isr, 0, CCU6_1_CH0_ISR_PRIORITY)
         car_run_state = RUNNING_INS;
         ins_start_motor_average_distance_count_sum = motor_average_distance_count_sum;
         // ins_start_angle_z = angle_z;
-        ins_start_angle_z = -270.0f;
+        ins_start_angle_z = 90.0f;
         inertial_navigation_mode = INERTIAL_NAVIGATION_MODE_NAVIGATION;
     }
 

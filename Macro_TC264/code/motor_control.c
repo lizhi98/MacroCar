@@ -3,8 +3,8 @@
 int32 motor_forward_linear_speed = MOTOR_FORWARD_LINEAR_SPEED;
 int32 motor_forward_curve_speed = MOTOR_FORWARD_CURVE_SPEED;
 
-#define TEST_SPEED_H 700
-#define TEST_SPEED_L 540
+#define TEST_SPEED_H 650
+#define TEST_SPEED_L 550
 
 CarRunState car_run_state = INIT_WAIT;
 
@@ -161,7 +161,7 @@ PIDParam motor_right_speed_pid = {
     .previous_previous_error = 0.0f
 };
 
-
+// 26
 PIDParam motion_image_steering_pid = {
     .type = FUZZY_PID_POS,
     .kp = 26.0f,
@@ -420,7 +420,8 @@ void PID_clear(PIDParam *pid_param)
 int16 motor_traveling_left_target_speed = 0;
 int16 motor_traveling_right_target_speed = 0;
 
-float motor_ins_to_image_error_k = 5.0f;
+// float motor_ins_to_image_error_k = 5.0f;
+float motor_ins_to_image_error_k = 4.5f;
 
 void motion_control_pit_callback()
 {
@@ -533,14 +534,16 @@ void motion_control_init(void)
 // 主循环中调用的函数，不要在中断中调用
 void motor_fun_soft_start(void)
 {
-    motor_fun_open_percent = 10;
-    system_delay_ms(1500);
     motor_fun_open_percent = 20;
-    system_delay_ms(1000);
-    motor_fun_open_percent = 40;
-    system_delay_ms(1000);
-    motor_fun_open_percent = 60;
-    system_delay_ms(1000);
+    system_delay_ms(1500);
+    if(MOTOR_FUN_LINEAR_OPEN_PERCENT > 40){
+        motor_fun_open_percent = 40;
+        system_delay_ms(1000);
+    }
+    if(MOTOR_FUN_LINEAR_OPEN_PERCENT > 60){
+        motor_fun_open_percent = 60;
+        system_delay_ms(1000);
+    }
     motor_fun_open_percent = MOTOR_FUN_LINEAR_OPEN_PERCENT;
     system_delay_ms(1000);
 }
@@ -560,7 +563,7 @@ void motor_traveling_soft_start(void)
             motor_right_current_pwm_duty = (motor_right_current_pwm_duty > 0) ? MOTOR_SOFT_START_PWM : -MOTOR_SOFT_START_PWM;
         }
         // 当电机转速大于前进速度时，认为软启动完成
-        if (motor_left_speed > 400 && motor_right_speed > 400)
+        if (motor_left_speed > 300 && motor_right_speed > 300)
         {
             motor_soft_start_flag = 1;
         }
@@ -596,7 +599,7 @@ void forward_speed_decision(void)
         // 从规则表中查找速度
         for(int i = 0; i < SPEED_DECISION_PARAM_LIST_SIZE; i++){
             // 0 && 为测试用，实际上删去
-            if(speed_decision_param_list[i].index == feature_T_index && (speed_decision_param_list[i].condition == -1 || speed_decision_param_list[i].condition == condition_T)){
+            if(0 && speed_decision_param_list[i].index == feature_T_index && (speed_decision_param_list[i].condition == -1 || speed_decision_param_list[i].condition == condition_T)){
                     // 如果条件为-1，表示不区分条件，直接使用该速度
                     motor_forward_speed = speed_decision_param_list[i].motor_forward_speed;
                     if(speed_decision_param_list[i].motor_average_distance > 0){
@@ -681,7 +684,7 @@ void run_control_protect()
         img_threshold_abnormal_count = 0;
     }
 
-    if (system_getval_ms() >= 3000 && !run_control_protect_trigger_flag && (img_threshold_abnormal_count >= 5 || run_once_flag))
+    if (system_getval_ms() >= 3000 && !run_control_protect_trigger_flag && (img_threshold_abnormal_count >= 10 || run_once_flag))
     {
         motor_traveling_power_flag = 0;       // 停车
         run_control_protect_trigger_flag = 1; // 设置运行保护触发标志位
