@@ -104,7 +104,7 @@ extern int16 motor_steering_speed;
 #define MOTION_CONTROL_PIT_TIME         3  // 单位ms
 #define MOTION_CONTROL_PIT_INDEX        CCU61_CH0
 
-#define MOTOR_SOFT_START_PWM            4000// 电机软启动PWM占空比
+#define MOTOR_SOFT_START_PWM            3000// 电机软启动PWM占空比
 
 // 不进行速度决策
 #define MOTOR_FORWARD_NORMAL_SPEED      500  // 前进正常速度
@@ -116,8 +116,8 @@ extern int16 motor_steering_speed;
 // #define MOTOR_FORWARD_CURVE_SPEED       630    // 前进转角速度
 
 // 3.6
-#define MOTOR_FORWARD_LINEAR_SPEED      630    // 前进直线速度
-#define MOTOR_FORWARD_CURVE_SPEED       620    // 前进转角速度
+// #define MOTOR_FORWARD_LINEAR_SPEED      630    // 前进直线速度
+// #define MOTOR_FORWARD_CURVE_SPEED       620    // 前进转角速度
 
 // 3.5
 // #define MOTOR_FORWARD_LINEAR_SPEED      570    // 前进直线速度
@@ -128,19 +128,19 @@ extern int16 motor_steering_speed;
 // #define MOTOR_FORWARD_CURVE_SPEED       550    // 前进转角速度
 
 // 3.2
-// #define MOTOR_FORWARD_LINEAR_SPEED      520    // 前进直线速度
-// #define MOTOR_FORWARD_CURVE_SPEED       520    // 前进转角速度
+#define MOTOR_FORWARD_LINEAR_SPEED      450    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       450    // 前进转角速度
 
 // #define MOTOR_FORWARD_LINEAR_SPEED      635    // 前进直线速度
 // #define MOTOR_FORWARD_CURVE_SPEED       615    // 前进转角速度
 
 // 负压风扇直线行驶开度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   72
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   60
 
 // #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 
-#define RUN_PROTECT_IMG_TH_MAX      80 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
-#define RUN_PROTECT_IMG_TH_MIN      30  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
+#define RUN_PROTECT_IMG_TH_MAX      70 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
+#define RUN_PROTECT_IMG_TH_MIN      25  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
 
 extern int32 motor_forward_linear_speed;
 extern int32 motor_forward_curve_speed;

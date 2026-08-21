@@ -14,8 +14,8 @@
 #define INS_DATA_POINT_NUM_MAX 500
 #define INS_DATA_SHEET_NUM_MAX 6
 
-// 152
-#define INS_DATA_VALID_INDEX_MAX {141,205,134,152,144,152} // 有效数据的最大索引值，超过该值的数据将被视为无效数据
+// 0 164
+#define INS_DATA_VALID_INDEX_MAX {160,205,134,152,144,152} // 有效数据的最大索引值，超过该值的数据将被视为无效数据
 
 #define INS_DATA_RECORD_DISTANCE 500 // 记录数据的距离间隔，单位为编码器计数
 

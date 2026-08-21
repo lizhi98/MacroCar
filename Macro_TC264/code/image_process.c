@@ -1,7 +1,7 @@
 #include "image_process.h"
 
-#define ERROR_IMAGE_LINE 61
-#define ERROR_IMAGE_LINE_2_D 53
+#define ERROR_IMAGE_LINE 70
+#define ERROR_IMAGE_LINE_2_D 56
 uint8 ERROR_IMAGE_LINE_2 = ERROR_IMAGE_LINE_2_D;
 
 #define STROP_FEATURE_T 1
@@ -9,7 +9,7 @@ uint8 ERROR_IMAGE_LINE_2 = ERROR_IMAGE_LINE_2_D;
 #define IMG_THRESHOLD_DIFF 15
 
 #define AMP_START_INDEX  33 //29
-#define AMP_END_INDEX    58 //55
+#define AMP_END_INDEX    25 //55
 
 #define encoder_count_image 32500
 
@@ -57,10 +57,25 @@ uint8 ERROR_IMAGE_LINE_2 = ERROR_IMAGE_LINE_2_D;
 //     -1,0,1 // 71
 // };
 
-// #define index_num 62
+// #define index_num 50
 // int T_index_list[index_num] = {
 //     0,1,1,1,
 //     1,1,0,0,
+//     1,0,1,0,1, // 13
+//     0,1,1,-1,1, // 18
+//     0,-1,-1, // 21
+//     0,0,1,0, // 25
+//     1,-1,-1,-1, // 29
+//     0,-1,0,0, // 33
+//     0,-1,-1,1, // 37
+//     1,1,0,1, // 41
+//     -1,-1,1,1, // 45
+//     -1,1,0,0,1, // 50
+// };
+
+// #define index_num 58
+// int T_index_list[index_num] = {
+//     0,1,0,0,
 //     1,0,1,0,1, // 13
 //     0,1,1,-1,1, // 18
 //     0,-1,-1, // 21
@@ -76,24 +91,77 @@ uint8 ERROR_IMAGE_LINE_2 = ERROR_IMAGE_LINE_2_D;
 //     -1,0,1,1,
 //     1,-1,-1,1
 // };
-#define index_num 59
+
+#define index_num 54
 int T_index_list[index_num] = {
-    -1,1,1,-1, //4
-    -1,-1,0,1,  //8
-    0,1,1,1,0,  //13
-    1,-1,-1,1,  //17
-    1,-1,0,-1,  //21
-    -1,-1,1,1,  //25    
-    0,0,1,    //29   //28
-    1,-1,-1,-1, //33
-    0,0,-1,0,   //37
-    0,0,1,1,    //41
-    0,-1,1,-1,  //45
-    -1,0,-1,0,  //49
-    -1,0,-1,0,  //53
-    0,-1,-1,-1, //57
-    -1,-1,0     //60
+    0,1,0,0,
+    1,0,1,0,1, // 13
+    0,1,1,-1,1, // 18
+    0,-1,-1, // 21
+    0,0,1,0, // 25
+    1,-1,-1,-1, // 29
+    0,-1,0,0, // 33
+    0,-1,-1,1, // 37
+    1,1,0,1, // 41
+    -1,-1,1,1, // 45
+    -1,1,0,0,1,
+    0,1,0,1,0,0,-1,1
 };
+
+// #define index_num 52
+// int T_index_list[index_num] = {
+//     0,1,0,0,
+//     1,0,1,0,1, // 13
+//     0,1,1,-1,1, // 18
+//     0,-1,-1, // 21
+//     0,0,1,0, // 25
+//     1,-1,-1,-1, // 29
+//     0,-1,0,0, // 33
+//     0,-1,-1,1, // 37
+//     1,1,0,1, // 41
+//     -1,-1,1,1, // 45
+//     -1,1,-1,0,-1,-1,1,-1,0,0,1
+// };
+
+
+// #define index_num 51
+// int T_index_list[index_num] = {
+//     0,1,0,0,
+//     1,0,1,0,1, // 13
+//     0,1,1,-1,1, // 18
+//     0,-1,-1, // 21
+//     0,0,1,0, // 25
+//     1,-1,-1,-1, // 29
+//     0,-1,0,0, // 33
+//     0,-1,-1,1, // 37
+//     1,1,0,1, // 41
+//     -1,-1,1,1, // 45
+//     -1,1,0,-1,0,-1,-1,-1,0,1
+// };
+
+// #define index_num 59
+// int T_index_list[index_num] = {
+//     -1,1,1,-1, //4
+//     -1,-1,0,1,  //8
+//     0,1,1,1,0,  //13
+//     1,-1,-1,1,  //17
+//     1,-1,0,-1,  //21
+//     -1,-1,1,1,  //25    
+//     0,0,1,    //29   //28
+//     1,-1,-1,-1, //33
+//     0,0,-1,0,   //37
+//     0,0,1,1,    //41
+//     0,-1,1,-1,  //45
+//     -1,0,-1,0,  //49
+//     -1,0,-1,0,  //53
+//     0,-1,-1,-1, //57
+//     -1,-1,0     //60
+// };
+
+// #define index_num 7
+// int T_index_list[index_num] = {
+//     0,1,0,1,1,0,1
+// };
 
 // #define index_num 6
 // int T_index_list[index_num] = {
@@ -808,7 +876,10 @@ uint8 feature_label=0;
 uint8 deceleration_label=0;
 uint8 feature_raw_l=0;
 uint8 feature_raw_r=0;
+
+
 int feature_T_index=0;
+// int feature_T_index=54;
 
 #define feature_raw 10    
 uint8 detect_feature_row=0;
@@ -1378,36 +1449,82 @@ int32 encoder_count_image_judge=0;
 int tun_straight_state=0;
 void feature_square()
 {
-    if(feature_T_index==1 ||feature_T_index==2 ||feature_T_index==3 )
-    {
-        ERROR_IMAGE_LINE_2=ERROR_IMAGE_LINE+9;
-    }
-    else if( feature_T_index==29 ||feature_T_index==30 ||feature_T_index==31 ||feature_T_index==32 
-        ||feature_T_index==55 ||feature_T_index==56 ||feature_T_index==57 ||feature_T_index==58 ||feature_T_index==59)
-    {
-        ERROR_IMAGE_LINE_2=ERROR_IMAGE_LINE;
-    }
-    else
-    {
-        ERROR_IMAGE_LINE_2=ERROR_IMAGE_LINE_2_D;
-    }
+    // if(feature_T_index==26)
+    // {
+    //     ERROR_IMAGE_LINE_2=ERROR_IMAGE_LINE_2_D+15;
+    // }
+    // // if( feature_T_index==29 ||feature_T_index==30 ||feature_T_index==31 ||feature_T_index==32 
+    // //     ||feature_T_index==55 ||feature_T_index==56 ||feature_T_index==57 ||feature_T_index==58 ||feature_T_index==59)
+    // // {
+    // //     ERROR_IMAGE_LINE_2=ERROR_IMAGE_LINE;
+    // // }
+    // else
+    // {
+    //     ERROR_IMAGE_LINE_2=ERROR_IMAGE_LINE_2_D;
+    // }
     if(feature_T_index==AMP_END_INDEX &&condition_T==0 && image_53_and_55_judge==0)
     {
         encoder_count_image_judge=motor_average_distance_count_sum;
         image_53_and_55_judge=1;
     }
-    if(feature_T_index == AMP_START_INDEX && condition_T==0 && image_53_and_55_judge==0)
+    if(feature_T_index==5 &&condition_T==0 && image_53_and_55_judge==0)
     {
         encoder_count_image_judge=motor_average_distance_count_sum;
         image_53_and_55_judge=1;
     }
-    if(motor_average_distance_count_sum - encoder_count_image_judge >=encoder_count_image && image_53_and_55_judge==1)
+
+    if(feature_T_index==54 && image_53_and_55_judge==0)
+    {
+        image_53_and_55_judge=1;
+        encoder_count_image_judge=motor_average_distance_count_sum;
+    }
+    if(feature_T_index==54 && motor_average_distance_count_sum - encoder_count_image_judge >=40000)
+    {
+        run_once_flag=1;
+    }
+
+    // if(feature_T_index==45 && condition_T==0 && image_53_and_55_judge==0)
+    // {
+    //     encoder_count_image_judge=motor_average_distance_count_sum;
+    //     image_53_and_55_judge=1;
+    // }
+    // if(feature_T_index == AMP_START_INDEX && condition_T==0 && image_53_and_55_judge==0)
+    // {
+    //     encoder_count_image_judge=motor_average_distance_count_sum;
+    //     image_53_and_55_judge=1;
+    // }
+    if(motor_average_distance_count_sum - encoder_count_image_judge >=encoder_count_image && image_53_and_55_judge==1 &&feature_T_index==AMP_END_INDEX)
     {
         feature_T_index++;
         feature_T++;
         image_53_and_55_judge=0;
     }
+    if(motor_average_distance_count_sum - encoder_count_image_judge >=encoder_count_image && image_53_and_55_judge==1 &&feature_T_index==5)
+    {
+        feature_T_index++;
+        feature_T++;
+        image_53_and_55_judge=0;
+    }
+    // else if(motor_average_distance_count_sum - encoder_count_image_judge >=encoder_count_image && image_53_and_55_judge==1 &&feature_T_index==45)
+    // {
+    //     feature_T_index++;
+    //     feature_T++;
+    //     image_53_and_55_judge=0;
+    // }
 
+
+    // if(feature_T_index==47 && condition_T==0 )
+    // {
+    //     feature_T_index++;
+    //     feature_T++;
+    //     if(feature_T>index_num)
+    //     {
+    //         feature_T=1;
+    //     }
+    //     zhuan_left_flag=1;
+    //     condition_T=1;
+    //     output_feature=1;
+    // }
     //路口判断
     if(T_index_list[feature_T_index]==1&& feature_raw_r==1&& condition_T==0 &&feature_label==1)
     {
@@ -1425,7 +1542,7 @@ void feature_square()
     }
     else if(T_index_list[feature_T_index]==-1&& feature_raw_l==1&& condition_T==0 &&feature_label==1)
     {
-        
+
             feature_T++;
             feature_T_index++;
             if(feature_T>index_num)
@@ -1471,16 +1588,16 @@ void feature_square()
         row_detect_least=0;
     }
     //停车
-    if(feature_T_index==index_num)
-    {
-        run_stop_flag=1;
-        feature_T_index=0;
-    }
+    // if(feature_T_index==index_num)
+    // {
+    //     run_stop_flag=1;
+    //     feature_T_index=0;
+    // }
     if(run_stop_flag == 1 && feature_T_index==STROP_FEATURE_T)
     {
         run_once_flag=1;
     }
-    // if(feature_T_index==54)
+    // if(feature_T_index==43)
     // {
     //     run_once_flag=1;
     // }
@@ -1612,11 +1729,11 @@ void feature_square()
                     // }
                     if(detect_feature_row>40 && detect_feature_row<80)
                     {
-                        if(mid_line_list[detect_feature_row+30]<150 && mid_line_list[detect_feature_row+30]>40)
+                        if(mid_line_list[detect_feature_row+30]<120 && mid_line_list[detect_feature_row+30]>60)
                         {
-                            if(mid_line_list[detect_feature_row-25]<150 && mid_line_list[detect_feature_row-25]>40)
+                            if(mid_line_list[detect_feature_row-25]<120 && mid_line_list[detect_feature_row-25]>60)
                             {
-                                Add_Line(mid_line_list[detect_feature_row+30],detect_feature_row+30,mid_line_list[detect_feature_row-20],detect_feature_row-20);
+                                // Add_Line(mid_line_list[detect_feature_row+30],detect_feature_row+30,mid_line_list[detect_feature_row-20],detect_feature_row-20);
                             }
                         }
                     }
@@ -1668,7 +1785,6 @@ void feature_square()
     {
         if(T_index_list[feature_T-1]!=0&&(zhuan_condition_right==1||zhuan_condition_left==1))
         {
-
             if(get_angle_err(angle_T) > 68.0f)
             {
                 output_feature=0;
@@ -2211,7 +2327,15 @@ void get_error_image()
     // {
     //     error_image=93-mid_line_list[ERROR_IMAGE_LINE];
     // }
-    error_image=93-mid_line_list[ERROR_IMAGE_LINE];
+    // feature_T_index = 54;
+    if(feature_T_index==54)
+    {
+        error_image=-10;
+    }
+    else
+    {
+        error_image=93-mid_line_list[ERROR_IMAGE_LINE];
+    }
 
 
 
@@ -2298,13 +2422,13 @@ void ins_image(uint8 (*source_image)[MT9V03X_W])
 
     if(ins_current_data_sheet_index == 0)
     {
-        feature_T_index=48;     
-        feature_T=48;
+        feature_T_index=47-4;     
+        feature_T=47-4;
     }
     if(ins_current_data_sheet_index == 2)
     {
-        feature_T_index=54;     
-        feature_T=54;
+        feature_T_index=54 - 4;     
+        feature_T=54 - 4;
     }
     if(ins_current_data_sheet_index == 3)
     {

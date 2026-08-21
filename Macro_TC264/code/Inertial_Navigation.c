@@ -4,7 +4,7 @@ InertialNavigationMode inertial_navigation_mode = INERTIAL_NAVIGATION_MODE_IDLE;
 
 uint8 ins_data_valid_index_max[INS_DATA_SHEET_NUM_MAX] = INS_DATA_VALID_INDEX_MAX; // 有效数据的最大索引值，超过该值的数据将被视为无效数据
 
-uint8 ins_current_data_sheet_index = 5; // 惯性导航数据集索引
+uint8 ins_current_data_sheet_index = 0; // 惯性导航数据集索引
 
 uint32 ins_data_record_index = 0; // 当前记录数据点索引
 

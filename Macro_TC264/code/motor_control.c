@@ -163,9 +163,8 @@ PIDParam motor_right_speed_pid = {
 
 
 PIDParam motion_image_steering_pid = {
-    .type = FUZZY_PID_POS,
-    .kp = 26.0f,
-    .ki = 0.0f,
+    .type = PID_POS,
+    .kp = 20.0f,
     .kd = 0.0f,
     .integral_limit = 0.0f,
     .integral = 0.0f,
@@ -183,7 +182,7 @@ PIDParam motion_image_steering_pid = {
 
 PIDParam motor_steering_pid = {
     .type = PID_POS,
-    .kp = 0.125f,
+    .kp = 0.12f,
     .ki = 0.0f,
     .kd = 0.05f,
     .integral_limit = 0.0f,
@@ -455,6 +454,13 @@ void motion_control_pit_callback()
     // 运行保护
     run_control_protect();
 
+
+    // if(feature_T_index >= 1 && feature_T_index <= 7){
+    //     motor_steering_pid.kp = 0.11f;
+    // }else{
+    //     motor_steering_pid.kp = 0.12f;
+    // }
+
     // int error_image_real = error_image;
     // if(condition_T){
     //     if(get_angle_err(angle_T) > 53.0f)
@@ -501,6 +507,8 @@ void motion_control_pit_callback()
             motor_right_current_pwm_duty = (int16)PID_calculate(&motor_right_speed_pid, (float)(motor_traveling_right_target_speed), (float)motor_right_speed);
         }
         motor_traveling_soft_start(); // 行进电机软启动
+        // motor_left_current_pwm_duty = 1800;
+        // motor_right_current_pwm_duty = 2200;
         // 应用PWM
         motor_traveling_set_pwm(&motor_left_current_pwm_duty, &motor_right_current_pwm_duty);
     }
@@ -533,14 +541,14 @@ void motion_control_init(void)
 // 主循环中调用的函数，不要在中断中调用
 void motor_fun_soft_start(void)
 {
-    motor_fun_open_percent = 10;
-    system_delay_ms(1500);
+    // motor_fun_open_percent = 10;
     motor_fun_open_percent = 20;
+    system_delay_ms(1500);
     system_delay_ms(1000);
     motor_fun_open_percent = 40;
     system_delay_ms(1000);
-    motor_fun_open_percent = 60;
-    system_delay_ms(1000);
+    // motor_fun_open_percent = 60;
+    // system_delay_ms(1000);
     motor_fun_open_percent = MOTOR_FUN_LINEAR_OPEN_PERCENT;
     system_delay_ms(1000);
 }
@@ -560,7 +568,7 @@ void motor_traveling_soft_start(void)
             motor_right_current_pwm_duty = (motor_right_current_pwm_duty > 0) ? MOTOR_SOFT_START_PWM : -MOTOR_SOFT_START_PWM;
         }
         // 当电机转速大于前进速度时，认为软启动完成
-        if (motor_left_speed > 400 && motor_right_speed > 400)
+        if (motor_left_speed > 200 && motor_right_speed > 200)
         {
             motor_soft_start_flag = 1;
         }
@@ -596,7 +604,7 @@ void forward_speed_decision(void)
         // 从规则表中查找速度
         for(int i = 0; i < SPEED_DECISION_PARAM_LIST_SIZE; i++){
             // 0 && 为测试用，实际上删去
-            if(speed_decision_param_list[i].index == feature_T_index && (speed_decision_param_list[i].condition == -1 || speed_decision_param_list[i].condition == condition_T)){
+            if(0 && speed_decision_param_list[i].index == feature_T_index && (speed_decision_param_list[i].condition == -1 || speed_decision_param_list[i].condition == condition_T)){
                     // 如果条件为-1，表示不区分条件，直接使用该速度
                     motor_forward_speed = speed_decision_param_list[i].motor_forward_speed;
                     if(speed_decision_param_list[i].motor_average_distance > 0){
@@ -618,7 +626,7 @@ void forward_speed_decision(void)
                         motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED;
                     }else{
                         // 小方框不采取直道速度
-                        if(feature_T_index >= 54 && feature_T_index <= 58 || feature_T_index >= 29 && feature_T_index <= 32){
+                        if((feature_T_index >= 54 && feature_T_index <= 58) || (feature_T_index >= 29 && feature_T_index <= 32)){
                             motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED;
                         }else{
                             motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;

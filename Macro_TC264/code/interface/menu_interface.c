@@ -377,14 +377,14 @@ void network_print_info(void){
     //     motor_traveling_left_target_speed,motor_traveling_right_target_speed,
     //     error_image,image_process_time,condition_T,feature_T,img_threshold,motion_image_steering_speed,motor_steering_speed,detect_feature_row
     // );
-    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%d,%d,%u,%u,%d,%u,%d\0",
+    sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%f,%d,%d,%d,%lu,%u,%d,%u,%d,%d,%u,%u,%d,%u,%d\0",
         motor_forward_speed,
         motor_left_speed,motor_right_speed,
         motor_left_pwm, motor_right_pwm,
-        attitude.yaw, gyro_current_data.gyro_z,
+        attitude.yaw, gyro_current_data.gyro_z,angle_z,
         battery_voltage,
         motor_traveling_left_target_speed,motor_traveling_right_target_speed,
-        error_image,image_process_time,condition_T,feature_T,img_threshold,
+        error_image,image_process_time,condition_T,feature_T_index,img_threshold,
         motion_image_steering_speed,motor_steering_speed,detect_feature_row,motor_fun_open_percent,back_condition_row,car_run_state,motor_average_distance_count_sum
     );
     // sprintf(info_buffer, "%d,%d,%d,%d,%d,%f,%f,%f,%f,%d,%d,%d,%d,%d,%u,%f,%lu\0",

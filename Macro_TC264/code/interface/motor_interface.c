@@ -45,10 +45,18 @@ void motor_traveling_set_pwm(int16 * left_pwm, int16 *right_pwm){
     motor_left_pwm  = *left_pwm;
     motor_right_pwm = *right_pwm;
 
+    if(motor_left_pwm < 0){
+        motor_left_pwm = 0;
+    }
+    if(motor_right_pwm < 0){
+        motor_right_pwm = 0;
+    }
+
     if(!motor_traveling_power_flag){
         motor_left_pwm  = 0;
         motor_right_pwm = 0;
     }
+    
     gpio_set_level(MOTOR_LEFT_PH_PIN,  (motor_left_pwm  > 0) ? 1 : 0);
     gpio_set_level(MOTOR_RIGHT_PH_PIN, (motor_right_pwm > 0) ? 1 : 0);
     pwm_set_duty(MOTOR_LEFT_EN_PIN,  abs(motor_left_pwm));
@@ -64,14 +72,14 @@ void motor_fun_set_open_percent(uint16 percent){
     // 50Hz 1ms高电平时间对应0%开度，2ms高电平时间对应100%开度，线性关系
     uint16 duty = (uint16)((1.0 + percent / 100.0) / (1000.0 / MOTOR_FUN_FREQUENCY) * PWM_DUTY_MAX);
     pwm_set_duty(MOTOR_FUN_PWM_PIN, duty);
-    // pwm_set_duty(MOTOR_FUN_PWM_PIN, 0);
+    //  pwm_set_duty(MOTOR_FUN_PWM_PIN, 0);
 }
 
-static uint8 motor_interface_pit_count = 0;
-static int16 motor_left_last_encoder_count = 0;
-static int16 motor_right_last_encoder_count = 0;
-static int16 motor_left_current_encoder_count = 0;
-static int16 motor_right_current_encoder_count = 0;
+volatile static uint8 motor_interface_pit_count = 0;
+volatile static int16 motor_left_last_encoder_count = 0;
+volatile static int16 motor_right_last_encoder_count = 0;
+volatile static int16 motor_left_current_encoder_count = 0;
+volatile static int16 motor_right_current_encoder_count = 0;
 
 // 主要是用于获取速度
 void motor_interface_pit_callback(void){
@@ -84,7 +92,7 @@ void motor_interface_pit_callback(void){
     motor_left_current_encoder_count = encoder_get_count(MOTOR_LEFT_ENCODER_INDEX);
     motor_right_current_encoder_count = encoder_get_count(MOTOR_RIGHT_ENCODER_INDEX);
 
-    motor_left_distance_count_sum += (motor_left_current_encoder_count - motor_left_last_encoder_count) * -1;
+    motor_left_distance_count_sum += (motor_left_current_encoder_count - motor_left_last_encoder_count)  * -1;
     motor_right_distance_count_sum += (motor_right_current_encoder_count - motor_right_last_encoder_count);
     motor_average_distance_count_sum = (motor_left_distance_count_sum + motor_right_distance_count_sum) / 2;
 

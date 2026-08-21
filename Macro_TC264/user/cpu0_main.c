@@ -44,6 +44,7 @@ int core0_main(void)
     motor_traveling_power_flag = 0;     // 行进电机PWM输出标志位，0:PWM输出为0  1:PWM输出正常
     motion_control_run_flag = 1;        // 行进电机运动标志位，0:电机速度环的目标速度为0，负压不变  1:电机速度和负压电压受到算法控制
     forward_speed_decision_enable = 1;  // 速度决策标志位，0:不执行速度决策  1:执行速度决策
+    // motor_traveling_pid_run_flag = 1;
 
 #ifdef SMARTCAR_DEBUG_IPS
     menu_show_main();                   // 显示主菜单
