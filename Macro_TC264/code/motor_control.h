@@ -34,7 +34,7 @@ typedef struct _SpeedDecisionParam
     const uint32  motor_forward_speed_exit; // 前进速度退出，平均距离计数和
 } SpeedDecisionParam;
 
-#define SPEED_DECISION_PARAM_LIST_SIZE 23
+#define SPEED_DECISION_PARAM_LIST_SIZE 22
 
 // 算法部分
 // PID算法
@@ -115,7 +115,7 @@ extern int16 motor_steering_speed;
 // #define MOTOR_FORWARD_LINEAR_SPEED      640    // 前进直线速度
 // #define MOTOR_FORWARD_CURVE_SPEED       630    // 前进转角速度
 
-// 3.6
+// 3.8
 // #define MOTOR_FORWARD_LINEAR_SPEED      630    // 前进直线速度
 // #define MOTOR_FORWARD_CURVE_SPEED       620    // 前进转角速度
 
@@ -127,20 +127,23 @@ extern int16 motor_steering_speed;
 // #define MOTOR_FORWARD_LINEAR_SPEED      550    // 前进直线速度
 // #define MOTOR_FORWARD_CURVE_SPEED       550    // 前进转角速度
 
-// 3.2
-#define MOTOR_FORWARD_LINEAR_SPEED      450    // 前进直线速度
-#define MOTOR_FORWARD_CURVE_SPEED       450    // 前进转角速度
+// 3.7
+#define MOTOR_FORWARD_LINEAR_SPEED      610    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       600    // 前进转角速度
 
 // #define MOTOR_FORWARD_LINEAR_SPEED      635    // 前进直线速度
 // #define MOTOR_FORWARD_CURVE_SPEED       615    // 前进转角速度
 
+#define TEST_SPEED_H 700
+#define TEST_SPEED_L 580
+
 // 负压风扇直线行驶开度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   60
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   75
 
 // #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 
-#define RUN_PROTECT_IMG_TH_MAX      70 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
-#define RUN_PROTECT_IMG_TH_MIN      25  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
+#define RUN_PROTECT_IMG_TH_MAX      200 // 运行保护图像阈值最大值，超过这个值认为图像异常，进行保护措施
+#define RUN_PROTECT_IMG_TH_MIN      100  // 运行保护图像阈值最小值，低于这个值认为图像异常，进行保护措施
 
 extern int32 motor_forward_linear_speed;
 extern int32 motor_forward_curve_speed;

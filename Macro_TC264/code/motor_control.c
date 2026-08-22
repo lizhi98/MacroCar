@@ -3,43 +3,57 @@
 int32 motor_forward_linear_speed = MOTOR_FORWARD_LINEAR_SPEED;
 int32 motor_forward_curve_speed = MOTOR_FORWARD_CURVE_SPEED;
 
-#define TEST_SPEED_H 700
-#define TEST_SPEED_L 540
-
 CarRunState car_run_state = INIT_WAIT;
 
+// 速度决策参数数组
 static const SpeedDecisionParam speed_decision_param_list[SPEED_DECISION_PARAM_LIST_SIZE] = {
-    // {.index = 6,    .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    // {.index = 7,    .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
-    // {.index = 8,    .condition = -1, .motor_average_distance = 69000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    // {.index = 9,    .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    // {.index = 10,   .condition = -1, .motor_average_distance = 69000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    // {.index = 11,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    // {.index = 12,   .condition = -1, .motor_average_distance = 42000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    // {.index = 13,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    // {.index = 14,   .condition = -1, .motor_average_distance = 26000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    // {.index = 15,   .condition = 0, .motor_average_distance = 49000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // 第一个小方框后的直行
+    {.index = 6,    .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 7,    .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    {.index = 8,    .condition = -1, .motor_average_distance = 69000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
 
+    {.index = 9,    .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 10,   .condition = -1, .motor_average_distance = 68000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    
+    {.index = 11,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 12,   .condition = -1, .motor_average_distance = 41000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    
+    {.index = 13,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 14,   .condition = -1, .motor_average_distance = 25000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    
+    // 大方框后的直行，后续进入极限小弯道
+    {.index = 15,   .condition = 0, .motor_average_distance = 45000,   .motor_forward_speed = TEST_SPEED_H - 20, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+
+    // 极限小弯道
     // {.index = 16,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
     // {.index = 17,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
     // {.index = 18,   .condition = 1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
 
-
-    // {.index = 18,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    // {.index = 19,   .condition = -1, .motor_average_distance = 35000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // 极限小弯道后直行
+    {.index = 18,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 19,   .condition = -1, .motor_average_distance = 34000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    
     // {.index = 21,   .condition = 0, .motor_average_distance = 0,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = 0},
     // {.index = 22,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = 0},
 
-    // {.index = 31,   .condition = 0, .motor_average_distance = 4000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    // {.index = 32,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
-    // {.index = 33,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
-    // {.index = 34,   .condition = -1, .motor_average_distance = 20000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // 下去的大长直道
+    {.index = 31,   .condition = 0, .motor_average_distance = 4000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    {.index = 32,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    {.index = 33,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    {.index = 34,   .condition = -1, .motor_average_distance = 18000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
 
-    // // {.index = 36,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    // // {.index = 38,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    // {.index = 36,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    // {.index = 38,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // 两个长直道路
+    // {.index = 36,   .condition = 0, .motor_average_distance = 90000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 38,   .condition = 0, .motor_average_distance = 90000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    
+    {.index = 36,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H - 0},
+    {.index = 38,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H - 0},
 
+
+    {.index = 45,   .condition = 0, .motor_average_distance = 10000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_L},
+    {.index = 46,   .condition = -1, .motor_average_distance = 0,    .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = TEST_SPEED_L},
+    {.index = 47,   .condition = -1, .motor_average_distance = 0,    .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = TEST_SPEED_L},
+    {.index = 48,   .condition = 1, .motor_average_distance = 0,    .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = TEST_SPEED_L},
     // {.index = 59,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
     // {.index = 60,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
     // {.index = 61,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
@@ -52,38 +66,38 @@ static const SpeedDecisionParam speed_decision_param_list[SPEED_DECISION_PARAM_L
     // {.index = 9,    .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
     // {.index = 10,   .condition = -1, .motor_average_distance = 69000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
     
-    {.index = 52,   .condition = -1, .motor_average_distance = 0,    .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
-    {.index = 51,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 52,   .condition = -1, .motor_average_distance = 0,    .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    // {.index = 51,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
     
-    {.index = 50,   .condition = -1, .motor_average_distance = 10000,    .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    {.index = 49,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    {.index = 48,   .condition = -1, .motor_average_distance = 10000,    .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    {.index = 47,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    {.index = 46,   .condition = -1, .motor_average_distance = 15000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    {.index = 45,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    {.index = 44,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 50,   .condition = -1, .motor_average_distance = 10000,    .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 49,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 48,   .condition = -1, .motor_average_distance = 10000,    .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 47,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 46,   .condition = -1, .motor_average_distance = 15000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 45,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 44,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
     
     
-    {.index = 41,   .condition = -1, .motor_average_distance = 20000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    {.index = 40,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 41,   .condition = -1, .motor_average_distance = 20000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 40,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
     
-    {.index = 38,   .condition = -1, .motor_average_distance = 18000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    {.index = 37,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
-    {.index = 36,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
-    {.index = 35,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 38,   .condition = -1, .motor_average_distance = 18000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 37,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    // {.index = 36,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    // {.index = 35,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
     
-    {.index = 27,   .condition = -1, .motor_average_distance = 40000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    {.index = 26,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
-    {.index = 25,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 27,   .condition = -1, .motor_average_distance = 40000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 26,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = 0},
+    // {.index = 25,   .condition = 0, .motor_average_distance = 5000,   .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
 
-    // {.index = 36,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    // {.index = 38,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
-    {.index = 21,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
-    {.index = 23,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // // {.index = 36,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // // {.index = 38,   .condition = 0, .motor_average_distance = 100000,   .motor_forward_speed = TEST_SPEED_H, .motor_forward_speed_exit = MOTOR_FORWARD_CURVE_SPEED},
+    // {.index = 21,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
+    // {.index = 23,   .condition = 0, .motor_average_distance = 5000,    .motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED, .motor_forward_speed_exit = TEST_SPEED_H},
 
-    {.index = 42,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED, .motor_forward_speed_exit = 0},
-    {.index = 43,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
-    {.index = 44,   .condition = 1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+    // {.index = 42,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED, .motor_forward_speed_exit = 0},
+    // {.index = 43,   .condition = -1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
+    // {.index = 44,   .condition = 1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0},
     // {.index = 62,   .condition = 1, .motor_average_distance = 0,   .motor_forward_speed = TEST_SPEED_L, .motor_forward_speed_exit = 0}
     
 };
@@ -164,7 +178,7 @@ PIDParam motor_right_speed_pid = {
 
 PIDParam motion_image_steering_pid = {
     .type = PID_POS,
-    .kp = 20.0f,
+    .kp = 27.0f,
     .kd = 0.0f,
     .integral_limit = 0.0f,
     .integral = 0.0f,
@@ -541,14 +555,14 @@ void motion_control_init(void)
 // 主循环中调用的函数，不要在中断中调用
 void motor_fun_soft_start(void)
 {
-    // motor_fun_open_percent = 10;
+    // motor_fun_open_percent = 5;
+    // system_delay_ms(1000);
     motor_fun_open_percent = 20;
     system_delay_ms(1500);
-    system_delay_ms(1000);
     motor_fun_open_percent = 40;
     system_delay_ms(1000);
-    // motor_fun_open_percent = 60;
-    // system_delay_ms(1000);
+    motor_fun_open_percent = 60;
+    system_delay_ms(1000);
     motor_fun_open_percent = MOTOR_FUN_LINEAR_OPEN_PERCENT;
     system_delay_ms(1000);
 }
@@ -604,7 +618,7 @@ void forward_speed_decision(void)
         // 从规则表中查找速度
         for(int i = 0; i < SPEED_DECISION_PARAM_LIST_SIZE; i++){
             // 0 && 为测试用，实际上删去
-            if(0 && speed_decision_param_list[i].index == feature_T_index && (speed_decision_param_list[i].condition == -1 || speed_decision_param_list[i].condition == condition_T)){
+            if(speed_decision_param_list[i].index == feature_T_index && (speed_decision_param_list[i].condition == -1 || speed_decision_param_list[i].condition == condition_T)){
                     // 如果条件为-1，表示不区分条件，直接使用该速度
                     motor_forward_speed = speed_decision_param_list[i].motor_forward_speed;
                     if(speed_decision_param_list[i].motor_average_distance > 0){
@@ -622,15 +636,20 @@ void forward_speed_decision(void)
             }else{
                 // 如果条件都不匹配，则使用默认速度
                 if(i == SPEED_DECISION_PARAM_LIST_SIZE - 1){
+                    // if(deceleration_label){
+                    //     motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED;
+                    // }else{
+                    //     // 小方框不采取直道速度
+                    //     if((feature_T_index >= 54 && feature_T_index <= 58) || (feature_T_index >= 29 && feature_T_index <= 32)){
+                    //         motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED;
+                    //     }else{
+                    //         motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;
+                    //     }
+                    // }
                     if(deceleration_label){
                         motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED;
                     }else{
-                        // 小方框不采取直道速度
-                        if((feature_T_index >= 54 && feature_T_index <= 58) || (feature_T_index >= 29 && feature_T_index <= 32)){
-                            motor_forward_speed = MOTOR_FORWARD_CURVE_SPEED;
-                        }else{
-                            motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;
-                        }
+                        motor_forward_speed = MOTOR_FORWARD_LINEAR_SPEED;
                     }
                     // 更新缓存
                     speed_decision_index_temp = feature_T_index;
@@ -695,14 +714,14 @@ void run_control_protect()
         run_control_protect_trigger_flag = 1; // 设置运行保护触发标志位
         // 记录保护触发时间
         run_protect_trigger_time = system_getval_ms();
-        int16 percent_temp = (int16)motor_fun_open_percent - 15; // 检测到异常时负压是否开启
+        int16 percent_temp = (int16)motor_fun_open_percent - 20; // 检测到异常时负压是否开启
         if (percent_temp <= 0)
         {
             percent_temp = 0;
         }
         motor_fun_open_percent = percent_temp; // 负压风扇减小
     }
-    if (run_control_protect_trigger_flag && system_getval_ms() - run_protect_trigger_time > 1000)
+    if (run_control_protect_trigger_flag && system_getval_ms() - run_protect_trigger_time > 800)
     {
         motor_fun_open_percent = 0; // 负压风扇关闭
     }

@@ -1,7 +1,7 @@
 #include "image_process.h"
 
 #define ERROR_IMAGE_LINE 70
-#define ERROR_IMAGE_LINE_2_D 56
+#define ERROR_IMAGE_LINE_2_D 50
 uint8 ERROR_IMAGE_LINE_2 = ERROR_IMAGE_LINE_2_D;
 
 #define STROP_FEATURE_T 1
