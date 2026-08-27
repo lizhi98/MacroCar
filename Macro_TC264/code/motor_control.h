@@ -1,8 +1,6 @@
 #ifndef __MOTOR_CONTROL_H__
 #define __MOTOR_CONTROL_H__
 
-#define SPEED_CHOICE 1 // 预赛1 决赛2
-
 #include "motor_interface.h"
 #include "image_process.h"
 #include "gyroscope_interface.h"
@@ -34,7 +32,7 @@ typedef struct _SpeedDecisionParam
     const uint32  motor_forward_speed_exit; // 前进速度退出，平均距离计数和
 } SpeedDecisionParam;
 
-#define SPEED_DECISION_PARAM_LIST_SIZE 30
+
 
 // 算法部分
 // PID算法
@@ -109,30 +107,13 @@ extern int16 motor_steering_speed;
 // 不进行速度决策
 #define MOTOR_FORWARD_NORMAL_SPEED      500  // 前进正常速度
 
-// 进行速度决策
 
-// 4.2
-// #define MOTOR_FORWARD_LINEAR_SPEED      640    // 前进直线速度
-// #define MOTOR_FORWARD_CURVE_SPEED       630    // 前进转角速度
+#define SPEED_DECISION_PARAM_LIST_SIZE 30
 
-// 3.8
-#define MOTOR_FORWARD_LINEAR_SPEED      600    // 前进直线速度
-#define MOTOR_FORWARD_CURVE_SPEED       600    // 前进转角速度
+#define MOTOR_FORWARD_LINEAR_SPEED      570    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       570    // 前进转角速度
 
-// 3.5
-// #define MOTOR_FORWARD_LINEAR_SPEED      570    // 前进直线速度
-// #define MOTOR_FORWARD_CURVE_SPEED       570    // 前进转角速度
 
-// 3.4
-// #define MOTOR_FORWARD_LINEAR_SPEED      550    // 前进直线速度
-// #define MOTOR_FORWARD_CURVE_SPEED       550    // 前进转角速度
-
-// 3.7
-// #define MOTOR_FORWARD_LINEAR_SPEED      570    // 前进直线速度
-// #define MOTOR_FORWARD_CURVE_SPEED       570    // 前进转角速度
-
-// #define MOTOR_FORWARD_LINEAR_SPEED      635    // 前进直线速度
-// #define MOTOR_FORWARD_CURVE_SPEED       615    // 前进转角速度
 
 #define TEST_SPEED_H 650
 #define TEST_SPEED_L 550
@@ -180,7 +161,7 @@ void motion_control_init(void);
 void motor_fun_soft_start(void); // 负压风扇软启动
 void motor_traveling_soft_start(void); // 行进电机软启动
 
-void forward_speed_decision(void); // 前进速度决策，基于图像处理结果
+void forward_speed_decision(void);
 
 void run_control_protect(void); // 运行保护，基于图像处理结果
 

@@ -12,7 +12,7 @@
 // #define radius 15
 
 #define INS_DATA_POINT_NUM_MAX 500
-#define INS_DATA_SHEET_NUM_MAX 6
+#define INS_DATA_SHEET_NUM_MAX 7
 
 // 0 164   1 157
 #define INS_DATA_VALID_INDEX_MAX {160,157,134,152,144,152} // 有效数据的最大索引值，超过该值的数据将被视为无效数据
