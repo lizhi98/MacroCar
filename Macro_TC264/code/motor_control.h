@@ -34,7 +34,7 @@ typedef struct _SpeedDecisionParam
     const uint32  motor_forward_speed_exit; // 前进速度退出，平均距离计数和
 } SpeedDecisionParam;
 
-#define SPEED_DECISION_PARAM_LIST_SIZE 22
+#define SPEED_DECISION_PARAM_LIST_SIZE 30
 
 // 算法部分
 // PID算法
@@ -116,8 +116,8 @@ extern int16 motor_steering_speed;
 // #define MOTOR_FORWARD_CURVE_SPEED       630    // 前进转角速度
 
 // 3.8
-// #define MOTOR_FORWARD_LINEAR_SPEED      630    // 前进直线速度
-// #define MOTOR_FORWARD_CURVE_SPEED       620    // 前进转角速度
+#define MOTOR_FORWARD_LINEAR_SPEED      600    // 前进直线速度
+#define MOTOR_FORWARD_CURVE_SPEED       600    // 前进转角速度
 
 // 3.5
 // #define MOTOR_FORWARD_LINEAR_SPEED      570    // 前进直线速度
@@ -128,17 +128,17 @@ extern int16 motor_steering_speed;
 // #define MOTOR_FORWARD_CURVE_SPEED       550    // 前进转角速度
 
 // 3.7
-#define MOTOR_FORWARD_LINEAR_SPEED      610    // 前进直线速度
-#define MOTOR_FORWARD_CURVE_SPEED       600    // 前进转角速度
+// #define MOTOR_FORWARD_LINEAR_SPEED      570    // 前进直线速度
+// #define MOTOR_FORWARD_CURVE_SPEED       570    // 前进转角速度
 
 // #define MOTOR_FORWARD_LINEAR_SPEED      635    // 前进直线速度
 // #define MOTOR_FORWARD_CURVE_SPEED       615    // 前进转角速度
 
-#define TEST_SPEED_H 700
-#define TEST_SPEED_L 580
+#define TEST_SPEED_H 650
+#define TEST_SPEED_L 550
 
 // 负压风扇直线行驶开度
-#define MOTOR_FUN_LINEAR_OPEN_PERCENT   75
+#define MOTOR_FUN_LINEAR_OPEN_PERCENT   70
 
 // #define CURVE_SPEED_EXIT_ANGLE_TH       70.0f // 转弯速度锁定解除转角阈值
 
